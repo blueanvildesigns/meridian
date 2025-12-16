@@ -15,6 +15,9 @@ dependencies:
   timezone: ^0.9.4
   provider: ^6.1.2
   shared_preferences: ^2.2.2
+  google_fonts: ^6.1.0
+  window_manager: ^0.4.3
+  flutter_acrylic: ^1.1.4
 
 dev_dependencies:
   flutter_test:

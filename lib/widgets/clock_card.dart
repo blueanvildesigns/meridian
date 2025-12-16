@@ -73,7 +73,6 @@ class ClockCard extends StatelessWidget {
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: timeColor,
-                fontFamily: 'Segoe UI',
               ),
             ),
             const SizedBox(width: 15),
