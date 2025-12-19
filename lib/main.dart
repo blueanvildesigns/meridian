@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart'; // <--- NEW IMPORT
 import 'package:meridian/providers/clock_provider.dart';
 import 'package:meridian/screens/home_screen.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +50,18 @@ void main() async {
     // 'acrylic' creates the blurred glass look.
     // 'mica' is the newer opaque-but-tinted Windows 11 look.
     // 'transparent' is fully clear.
-    await Window.setEffect(effect: WindowEffect.acrylic, color: const Color(0xCC222222));
+    if (Platform.isWindows) {
+      await Window.setEffect(
+        effect: WindowEffect.acrylic,
+        color: const Color(0xCC222222),
+      );
+    } else if (Platform.isMacOS) {
+      // macOS "Sidebar" effect is the closest to the modern glass look
+      await Window.setEffect(
+        effect: WindowEffect.sidebar,
+        color: Colors.transparent,
+      );
+    }
     // 0xCC = ~80% opacity. 222222 = Dark Tint.
   });
 

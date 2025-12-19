@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meridian - Time Coordination for Pros</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;600&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #3F51B5; /* Indigo */
+            --glass: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, #E0E7FF 0%, #F0F4F8 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- HERO SECTION --- */
+        header {
+            text-align: center;
+            padding: 80px 20px 40px;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-family: 'IBM Plex Serif', serif;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* --- GALLERY GRID SECTION --- */
+        .gallery-container {
+            max-width: 1200px;
+            width: 90%;
+            margin-bottom: 80px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .gallery-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .caption-area {
+            padding: 20px;
+        }
+
+        .caption-title {
+            font-family: 'IBM Plex Serif', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .caption-text {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px rgba(63, 81, 181, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(63, 81, 181, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-dark);
+            border: 1px solid #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #F8FAFC;
+            transform: translateY(-2px);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            margin-top: auto;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Meridian</h1>
+    <p class="subtitle">Stop doing mental math. Coordinate global meetings instantly with a beautiful, native Windows dashboard.</p>
+
+    <div class="btn-group">
+        <a href="[PASTE_YOUR_DOWNLOAD_LINK_HERE]" class="btn btn-primary">
+            Download for Windows (v1.0)
+        </a>
+
+        <a href="https://www.buymeacoffee.com/[YOUR_COFFEE_USERNAME]" target="_blank" class="btn btn-secondary">
+            ☕ Buy me a coffee
+        </a>
+    </div>
+</header>
+
+<div class="gallery-container">
+    <div class="gallery-grid">
+
+        <div class="gallery-card">
+            <img src="Screenshot1.png" alt="Meridian Homescreen">
+            <div class="caption-area">
+                <div class="caption-title">Your Global Dashboard</div>
+                <p class="caption-text">A clean, glass-morphic view of all your important cities. See immediately if it's day or night across the globe.</p>
+            </div>
+        </div>
+
+        <div class="gallery-card">
+            <img src="Screenshot2.png" alt="Time Jump Selection">
+            <div class="caption-area">
+                <div class="caption-title">Select a Target</div>
+                <p class="caption-text">Don't guess. Use the dropdown to select a specific city you need to coordinate with.</p>
+            </div>
+        </div>
+
+        <div class="gallery-card">
+            <img src="Screenshot3.png" alt="Picking a Time">
+            <div class="caption-area">
+                <div class="caption-title">Pick a Future Time</div>
+                <p class="caption-text">Dial in a meeting time (e.g., 3:00 PM) to see what that time looks like everywhere else.</p>
+            </div>
+        </div>
+
+        <div class="gallery-card">
+            <img src="Screenshot4.png" alt="Adjusted World Time">
+            <div class="caption-area">
+                <div class="caption-title">Instant Coordination</div>
+                <p class="caption-text">The entire dashboard updates instantly. See who will be asleep and who will be awake at your chosen time.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Blue Anvil Designs. Open Source on <a href="https://github.com/YOUR_USERNAME/meridian">GitHub</a>.</p>
+</footer>
+
+</body>
+</html>
