@@ -197,6 +197,69 @@
             margin-right: auto;
         }
 
+        /* --- FEEDBACK SECTION --- */
+        .feedback-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 0 20px;
+            margin-bottom: 60px;
+        }
+
+        .feedback-card {
+            background: linear-gradient(135deg, rgba(63, 81, 181, 0.1) 0%, rgba(63, 81, 181, 0.05) 100%);
+            border: 1px solid rgba(63, 81, 181, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .feedback-content h3 {
+            margin: 0 0 8px 0;
+            font-family: 'IBM Plex Serif', serif;
+            color: var(--primary);
+        }
+
+        .feedback-content p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            max-width: 450px;
+        }
+
+        .btn-feedback {
+            background-color: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .btn-feedback:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(63, 81, 181, 0.2);
+        }
+
+        /* Responsive: Stack vertically on phones */
+        @media (max-width: 768px) {
+            .feedback-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .feedback-content p {
+                margin-bottom: 20px;
+            }
+        }
+
         /* --- FOOTER --- */
         footer {
             margin-top: auto;
@@ -235,8 +298,8 @@
             Download for Mac
         </a>
 
-        <a href="https://www.buymeacoffee.com/[YOUR_COFFEE_USERNAME]" target="_blank" class="btn btn-secondary">
-            ☕ Support
+        <a href="https://ko-fi.com/grahamtholomew" target="_blank" class="btn btn-secondary">
+            ☕ Buy Me a Cup of Coffee
         </a>
     </div>
 
@@ -284,6 +347,20 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<div class="feedback-container">
+    <div class="feedback-card">
+        <div class="feedback-content">
+            <h3>📢 Help Shape Meridian</h3>
+            <p>Thank you for downloading! I am a solo developer building this in public. If you find a bug or have a feature request, I'd love to hear from you.</p>
+        </div>
+        <div class="feedback-action">
+            <a href="mailto:blueanvildesigns@gmail.com?subject=Meridian Feedback" class="btn btn-feedback">
+                Send Feedback
+            </a>
+        </div>
     </div>
 </div>
 
