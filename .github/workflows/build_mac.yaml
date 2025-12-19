@@ -1,0 +1,43 @@
+name: Build macOS App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      # 1. Check out the code
+      - uses: actions/checkout@v4
+
+      # 2. Install Flutter
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          architecture: x64
+
+      # 3. Enable Mac Desktop support
+      - run: flutter config --enable-macos-desktop
+
+      # 4. Get dependencies
+      - run: flutter pub get
+
+      # 5. Build the App
+      # We use --no-codesign because we don't have an Apple Developer Cert ($99/yr)
+      - run: flutter build macos --release --no-codesign
+
+      # 6. Zip the App
+      # (Mac apps are folders, so we must zip them to download)
+      - name: Zip the App
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r Meridian_Mac.zip Meridian.app
+
+      # 7. Upload the Zip so you can download it
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Meridian-Mac-Build
+          path: build/macos/Build/Products/Release/Meridian_Mac.zip
