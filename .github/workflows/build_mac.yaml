@@ -27,7 +27,7 @@ jobs:
 
       # 5. Build the App
       # We use --no-codesign because we don't have an Apple Developer Cert ($99/yr)
-      - run: flutter build macos --release --no-codesign
+      - run: flutter build macos --release
 
       # 6. Zip the App
       # (Mac apps are folders, so we must zip them to download)
