@@ -52,15 +52,26 @@
 
         /* --- GALLERY GRID SECTION --- */
         .gallery-container {
-            max-width: 1200px;
+            max-width: 1000px;
             width: 90%;
             margin-bottom: 80px;
         }
 
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
+
+            /* NEW: This prevents cards from stretching to match neighbors. */
+            /* They will now shrink to fit their own content perfectly. */
+            align-items: start;
+        }
+
+        /* Mobile Responsive: Collapse to 1 column on phones */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .gallery-card {
@@ -87,6 +98,23 @@
             border-bottom: 1px solid rgba(255,255,255,0.3);
         }
 
+        /* --- DUAL IMAGE CONTAINER (For Card 3) --- */
+        .dual-image-row {
+            display: flex;
+            width: 100%;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .dual-image-row img {
+            width: 50%; /* Each image takes half width */
+            object-fit: cover; /* Ensures they fill the height nicely */
+            border-bottom: none; /* Remove bottom border from individual imgs */
+        }
+
+        .dual-image-row img:first-child {
+            border-right: 1px solid rgba(255,255,255,0.3);
+        }
+
         .caption-area {
             padding: 20px;
         }
@@ -109,18 +137,21 @@
         /* --- BUTTONS --- */
         .btn-group {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
-            margin-bottom: 60px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
         .btn {
-            padding: 16px 32px;
+            padding: 16px 28px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 700;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-primary {
@@ -134,6 +165,18 @@
             box-shadow: 0 15px 30px rgba(63, 81, 181, 0.4);
         }
 
+        /* Specific style for Mac button to differentiate slightly if desired */
+        .btn-mac {
+            background-color: #1E293B; /* Dark Slate for Mac */
+            color: white;
+            box-shadow: 0 10px 20px rgba(30, 41, 59, 0.3);
+        }
+
+        .btn-mac:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(30, 41, 59, 0.4);
+        }
+
         .btn-secondary {
             background-color: white;
             color: var(--text-dark);
@@ -143,6 +186,15 @@
         .btn-secondary:hover {
             background-color: #F8FAFC;
             transform: translateY(-2px);
+        }
+
+        .mac-warning {
+            font-size: 0.85rem;
+            color: #94A3B8;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* --- FOOTER --- */
@@ -164,17 +216,34 @@
 
 <header>
     <h1>Meridian</h1>
-    <p class="subtitle">Stop doing mental math. Coordinate global meetings instantly with a beautiful, native Windows dashboard.</p>
+    <p class="subtitle">Stop doing mental math. Coordinate global meetings instantly with a beautiful, native dashboard for Windows & macOS.</p>
 
     <div class="btn-group">
-        <a href="[PASTE_YOUR_DOWNLOAD_LINK_HERE]" class="btn btn-primary">
-            Download for Windows (v1.0)
+        <a href="[PASTE_YOUR_WINDOWS_LINK_HERE]" class="btn btn-primary">
+            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" style="margin-right: 8px;">
+                <title>Windows</title>
+                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+            </svg>
+            Download for Windows
+        </a>
+
+        <a href="[PASTE_YOUR_MAC_LINK_HERE]" class="btn btn-mac">
+            <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" style="margin-right: 8px;">
+                <title>Apple</title>
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.54-.65.9-1.51.9-2.39-.88.04-1.95.58-2.58 1.32-.56.65-.93 1.57-.9 2.4 1.05.08 2.03-.6 2.58-1.33z"/>
+            </svg>
+            Download for Mac
         </a>
 
         <a href="https://www.buymeacoffee.com/[YOUR_COFFEE_USERNAME]" target="_blank" class="btn btn-secondary">
-            ☕ Buy me a coffee
+            ☕ Support
         </a>
     </div>
+
+    <p class="mac-warning">
+        <strong>Mac Users:</strong> After downloading, move the app to your Applications folder. <br>
+        If macOS prevents opening, right-click the app and select <em>Open</em>.
+    </p>
 </header>
 
 <div class="gallery-container">
@@ -197,10 +266,13 @@
         </div>
 
         <div class="gallery-card">
-            <img src="Screenshot3.png" alt="Picking a Time">
+            <div class="dual-image-row">
+                <img src="Screenshot3a.png" alt="Clock Input">
+                <img src="Screenshot3b.png" alt="Time Input">
+            </div>
             <div class="caption-area">
                 <div class="caption-title">Pick a Future Time</div>
-                <p class="caption-text">Dial in a meeting time (e.g., 3:00 PM) to see what that time looks like everywhere else.</p>
+                <p class="caption-text">Dial in a meeting time using the clock dial or manual entry to see what that time looks like everywhere else.</p>
             </div>
         </div>
 
