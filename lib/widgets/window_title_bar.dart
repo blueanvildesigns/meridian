@@ -7,36 +7,34 @@ class WindowTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40, // Standard title bar height
-      color: Colors.indigo, // Match your app theme
+      height: 40,
+      color: Colors.transparent, // Keep transparent for the glass look
       child: Row(
         children: [
-          // 1. DRAGGABLE AREA (The Title)
+          // 1. DRAGGABLE AREA
           Expanded(
             child: DragToMoveArea(
-              child: Row(
-                children: [
-                  const SizedBox(width: 16),
-                  // Optional: Add your small app icon here if you want
-                  const Icon(Icons.public, color: Colors.white, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Meridian",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: Container(
+                color: Colors.transparent, // Capture clicks/drags
+                padding: const EdgeInsets.only(left: 16),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Meridian",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF1E293B), // Dark text for contrast
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ),
             ),
           ),
 
-          // 2. WINDOW CONTROLS (Min, Max, Close)
+          // 2. WINDOW CONTROLS
           _WindowButton(
             icon: Icons.remove,
             onPressed: () => windowManager.minimize(),
           ),
+          // Maximize button (Optional)
           _WindowButton(
             icon: Icons.crop_square,
             onPressed: () async {
@@ -58,7 +56,7 @@ class WindowTitleBar extends StatelessWidget {
   }
 }
 
-// Helper Widget for the buttons
+// --- HELPER CLASS ---
 class _WindowButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -76,15 +74,15 @@ class _WindowButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        // Close button turns red on hover, others get slightly lighter
-        hoverColor: isClose ? Colors.red : Colors.white.withOpacity(0.1),
+        hoverColor: isClose ? Colors.red : Colors.grey.withOpacity(0.2),
         child: SizedBox(
           width: 46,
           height: 40,
           child: Icon(
             icon,
             size: 16,
-            color: Colors.white,
+            // Use dark icons since your background is light/glass
+            color: const Color(0xFF1E293B),
           ),
         ),
       ),

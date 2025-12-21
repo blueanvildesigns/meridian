@@ -4,7 +4,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:flutter_acrylic/flutter_acrylic.dart'; // <--- NEW IMPORT
+import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:meridian/providers/clock_provider.dart';
 import 'package:meridian/screens/home_screen.dart';
 import 'dart:io';
