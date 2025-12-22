@@ -78,6 +78,13 @@ class HomeScreen extends StatelessWidget {
                 buildDefaultDragHandles: false,
                 padding: const EdgeInsets.only(top: 0, bottom: 100),
                 itemCount: provider.cities.length,
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    child: child,
+                  );
+                },
                 onReorder: (oldIndex, newIndex) {
                   provider.reorderCity(oldIndex, newIndex);
                 },
