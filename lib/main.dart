@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meridian/providers/settings_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:google_fonts/google_fonts.dart';
@@ -67,6 +68,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ClockProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: const MeridianApp(),
     ),

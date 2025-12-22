@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meridian/screens/settings_screen.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowTitleBar extends StatelessWidget {
@@ -8,20 +9,19 @@ class WindowTitleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 40,
-      color: Colors.transparent, // Keep transparent for the glass look
+      color: Colors.transparent,
       child: Row(
         children: [
-          // 1. DRAGGABLE AREA
           Expanded(
             child: DragToMoveArea(
               child: Container(
-                color: Colors.transparent, // Capture clicks/drags
+                color: Colors.transparent,
                 padding: const EdgeInsets.only(left: 16),
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Meridian",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF1E293B), // Dark text for contrast
+                    color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -29,12 +29,24 @@ class WindowTitleBar extends StatelessWidget {
             ),
           ),
 
-          // 2. WINDOW CONTROLS
+          _WindowButton(
+              icon: Icons.settings,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierColor: Colors.transparent,
+                  builder: (context) => const SettingsScreen(),
+                );
+              },
+          ),
+
+          const SizedBox(width: 8),
+
           _WindowButton(
             icon: Icons.remove,
             onPressed: () => windowManager.minimize(),
           ),
-          // Maximize button (Optional)
+
           _WindowButton(
             icon: Icons.crop_square,
             onPressed: () async {
@@ -56,7 +68,6 @@ class WindowTitleBar extends StatelessWidget {
   }
 }
 
-// --- HELPER CLASS ---
 class _WindowButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -81,7 +92,6 @@ class _WindowButton extends StatelessWidget {
           child: Icon(
             icon,
             size: 16,
-            // Use dark icons since your background is light/glass
             color: const Color(0xFF1E293B),
           ),
         ),
