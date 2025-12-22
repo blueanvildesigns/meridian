@@ -19,6 +19,7 @@ dependencies:
   window_manager: ^0.4.3
   flutter_acrylic: ^1.1.4
   url_launcher: ^6.3.2
+  tray_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:
@@ -27,5 +28,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # We will add the icon here later manually,
-  # but for Windows, we replace the .ico file directly.
+  assets:
+    - assets/images/

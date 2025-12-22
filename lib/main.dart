@@ -7,15 +7,15 @@ import 'package:window_manager/window_manager.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:meridian/providers/clock_provider.dart';
 import 'package:meridian/screens/home_screen.dart';
+import 'package:meridian/managers/system_tray_manager.dart';
 import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
-  await Window.initialize(); // <--- Initialize Acrylic
+  await Window.initialize();
   tz.initializeTimeZones();
 
-  // Load Saved Window State
   final prefs = await SharedPreferences.getInstance();
   final double? width = prefs.getDouble('window_width');
   final double? height = prefs.getDouble('window_height');
@@ -28,8 +28,8 @@ void main() async {
     minimumSize: Size(400, 600),
     center: true,
     skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden, // Frameless
-    backgroundColor: Colors.transparent, // Crucial for glass effect
+    titleBarStyle: TitleBarStyle.hidden,
+    backgroundColor: Colors.transparent,
   );
 
   windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -46,17 +46,15 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
 
-    // --- ENABLE GLASS EFFECT ---
-    // 'acrylic' creates the blurred glass look.
-    // 'mica' is the newer opaque-but-tinted Windows 11 look.
-    // 'transparent' is fully clear.
+    await SystemTrayManager().init();
+    await windowManager.setPreventClose(true);
+
     if (Platform.isWindows) {
       await Window.setEffect(
         effect: WindowEffect.acrylic,
         color: const Color(0xCC222222),
       );
     } else if (Platform.isMacOS) {
-      // macOS "Sidebar" effect is the closest to the modern glass look
       await Window.setEffect(
         effect: WindowEffect.sidebar,
         color: Colors.transparent,
@@ -116,6 +114,14 @@ class _MeridianAppState extends State<MeridianApp> with WindowListener {
   }
 
   @override
+  void onWindowClose() async {
+    bool isPreventClose = await windowManager.isPreventClose();
+    if (isPreventClose) {
+      await windowManager.hide();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Meridian',
@@ -125,7 +131,6 @@ class _MeridianAppState extends State<MeridianApp> with WindowListener {
         textTheme: GoogleFonts.ibmPlexSerifTextTheme(
           Theme.of(context).textTheme,
         ),
-        // IMPORTANT: Set Scaffold Background to Transparent so the glass shows through!
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.indigo,
           background: Colors.transparent,
