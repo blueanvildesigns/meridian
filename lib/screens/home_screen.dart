@@ -6,6 +6,9 @@ import 'package:meridian/widgets/time_controls.dart';
 import 'package:meridian/widgets/city_search.dart';
 import 'package:meridian/widgets/window_title_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
+// 1. NEW IMPORTS
+import 'package:meridian/utils/style_helper.dart';
+import 'package:meridian/providers/settings_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,18 +22,26 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to both providers
     final provider = Provider.of<ClockProvider>(context);
+    final settings = Provider.of<SettingsProvider>(context);
+
+    // 2. Determine Background Color based on Theme
+    // Glass: Keep your existing translucent white
+    // Minimalist: Use the solid "Clay" color (neuBaseColor)
+    final Color appBackgroundColor = settings.currentTheme == AppTheme.neumorphic
+        ? StyleHelper.neuBaseColor
+        : const Color(0xFFF0F4F8).withOpacity(0.85);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF0F4F8).withOpacity(0.85),
+          color: appBackgroundColor, // Applied here
         ),
         child: Column(
           children: [
             const WindowTitleBar(),
-
             Container(
               padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
               child: Row(
@@ -103,8 +114,10 @@ class HomeScreen extends StatelessWidget {
       ),
       bottomNavigationBar: const TimeControls(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
+
+      // 3. NEW FAB IMPLEMENTATION
+      floatingActionButton: GestureDetector(
+        onTap: () async {
           final String? selectedZone = await showSearch<String?>(
             context: context,
             delegate: CitySearchDelegate(),
@@ -115,9 +128,18 @@ class HomeScreen extends StatelessWidget {
                 .addCity(name, selectedZone);
           }
         },
-        backgroundColor: Colors.indigo,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+        child: Container(
+          height: 56,
+          width: 56,
+          // Decoration handles the look (Indigo Orb vs Clay Button)
+          decoration: StyleHelper.getFabDecoration(settings.currentTheme),
+          child: Icon(
+            Icons.add,
+            // Icon color handles contrast (White vs Dark Grey)
+            color: StyleHelper.getFabIconColor(settings.currentTheme),
+            size: 30,
+          ),
+        ),
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/clock_provider.dart';
 import '../models/city.dart';
+import '../utils/style_helper.dart';
+import '../providers/settings_provider.dart';
 
 class ClockCard extends StatelessWidget {
   final City city;
@@ -11,86 +13,112 @@ class ClockCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ClockProvider>(context);
-    final data = provider.getCityData(city.timezoneId);
+    // 1. Listen to Providers
+    final clockProvider = Provider.of<ClockProvider>(context);
+    final settings = Provider.of<SettingsProvider>(context);
 
-    final bool isNight = data['isNight'];
+    final data = clockProvider.getCityData(city.timezoneId);
+    final AppTheme currentTheme = settings.currentTheme;
+    final bool isNight = data['isNight']; // <--- We use this now!
 
-    final Color cardBg = isNight ? const Color(0xFF1F2937) : Colors.white;
-    final Color textColor = isNight ? Colors.white : const Color(0xFF1E293B);
-    final Color timeColor = isNight ? const Color(0xFFBFDBFE) : Colors.indigo;
-    final Color dragIconColor = isNight ? Colors.grey[600]! : Colors.grey[400]!;
+    // 2. Logic: Determine Colors
+    Color baseTextColor = StyleHelper.getPrimaryTextColor(currentTheme, isNight: isNight);
+    Color secondaryTextColor = StyleHelper.getSecondaryTextColor(currentTheme, isNight: isNight);
 
+    // Time Color Logic
+    Color timeColor;
+    if (isNight) {
+      // Night: Light Blue for contrast
+      timeColor = const Color(0xFFBFDBFE);
+    } else {
+      // Day: Dark for Neumorphic, Indigo for Glass
+      timeColor = currentTheme == AppTheme.neumorphic
+          ? Colors.blueGrey.shade900
+          : Colors.indigo;
+    }
+
+    // Status Color Logic
     Color statusColor;
     if (data['status'] == 'warning') {
-      statusColor = isNight ? const Color(0xFF60A5FA) : Colors.blue[700]!;
+      statusColor = isNight ? Colors.orangeAccent : Colors.deepOrange;
     } else if (data['status'] == 'error') {
-      statusColor = isNight ? const Color(0xFFF87171) : Colors.red[700]!;
+      statusColor = Colors.redAccent;
     } else {
-      statusColor = isNight ? const Color(0xFF60A5FA) : Colors.grey;
+      statusColor = secondaryTextColor;
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12, left: 20, right: 20),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+
+      // 3. APPLY DECORATION (Passing isNight)
+      decoration: StyleHelper.getCardDecoration(currentTheme, isNight: isNight),
+
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
 
+        // CITY NAME (With Dynamic Font)
         title: Text(
           city.name,
-          style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: textColor
+          style: StyleHelper.getThemeTextStyle(
+            currentTheme,
+            fontSize: 22, // Bumped up slightly for Serif readability
+            fontWeight: FontWeight.bold,
+            color: baseTextColor,
           ),
         ),
+
+        // DAY / STATUS
         subtitle: Text(
           data['day'],
-          style: TextStyle(
+          style: StyleHelper.getThemeTextStyle(
+            currentTheme,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
             color: statusColor,
-            fontWeight: (isNight || data['status'] != 'neutral')
-                ? FontWeight.bold
-                : FontWeight.normal,
           ),
         ),
 
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // TIME DISPLAY (With Dynamic Font)
             Text(
               data['time'],
-              style: TextStyle(
+              style: StyleHelper.getThemeTextStyle(
+                currentTheme,
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: timeColor,
               ),
             ),
-            const SizedBox(width: 15),
-            Container(width: 1, height: 30, color: isNight ? Colors.white24 : Colors.grey[300]),
 
+            const SizedBox(width: 15),
+
+            // DIVIDER
+            Container(
+              width: 1,
+              height: 30,
+              color: isNight ? Colors.white24 : Colors.grey[400],
+            ),
+
+            // DELETE BUTTON
             IconButton(
               icon: const Icon(Icons.delete_outline, size: 20),
-              color: isNight ? Colors.red[200] : Colors.red[300],
-              onPressed: () => provider.removeCity(index),
+              color: isNight ? Colors.white54 : Colors.red[300],
+              onPressed: () => clockProvider.removeCity(index),
             ),
 
             const SizedBox(width: 10),
 
+            // DRAG HANDLE
             ReorderableDragStartListener(
               index: index,
               child: MouseRegion(
                 cursor: SystemMouseCursors.grab,
-                child: Icon(Icons.drag_handle, color: dragIconColor),
+                child: Icon(
+                  Icons.drag_handle,
+                  color: baseTextColor.withOpacity(0.5),
+                ),
               ),
             ),
           ],
