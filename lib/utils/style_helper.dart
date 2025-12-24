@@ -6,72 +6,71 @@ class StyleHelper {
   static const Color neuBaseColor = Color(0xFFE0E5EC);
   static const Color neuTextDark = Color(0xFF3E4E5E);
   static const Color neuTextLight = Color(0xFF9EA9B6);
-  static const Color nightGlassColor = Color(0x66000000);
 
-  // Night Gradient Colors
+  // High Opacity Colors for Glass Mode (readability fixes)
+  static final Color glassDayColor = Colors.white.withOpacity(0.95);
+  static final Color glassNightColor = Colors.black.withOpacity(0.85); // Dark but visible
+
   static const Color nightCardTopLeft = Color(0xFF2C3E50);
   static const Color nightCardBottomRight = Color(0xFF111827);
 
   // --- 1. CARD DECORATION ---
-  static BoxDecoration getCardDecoration(AppTheme theme, {required bool isNight}) {
+  static BoxDecoration getCardDecoration(AppTheme theme, {
+    required bool isNight,
+    bool isDragging = false,
+  }) {
     if (theme == AppTheme.neumorphic) {
-      // --- MINIMALIST THEME ---
+      // [MINIMALIST] (Unchanged)
       if (isNight) {
-        // Night: Tactile Gradient Tile
         return BoxDecoration(
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              nightCardTopLeft,    // Light hits here
-              nightCardBottomRight, // Shadow settles here
-            ],
+            colors: [nightCardTopLeft, nightCardBottomRight],
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.15),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.5),
-              offset: const Offset(4, 4),
-              blurRadius: 8,
+              offset: isDragging ? const Offset(8, 8) : const Offset(4, 4),
+              blurRadius: isDragging ? 12 : 8,
             ),
           ],
         );
       } else {
-        // Day: Clay Extrusion
         return BoxDecoration(
           color: neuBaseColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            const BoxShadow(
-                color: Colors.white,
-                offset: Offset(-8, -8),
-                blurRadius: 16
-            ),
+            if (!isDragging)
+              const BoxShadow(color: Colors.white, offset: Offset(-8, -8), blurRadius: 16),
             BoxShadow(
-                color: Colors.blueGrey.shade300,
-                offset: const Offset(8, 8),
-                blurRadius: 16
+              color: isDragging ? Colors.black.withOpacity(0.2) : Colors.blueGrey.shade300,
+              offset: isDragging ? const Offset(12, 12) : const Offset(8, 8),
+              blurRadius: isDragging ? 20 : 16,
             ),
           ],
         );
       }
     } else {
-      // --- GLASS THEME (Default) ---
+      // --- [GLASS THEME] ---
+      // Fix: Restore Night Logic but keep HIGH OPACITY
       return BoxDecoration(
-        color: isNight ? nightGlassColor : Colors.white.withOpacity(0.4),
+        // Night = Dark High Opacity | Day = White High Opacity
+        color: isNight ? glassNightColor : glassDayColor,
+
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isNight ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.6),
+          // Subtle white border for night, strong white border for day
+          color: isNight ? Colors.white.withOpacity(0.2) : Colors.white.withOpacity(0.6),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 16,
+            blurRadius: isDragging ? 24 : 16,
+            offset: isDragging ? const Offset(0, 8) : Offset.zero,
           ),
         ],
       );
@@ -80,13 +79,17 @@ class StyleHelper {
 
   // --- 2. TEXT COLORS ---
   static Color getPrimaryTextColor(AppTheme theme, {required bool isNight}) {
+    // If it's Night (in ANY theme), we need white text to read against the dark card
     if (isNight) return Colors.white;
+
+    // Day Mode:
     if (theme == AppTheme.neumorphic) return neuTextDark;
-    return const Color(0xFF1E293B);
+    return const Color(0xFF1E293B); // Dark Slate for Glass Day
   }
 
   static Color getSecondaryTextColor(AppTheme theme, {required bool isNight}) {
     if (isNight) return Colors.white70;
+
     if (theme == AppTheme.neumorphic) return neuTextLight;
     return const Color(0xFF64748B);
   }
@@ -98,7 +101,6 @@ class StyleHelper {
     Color? color,
   }) {
     if (theme == AppTheme.neumorphic) {
-      // MINIMALIST: Sans-Serif
       return TextStyle(
         fontFamily: 'Segoe UI',
         fontFamilyFallback: const ['Roboto', 'Arial', 'Sans-Serif'],
@@ -107,7 +109,6 @@ class StyleHelper {
         color: color,
       );
     } else {
-      // GLASS: Serif
       return TextStyle(
         fontFamily: 'IBM Plex Serif',
         fontFamilyFallback: const ['Georgia', 'Times New Roman', 'Serif'],
@@ -118,51 +119,43 @@ class StyleHelper {
     }
   }
 
-  // ... inside StyleHelper class ...
-
-  // --- 4. FAB DECORATION ---
+  // --- 4. FAB DECORATION (Unchanged) ---
   static BoxDecoration getFabDecoration(AppTheme theme) {
     if (theme == AppTheme.neumorphic) {
-      // MINIMALIST: Tactile "Physical Button"
       return BoxDecoration(
-        color: neuBaseColor, // Matches the background
+        color: neuBaseColor,
         shape: BoxShape.circle,
         boxShadow: [
-          // Light Top-Left
-          const BoxShadow(
-            color: Colors.white,
-            offset: Offset(-6, -6),
-            blurRadius: 10,
-          ),
-          // Dark Bottom-Right
-          BoxShadow(
-            color: Colors.blueGrey.shade300,
-            offset: const Offset(6, 6),
-            blurRadius: 10,
-          ),
+          const BoxShadow(color: Colors.white, offset: Offset(-6, -6), blurRadius: 10),
+          BoxShadow(color: Colors.blueGrey.shade300, offset: const Offset(6, 6), blurRadius: 10),
         ],
       );
     } else {
-      // GLASS: Standard Floating Orb
       return BoxDecoration(
-        color: Colors.indigo, // Matches the Jump Bar
+        color: Colors.indigo,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(
-            color: Colors.indigo.withOpacity(0.4),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          BoxShadow(color: Colors.indigo.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       );
     }
   }
 
-  // --- 5. FAB ICON COLOR ---
   static Color getFabIconColor(AppTheme theme) {
-    if (theme == AppTheme.neumorphic) {
-      return Colors.blueGrey.shade800; // Dark grey to look etched in
-    }
-    return Colors.white; // White icon on the blue orb
+    if (theme == AppTheme.neumorphic) return Colors.blueGrey.shade800;
+    return Colors.white;
+  }
+
+  // --- 6. HEADER ELEMENT DECORATION (Unchanged) ---
+  static BoxDecoration getNeumorphicHeaderDecoration() {
+    return BoxDecoration(
+      color: neuBaseColor,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
+      boxShadow: [
+        const BoxShadow(color: Colors.white, offset: Offset(-4, -4), blurRadius: 8),
+        BoxShadow(color: Colors.blueGrey.shade300, offset: const Offset(4, 4), blurRadius: 8),
+      ],
+    );
   }
 }

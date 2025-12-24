@@ -8,8 +8,14 @@ import '../providers/settings_provider.dart';
 class ClockCard extends StatelessWidget {
   final City city;
   final int index;
+  final bool isDragging;
 
-  const ClockCard({super.key, required this.city, required this.index});
+  const ClockCard({
+    super.key,
+    required this.city,
+    required this.index,
+    this.isDragging = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +32,22 @@ class ClockCard extends StatelessWidget {
     Color secondaryTextColor = StyleHelper.getSecondaryTextColor(currentTheme, isNight: isNight);
 
     // Time Color Logic
+    // Inside ClockCard build method:
+
+    // Time Color Logic
     Color timeColor;
+
     if (isNight) {
-      // Night: Light Blue for contrast
+      // Night Mode (Both Glass and Minimalist)
+      // Use Light Blue so it pops against the Dark/Black card
       timeColor = const Color(0xFFBFDBFE);
     } else {
-      // Day: Dark for Neumorphic, Indigo for Glass
-      timeColor = currentTheme == AppTheme.neumorphic
-          ? Colors.blueGrey.shade900
-          : Colors.indigo;
+      // Day Mode
+      // Glass Day = Indigo (High Contrast on White)
+      // Minimalist Day = Dark Grey (Etched look)
+      timeColor = currentTheme == AppTheme.glass
+          ? Colors.indigo
+          : Colors.blueGrey.shade900;
     }
 
     // Status Color Logic
@@ -51,7 +64,11 @@ class ClockCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
 
       // 3. APPLY DECORATION (Passing isNight)
-      decoration: StyleHelper.getCardDecoration(currentTheme, isNight: isNight),
+      decoration: StyleHelper.getCardDecoration(
+          currentTheme,
+          isNight: isNight,
+          isDragging: isDragging
+      ),
 
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
