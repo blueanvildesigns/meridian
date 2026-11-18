@@ -3,9 +3,9 @@ name: Web app CI
 on:
   push:
     branches: [main]
-    paths: ['webapp/**', 'docs/**', '.github/workflows/webapp-ci.yml']
+    paths: ['webapp/**', 'docs/**', 'firebase.json', '.github/workflows/webapp-ci.yml']
   pull_request:
-    paths: ['webapp/**', 'docs/**', '.github/workflows/webapp-ci.yml']
+    paths: ['webapp/**', 'docs/**', 'firebase.json', '.github/workflows/webapp-ci.yml']
   workflow_dispatch:
 
 permissions:
