@@ -105,8 +105,8 @@ describe('names and aliases', () => {
 
   it('ranks exact names and aliases above prefixes, then by population', () => {
     expect(top('london', 2)).toEqual(['London, GB', 'London, CA']);
-    // A small town really named Calcutta or Mexico doesn't outrank the big city's alias.
-    expect(top('calcutta', 2)).toEqual(['Kolkata, IN', 'Calcutta, ZA']);
+    // A smaller place really named Mexico doesn't outrank the big city's alias.
+    expect(top('calcutta')).toEqual(['Kolkata, IN']);
     expect(top('mexico')).toEqual(['Mexico City, MX']);
     expect(search('paris').results[0]).toMatchObject({ match: 'name' });
     expect(top('paris')).toEqual(['Paris, FR']);
@@ -115,7 +115,8 @@ describe('names and aliases', () => {
   it('understands a region or country after the name', () => {
     expect(top('london ontario')).toEqual(['London, CA']);
     expect(top('london, canada')).toEqual(['London, CA']);
-    expect(top('paris texas')).toEqual(['Paris, US']);
+    expect(place(search('portland maine').results[0]).region).toBe('Maine');
+    expect(place(search('portland oregon').results[0]).region).toBe('Oregon');
     expect(place(search('birmingham alabama').results[0]).countryCode).toBe('US');
     expect(place(search('birmingham england').results[0]).countryCode).toBe('GB');
   });

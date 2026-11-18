@@ -1,4 +1,4 @@
-// Builds Meridian's city data from a GeoNames export (decisions D18 and M2-3 to M2-6).
+// Builds Meridian's city data from a GeoNames export (decisions D18 and M2-3 to M2-6, M2-10).
 //
 // Usage: node scripts/build-cities.ts [--from <dir>]
 //   Without --from, downloads the four GeoNames files into a fresh temporary folder.
@@ -36,6 +36,12 @@ const FORMAT = 1;
 
 /** Historical, abandoned or destroyed places: not somewhere anyone's clock is. */
 const DROPPED_FEATURES = new Set(['PPLH', 'PPLQ', 'PPLW', 'PPLCH']);
+
+/**
+ * Places kept (owner decision, M2-10): 50,000 people or more, every capital, and each zone's
+ * representative, so no zone loses its sunrise location or its place in search.
+ */
+const MIN_POPULATION = 50_000;
 
 /** alternateNames "languages" that are really codes. Airport codes stay out until licensed. */
 const CODE_TAGS = new Set([
@@ -111,6 +117,7 @@ interface CityRow {
   lat: number;
   lon: number;
   population: number;
+  capital: boolean;
 }
 
 interface AltName {
@@ -221,6 +228,7 @@ async function main() {
       lat: round1(Number(f[4])),
       lon: round1(Number(f[5])),
       population: Number(f[14]),
+      capital: f[7] === 'PPLC',
     });
   }
   if (unknownZones.size > 0) {
@@ -311,29 +319,12 @@ async function main() {
     return kept;
   };
 
-  // Countries actually used, with display names from CLDR (this Node's ICU).
-  const countries: Record<string, string[]> = {};
-  for (const code of [...new Set(cities.map((c) => c.countryCode))].sort()) {
-    const names: string[] = [];
-    for (const n of countryNamesOf(code)) {
-      if (n && !names.some((m) => fold(m) === fold(n))) names.push(n);
-    }
-    countries[code] = names;
-  }
-
-  const regions: Record<string, string> = {};
-  for (const c of cities) {
-    const key = `${c.countryCode}.${c.admin1}`;
-    const name = regionNames.get(key);
-    if (name) regions[key] = name;
-  }
-
   const zones = [...new Set(cities.map((c) => c.zone))].sort();
   const zoneIndex = new Map(zones.map((z, i) => [z, i]));
 
-  const rows = cities.map((c) => {
+  const allRows = cities.map((c) => {
     const aliases = aliasesFor(c);
-    const region = regions[`${c.countryCode}.${c.admin1}`] ? c.admin1 : '';
+    const region = regionNames.has(`${c.countryCode}.${c.admin1}`) ? c.admin1 : '';
     const row: unknown[] = [
       c.geonameId,
       c.name,
@@ -350,15 +341,41 @@ async function main() {
   // One representative place per zone (D5, refined in M2-5): the zone's namesake if we have it
   // (Asia/Kolkata → Kolkata, not the bigger Mumbai), otherwise the most populous place.
   const representatives: Record<string, [string, string, number, number]> = {};
+  const representativeIds = new Set<number>();
   for (const zone of zones) {
     const namesake = fold((zone.split('/').pop() ?? '').replace(/_/g, ' '));
-    const inZone = rows.filter((r) => r.city.zone === zone);
+    const inZone = allRows.filter((r) => r.city.zone === zone);
     const pick =
       inZone.find(
         (r) => fold(r.city.name) === namesake || r.aliases.some((a) => fold(a) === namesake),
       ) ?? inZone[0];
-    if (pick)
+    if (pick) {
       representatives[zone] = [pick.city.name, pick.city.countryCode, pick.city.lat, pick.city.lon];
+      representativeIds.add(pick.city.geonameId);
+    }
+  }
+
+  const rows = allRows.filter(
+    (r) =>
+      r.city.population >= MIN_POPULATION ||
+      r.city.capital ||
+      representativeIds.has(r.city.geonameId),
+  );
+
+  // Countries and regions actually used, with country names from CLDR (this Node's ICU).
+  const countries: Record<string, string[]> = {};
+  for (const code of [...new Set(rows.map((r) => r.city.countryCode))].sort()) {
+    const names: string[] = [];
+    for (const n of countryNamesOf(code)) {
+      if (n && !names.some((m) => fold(m) === fold(n))) names.push(n);
+    }
+    countries[code] = names;
+  }
+  const regions: Record<string, string> = {};
+  for (const { city } of rows) {
+    const key = `${city.countryCode}.${city.admin1}`;
+    const name = regionNames.get(key);
+    if (name) regions[key] = name;
   }
 
   const dumpDate = files['cities15000.zip'].lastModified.slice(0, 10);

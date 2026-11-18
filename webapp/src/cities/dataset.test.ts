@@ -12,8 +12,9 @@ const RAW = readFileSync(resolve('src/cities/data/cities.v1.json'));
 describe('the generated dataset', () => {
   const data = realDataset();
 
-  it('stays inside the city-data budget (hosting-plan section 3: under ~1.5 MB compressed)', () => {
-    expect(gzipSync(RAW, { level: 9 }).length).toBeLessThan(1_500_000);
+  it('stays near the ~400 KB target (M2-10), well inside the 1.5 MB budget', () => {
+    // 393 KB gzip at the 2026-11-18 export; the headroom absorbs normal GeoNames growth.
+    expect(gzipSync(RAW, { level: 9 }).length).toBeLessThan(450_000);
   });
 
   it('credits GeoNames under CC BY 4.0', () => {
@@ -21,8 +22,9 @@ describe('the generated dataset', () => {
     expect(data.source.dumpDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it('has a sensible number of places, each listed once', () => {
-    expect(data.places.length).toBeGreaterThan(30_000);
+  it('has places of 50,000+ people plus capitals (M2-10), each listed once', () => {
+    expect(data.places.length).toBeGreaterThan(12_000);
+    expect(data.places.length).toBeLessThan(15_000);
     expect(new Set(data.places.map((p) => p.geonameId)).size).toBe(data.places.length);
     expect(data.places.every((p, i) => p.rank === i)).toBe(true);
   });
@@ -59,6 +61,15 @@ describe('the generated dataset', () => {
         if (other) expect(other, `${p.name}: ${key}`).toBe(p.countryCode);
       }
     }
+  });
+
+  it('keeps small capitals and at least one place in every zone', () => {
+    const names = new Set(data.places.map((p) => p.name));
+    for (const capital of ['Vaduz', 'Ngerulmud', 'Funafuti', 'Vatican City', 'Stanley']) {
+      expect(names, capital).toContain(capital);
+    }
+    const zonesWithPlaces = new Set(data.places.map((p) => p.zone));
+    expect(data.zones.filter((z) => !zonesWithPlaces.has(z))).toEqual([]);
   });
 
   it('puts the biggest cities first', () => {
@@ -139,7 +150,7 @@ describe('loadDataset', () => {
     expect(a).toBe(b);
     expect(fetcher).toHaveBeenCalledTimes(1);
     expect(fetcher.mock.calls[0]?.[0]).toMatch(/cities\.v1.*\.json/);
-    expect(a.places.length).toBeGreaterThan(30_000);
+    expect(a.places.length).toBeGreaterThan(12_000);
   });
 
   it('tries again after a failure instead of remembering it', async () => {
