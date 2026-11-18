@@ -12,7 +12,7 @@ export interface HeaderRule {
 
 export interface HostingConfig {
   public: string;
-  rewrites?: { source: string; destination: string }[];
+  rewrites?: { source?: string; regex?: string; destination: string }[];
   headers?: HeaderRule[];
 }
 

@@ -29,6 +29,13 @@ test('rewrites unknown paths to the app', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Meridian' })).toBeVisible();
 });
 
+test('answers a missing asset with 404, not the app shell', async ({ request }) => {
+  const res = await request.get('/assets/index-does-not-exist.js');
+  expect(res.status()).toBe(404);
+  expect(res.headers()['cache-control']).toBe('no-cache');
+  expect(await res.text()).not.toContain('id="root"');
+});
+
 test('runs under the production CSP with no violations', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __cspViolations: string[] };

@@ -53,7 +53,15 @@ createServer((req, res) => {
     return;
   }
   if (!file) {
-    res.writeHead(404, { ...headers, 'content-type': 'text/plain' }).end('Not found');
+    // Firebase serves /404.html from the public root when nothing matches, with the headers
+    // for /404.html rather than the request path (observed on a preview channel, 2026-11-18).
+    const notFound = fileAt('/404.html');
+    res.writeHead(404, {
+      ...headersFor(config, '/404.html'),
+      'content-type': TYPES['.html'] ?? 'text/html',
+    });
+    if (notFound) createReadStream(notFound).pipe(res);
+    else res.end('Not found');
     return;
   }
   res.writeHead(200, {

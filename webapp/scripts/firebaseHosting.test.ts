@@ -59,9 +59,21 @@ describe('firebase.json headers', () => {
     expect(headersFor(config, path)['cache-control']).toBe('no-cache');
   });
 
-  it('rewrites unknown paths to the SPA entry', () => {
-    expect(rewriteFor(config, '/some/deep/route')).toBe('/index.html');
-  });
+  it.each(['/', '/some/deep/route'])(
+    'rewrites the extensionless path %s to the SPA entry',
+    (path) => {
+      expect(rewriteFor(config, path)).toBe('/index.html');
+    },
+  );
+
+  // Otherwise a missing hashed file (an old chunk after a deploy, a source map) would be
+  // answered with index.html under the year-long immutable cache header.
+  it.each(['/assets/index-gone.js', '/assets/index-abc123.js.map', '/data/cities.v0.json'])(
+    'does not rewrite the file-like path %s',
+    (path) => {
+      expect(rewriteFor(config, path)).toBeUndefined();
+    },
+  );
 });
 
 describe('Content-Security-Policy', () => {
