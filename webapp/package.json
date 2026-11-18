@@ -2,6 +2,7 @@
   "name": "meridian-web",
   "private": true,
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=26"
@@ -10,6 +11,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview --port 4173 --strictPort",
+    "serve": "node scripts/serve-dist.ts 4173",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
