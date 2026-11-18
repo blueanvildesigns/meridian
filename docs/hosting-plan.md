@@ -94,7 +94,7 @@ Go live when all of the following are true:
 - Remove noindex only at launch.
 
 ## 9. Order of work for hosting
-- M0: Firebase project, domain connected and certificate issued, workflows generated, a placeholder page deployed to the real domain (noindex). This proves the pipeline early.
+- M0: Firebase project, domain connected and certificate issued, workflows generated, a placeholder page deployed to the real domain (noindex). This proves the pipeline early. **Done 2026-11-18** (PR 21; decisions M0-15 and M0-20 to M0-27).
 - Each milestone: PR preview for review.
 - M7: measure bundle and transfer, set the final headers, make the billing decision, run the launch gate, remove noindex, announce.
 
@@ -111,5 +111,5 @@ Go live when all of the following are true:
 ## 11. Open items
 - Spark vs Blaze (Graham).
 - Whether to redirect the `.com` and `.dev` domains.
-- Repo public from the start, or private until launch.
+- ~~Repo public from the start, or private until launch.~~ Private until launch (M0-17). GitHub Pages unpublished (M0-27).
 - Confirm sole authorship before the first public MIT release.
