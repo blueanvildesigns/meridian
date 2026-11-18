@@ -34,7 +34,7 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 ## 3. Keep traffic and cost low (requirements for the build)
 - Static assets served with Brotli/gzip (Firebase compresses automatically; verify).
 - Hashed asset filenames with long immutable cache headers; `index.html` always revalidated.
-- City data as a separate, compact file (target under 1.5 MB compressed), loaded when needed and cached. Consider loading it lazily on first Add city or search.
+- City data as a separate, compact file (target under 1.5 MB compressed), loaded when needed and cached. Consider loading it lazily on first Add city or search. Done at M2: hashed asset, fetched on first use (M2-10).
 - Fonts self-hosted, subset to Latin where possible, `font-display: swap`.
 - JS budget: under 300 KB compressed for the initial route (excluding the Temporal polyfill when native Temporal exists). Load the polyfill only when needed.
 - No analytics or third-party calls (also a product decision).
@@ -43,6 +43,7 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 | Milestone | Initial JS (gzip / Brotli) | CSS (gzip) | Fonts on first visit | City data | Notes |
 |---|---|---|---|---|---|
 | M0 (2026-11-18) | 69.2 KB / 59.4 KB | 2.1 KB | about 113 KB (Latin woff2, 5 weights) | none yet | Shell only: React plus header and footer. Budget: 300 KB JS. |
+| M2 (2026-11-18) | 69.8 KB gzip (no new imports; the M2 modules are wired in at M3/M4) | 2.1 KB | unchanged | **963 KB gzip / 688 KB Brotli** (2.30 MB raw), lazy-loaded as `/assets/cities.v1-<hash>.json` with immutable caching. Bundled zone file: 6.9 KB gzip. | 34,224 places, 42,120 aliases (decisions M2-3, M2-4, M2-10). Over the 400 KB target in D18, under the 1.5 MB budget; a unit test guards the budget. Brotli measured locally at quality 11; Firebase's level is unverified. |
 
 ## 4. Firebase configuration
 Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are mirrored locally by `webapp/scripts/serve-dist.ts`, and e2e runs against that. It was checked on a real preview channel too (M0-20, M0-21): the rewrite now covers only extensionless paths, and Firebase overrides `Strict-Transport-Security`. Decisions M0-12 to M0-16 and M0-20 to M0-21 in `docs/decisions-log.md`. Original outline:
