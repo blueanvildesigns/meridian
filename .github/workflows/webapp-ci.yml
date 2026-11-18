@@ -1,0 +1,68 @@
+name: Web app CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['webapp/**', 'docs/**', '.github/workflows/webapp-ci.yml']
+  pull_request:
+    paths: ['webapp/**', 'docs/**', '.github/workflows/webapp-ci.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: webapp-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: webapp
+
+jobs:
+  check:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: webapp/.nvmrc
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Bundle size summary
+        run: |
+          {
+            echo '### Bundle size'
+            echo '| File | Size | Gzip |'
+            echo '|---|---:|---:|'
+            for f in dist/assets/*.js dist/assets/*.css; do
+              echo "| $(basename "$f") | $(stat -c %s "$f") | $(gzip -c "$f" | wc -c) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  e2e:
+    name: End-to-end (Chromium, Firefox, WebKit, mobile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: webapp/.nvmrc
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: webapp/playwright-report
+          retention-days: 14
