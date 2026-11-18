@@ -92,6 +92,12 @@ describe('Content-Security-Policy', () => {
     }
   });
 
+  // WebKit applies it to http://localhost too, which breaks the e2e server, and in production it
+  // does nothing: every resource is same-origin and Firebase serves HTTPS only, with HSTS.
+  it('omits upgrade-insecure-requests', () => {
+    expect(csp.has('upgrade-insecure-requests')).toBe(false);
+  });
+
   it('locks down framing, plugins, base URI and forms', () => {
     expect(csp.get('frame-ancestors')).toEqual(["'none'"]);
     expect(csp.get('object-src')).toEqual(["'none'"]);
