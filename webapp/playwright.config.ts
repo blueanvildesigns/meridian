@@ -12,9 +12,9 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
   },
-  // Test the production build, not the dev server: that is what ships.
+  // Test the production build with firebase.json's headers (CSP included): that is what ships.
   webServer: {
-    command: 'npm run build && npm run preview',
+    command: 'npm run build && npm run serve',
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
