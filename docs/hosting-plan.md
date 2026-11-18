@@ -45,9 +45,9 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 | M0 (2026-11-18) | 69.2 KB / 59.4 KB | 2.1 KB | about 113 KB (Latin woff2, 5 weights) | none yet | Shell only: React plus header and footer. Budget: 300 KB JS. |
 
 ## 4. Firebase configuration
-Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are mirrored locally by `webapp/scripts/serve-dist.ts`, and e2e runs against that. Decisions M0-12 to M0-16 in `docs/decisions-log.md`. Original outline:
+Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are mirrored locally by `webapp/scripts/serve-dist.ts`, and e2e runs against that. It was checked on a real preview channel too (M0-20, M0-21): the rewrite now covers only extensionless paths, and Firebase overrides `Strict-Transport-Security`. Decisions M0-12 to M0-16 and M0-20 to M0-21 in `docs/decisions-log.md`. Original outline:
 - `public`: the Vite build output directory.
-- Rewrite everything to `/index.html` (single-page app; Jump links use the URL).
+- Rewrite extensionless paths to `/index.html` (single-page app; Jump links use the URL hash). Missing files 404 (`public/404.html`).
 - Headers:
   - `/assets/**`: `Cache-Control: public, max-age=31536000, immutable`
   - `/index.html` and `/`: `Cache-Control: no-cache`
@@ -65,6 +65,7 @@ Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are 
 8. Optional: redirect `meridian.blueanvildesigns.com` and `.dev` to the `.io` address (the wizard has a redirect option). Decide later.
 
 ## 6. CI/CD (GitHub Actions)
+Implemented as the `deploy-preview` and `deploy-live` jobs in `.github/workflows/webapp-ci.yml` (M0-15). Firebase project `meridian-web-a5829`. Original outline:
 - Run `firebase init hosting:github` from the repo root. It creates a service account, stores its key as a GitHub secret, and writes two workflows:
   - on pull request: build, test, deploy to a preview channel and comment the URL on the PR
   - on merge to `main`: build, test, deploy to live
