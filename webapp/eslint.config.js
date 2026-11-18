@@ -23,6 +23,17 @@ export default tseslint.config(
     },
   },
   {
+    // Time code goes through T() so the polyfill and native paths are the same code (M1-1).
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/time/temporal.ts'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        { name: 'Temporal', message: 'Use T() from src/time/temporal.ts.' },
+      ],
+    },
+  },
+  {
     files: ['vite.config.ts', 'playwright.config.ts', 'e2e/**', 'scripts/**'],
     languageOptions: { globals: globals.node },
   },
