@@ -47,12 +47,18 @@ describe('the old app’s search failures (REVERSE_ENGINEERING §2.3, bug 13)', 
       expect.objectContaining({ name: 'Pacific Standard Time', abbreviation: 'PST' }),
     ]);
     expect(r.zoneGroups[0]?.zones).toEqual(
-      expect.arrayContaining(['America/Los_Angeles', 'America/Vancouver', 'America/Tijuana']),
+      expect.arrayContaining(['America/Los_Angeles', 'America/Tijuana']),
     );
     expect(label(r.results[0])).toBe('Los Angeles, US');
     const names = r.results.map(label);
-    expect(names).toEqual(expect.arrayContaining(['Vancouver, CA', 'Seattle, US', 'Tijuana, MX']));
+    expect(names).toEqual(expect.arrayContaining(['Seattle, US', 'Tijuana, MX']));
     expect(r.results[0]).toMatchObject({ match: 'zone', matched: 'PST' });
+    // Vancouver isn't asserted here: tz 2026e keeps British Columbia on UTC−7 all year (PDT), so
+    // whether "pst" finds it depends on the engine's tz version. The search follows the engine.
+  });
+
+  it('pdt finds Vancouver under any tz version (summer time before 2026e, all year after)', () => {
+    expect(search('pdt').results.map(label)).toContain('Vancouver, CA');
   });
 
   it('india → Indian cities, not Indiana', () => {
