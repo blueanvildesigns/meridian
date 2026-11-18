@@ -1,0 +1,162 @@
+/*
+ * Design tokens. Source of truth: docs/design-spec.md section 2, plus canvas values
+ * adopted in docs/decisions-log.md (C3–C6). Values marked "derived" are not in any
+ * mockup; they are chosen here and verified by src/styles/contrast.test.ts.
+ *
+ * Light is the default. Dark applies when <html data-theme="dark"> (set before first
+ * paint by the inline script in index.html, from Settings > Appearance or the system).
+ */
+:root {
+  color-scheme: light;
+
+  /* Page and surfaces */
+  --page: #eef2f8;
+  --surface: #ffffff;
+  --panel: #ffffff;
+  --backdrop: #aeb8cc;
+  --fg: #14213d;
+  --muted: #4a5a75;
+  --line: #d5ddea;
+
+  /* Accent and controls */
+  --accent: #2f4bd0;
+  --on-accent: #ffffff;
+  --accent-text: #1d3ab0;
+  --link: #2f4bd0;
+  --link-hover: #1d3ab0;
+  --control-bg: #ffffff;
+  --control-border: #6f82a3;
+  --seg-bg: #eef2f8;
+  --seg-selected-bg: #14213d;
+  --seg-selected-fg: #ffffff;
+  --disabled-bg: #c9d1e3;
+  --disabled-fg: #4a5a75;
+  --focus: #1d3ab0;
+
+  /* Day card */
+  --day-card-bg: #ffffff;
+  --day-card-fg: #14213d;
+  --day-card-muted: #4a5a75;
+  --day-card-line: #d5ddea;
+  --day-chip-bg: #e6ecff; /* canvas (C4) */
+  --day-chip-fg: #1d3ab0; /* canvas (C4) */
+  --day-icon: #8a4200;
+  --day-focus: #1d3ab0;
+
+  /* Night card */
+  --night-card-bg: #14213d;
+  --night-card-fg: #f4f7ff;
+  --night-card-muted: #b9c6e0;
+  --night-card-line: #2c3c63; /* canvas (C4) */
+  --night-chip-bg: #27386a; /* canvas (C4) */
+  --night-chip-fg: #d2e1ff; /* canvas (C4) */
+  --night-icon: #f2c078;
+  --night-focus: #8fb0ff;
+
+  /* Warning: storage banner, unrecognized-zone card */
+  --warn-bg: #fff4d6;
+  --warn-border: #e3b341;
+  --warn-text: #4a2f00;
+  --warn-icon: #8a4200;
+  --warn-link: #1d3ab0;
+  --warn-accent: #c58a1b; /* dashed border of the unrecognized-zone card */
+
+  /* Jump banner and reference tag: canvas JumpActive (C3, C6) */
+  --jump-bg: #fff4e5;
+  --jump-border: #b45309;
+  --jump-text: #7a3a00;
+  --ref-tag-bg: #2f4bd0;
+  --ref-tag-fg: #ffffff;
+  --ref-border: #2f4bd0;
+
+  /* Type */
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --size-wordmark: 30px;
+  --size-dialog-title: 22px;
+  --size-city: 20px;
+  --size-clock: 40px; /* design-spec wins over canvas 44px (C1) */
+  --size-body: 15px;
+  --size-label: 13px;
+
+  /* Shape and spacing */
+  --radius-card: 16px;
+  --radius-dialog: 20px;
+  --radius-control: 10px;
+  --radius-pill: 999px;
+  --page-max: 1240px; /* canvas (C7) */
+  --page-pad-top: 28px; /* canvas (C7) */
+  --page-pad-x: 32px;
+  --grid-gap: 20px;
+  --card-min-h: 214px;
+  --col-min: 268px;
+  --dialog-w: 600px;
+  --dialog-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  --target: 44px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --page: #0b1426;
+  --surface: #14213d;
+  --panel: #14213d;
+  --backdrop: #050a14;
+  --fg: #f4f7ff;
+  --muted: #b9c6e0;
+  --line: #2c3c63;
+
+  --accent: #8fb0ff;
+  --on-accent: #0b1426;
+  --accent-text: #9db8ff; /* canvas DarkMain LIVE label */
+  --link: #8fb0ff;
+  --link-hover: #b7cdff; /* canvas DarkMain */
+  --control-bg: #14213d;
+  --control-border: #7a8db3;
+  --seg-bg: #0b1426;
+  --seg-selected-bg: #8fb0ff;
+  --seg-selected-fg: #0b1426;
+  --disabled-bg: #2c3c63; /* derived */
+  --disabled-fg: #b9c6e0; /* derived */
+  --focus: #8fb0ff;
+
+  --day-card-bg: #dce6f7;
+  --day-card-fg: #14213d;
+  --day-card-muted: #3f5070;
+  --day-card-line: #b4c3de;
+  --day-chip-bg: #c4d3f5;
+  --day-chip-fg: #1d3ab0;
+  --day-icon: #8a4200;
+  --day-focus: #1d3ab0;
+
+  --night-card-bg: #14213d;
+  --night-card-fg: #f4f7ff;
+  --night-card-muted: #b9c6e0;
+  --night-card-line: #2c3c63;
+  --night-chip-bg: #27386a;
+  --night-chip-fg: #d2e1ff;
+  --night-icon: #f2c078;
+  --night-focus: #8fb0ff;
+
+  --warn-bg: #3b2c0b; /* derived */
+  --warn-border: #c58a1b; /* derived */
+  --warn-text: #ffe7b0; /* derived */
+  --warn-icon: #f2c078; /* derived */
+  --warn-link: #9db8ff; /* derived */
+  --warn-accent: #e3b341; /* derived */
+
+  --jump-bg: #3a2508; /* derived */
+  --jump-border: #e59a4a; /* derived */
+  --jump-text: #ffddb3; /* derived */
+  --ref-tag-bg: #8fb0ff; /* derived */
+  --ref-tag-fg: #0b1426; /* derived */
+  --ref-border: #8fb0ff; /* derived */
+}
+
+@media (max-width: 640px) {
+  :root {
+    --size-wordmark: 24px;
+    --page-pad-top: 16px;
+    --page-pad-x: 16px;
+  }
+}

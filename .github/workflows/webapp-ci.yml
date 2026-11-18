@@ -1,0 +1,134 @@
+name: Web app CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      [
+        "webapp/**",
+        "docs/**",
+        "firebase.json",
+        ".firebaserc",
+        ".github/workflows/webapp-ci.yml",
+      ]
+  pull_request:
+    paths:
+      [
+        "webapp/**",
+        "docs/**",
+        "firebase.json",
+        ".firebaserc",
+        ".github/workflows/webapp-ci.yml",
+      ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: webapp-ci-${{ github.ref }}
+  # Superseded PR runs are cancelled; a live deploy on main is never cut off halfway.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: webapp
+
+jobs:
+  check:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: webapp/.nvmrc
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: webapp/dist
+          retention-days: 7
+      - name: Bundle size summary
+        run: |
+          {
+            echo '### Bundle size'
+            echo '| File | Size | Gzip |'
+            echo '|---|---:|---:|'
+            for f in dist/assets/*.js dist/assets/*.css; do
+              echo "| $(basename "$f") | $(stat -c %s "$f") | $(gzip -c "$f" | wc -c) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  e2e:
+    name: End-to-end (Chromium, Firefox, WebKit, mobile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: webapp/.nvmrc
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: webapp/playwright-report
+          retention-days: 14
+
+  # Deploys reuse the exact build the check job produced, and run only after every check passes.
+  # Firebase project: meridian-web-a5829 (also in .firebaserc). The service-account key is a
+  # repository secret created by `firebase init hosting:github`, limited to Hosting deploys.
+  deploy-preview:
+    name: Deploy PR preview
+    needs: [check, e2e]
+    # Fork PRs get no secrets, so skip rather than fail.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # comment the preview URL on the PR
+      checks: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: webapp/dist
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MERIDIAN_WEB_A5829 }}
+          projectId: meridian-web-a5829
+          expires: 7d
+
+  deploy-live:
+    name: Deploy live
+    needs: [check, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: webapp/dist
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MERIDIAN_WEB_A5829 }}
+          projectId: meridian-web-a5829
+          channelId: live
