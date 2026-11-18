@@ -98,3 +98,6 @@ Contrast: verify every text/background pair meets WCAG AA (4.5:1 body, 3:1 large
 ## 7. Content
 - Voice: plain and short. Credits and licence copy lives in About (GeoNames CC BY 4.0 required).
 - Placeholders to finalise: About version string and site URL; airport-data credit pending its licence.
+
+## 8. Performance and deployment
+Bundle and data-size budgets, caching, headers and launch gating are in `docs/hosting-plan.md` (sections 3, 4, 8). They are requirements, not suggestions: the free hosting tier has a 10 GB/month transfer limit.

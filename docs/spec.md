@@ -1,6 +1,6 @@
 # Meridian Web: Master Spec
 
-Status: draft, in design. Merged from `docs/archive/`. Baseline analysis: `docs/REVERSE_ENGINEERING.md`.
+Status: design approved 2026-11-17. Visual details: `docs/design-spec.md`. Hosting and launch: `docs/hosting-plan.md`. Merged from `docs/archive/`. Baseline analysis: `docs/REVERSE_ENGINEERING.md`.
 
 ## 1. Product
 
@@ -81,17 +81,16 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 - React + TypeScript + Vite; static SPA, no backend.
 - Time math: Temporal (native where available, polyfill otherwise). Zone rules from browser `Intl`.
 - City data: GeoNames subset bundled as static JSON with aliases; attribution on the About page.
-- Hosting: the user's GCP setup (mechanism and domain still open).
+- Repo: GitHub (stays). License: MIT.
+- Hosting: Firebase Hosting at `https://meridian.blueanvildesigns.io`, deployed by GitHub Actions (PR previews, live on merge to `main`). Costs, config, DNS steps, launch gating: `docs/hosting-plan.md`.
 
 ## 8. Open questions
 
-- Visual identity details: palette, typography, themes (single theme vs light/dark pair).
-- GCP hosting mechanism and domain.
+- Spark vs Blaze billing plan for launch; redirects for the .com/.dev domains; repo public or private until launch (see `docs/hosting-plan.md`).
 - Safari Temporal status and polyfill choice.
 - GeoNames filter threshold and alias source.
 - Airport-code dataset (IATA) source and license; result ranking and result cap.
 - Jump URL format and handling of a reference city missing from the recipient's list; real date and time input controls.
-- Screens still to design: settings, About, empty list state, error states, app-wide dark mode.
 - Undo toast duration; rename validation (empty name, max length).
 - Whether the old app still builds on Windows/macOS (only matters for a side-by-side reference).
 - Test strategy for time math (the old app's probe cases are a ready-made regression set).
