@@ -3,9 +3,23 @@ name: Web app CI
 on:
   push:
     branches: [main]
-    paths: ['webapp/**', 'docs/**', 'firebase.json', '.github/workflows/webapp-ci.yml']
+    paths:
+      [
+        "webapp/**",
+        "docs/**",
+        "firebase.json",
+        ".firebaserc",
+        ".github/workflows/webapp-ci.yml",
+      ]
   pull_request:
-    paths: ['webapp/**', 'docs/**', 'firebase.json', '.github/workflows/webapp-ci.yml']
+    paths:
+      [
+        "webapp/**",
+        "docs/**",
+        "firebase.json",
+        ".firebaserc",
+        ".github/workflows/webapp-ci.yml",
+      ]
   workflow_dispatch:
 
 permissions:
@@ -13,7 +27,8 @@ permissions:
 
 concurrency:
   group: webapp-ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR runs are cancelled; a live deploy on main is never cut off halfway.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
@@ -36,6 +51,11 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: webapp/dist
+          retention-days: 7
       - name: Bundle size summary
         run: |
           {
@@ -66,3 +86,49 @@ jobs:
           name: playwright-report
           path: webapp/playwright-report
           retention-days: 14
+
+  # Deploys reuse the exact build the check job produced, and run only after every check passes.
+  # Firebase project: meridian-web-a5829 (also in .firebaserc). The service-account key is a
+  # repository secret created by `firebase init hosting:github`, limited to Hosting deploys.
+  deploy-preview:
+    name: Deploy PR preview
+    needs: [check, e2e]
+    # Fork PRs get no secrets, so skip rather than fail.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # comment the preview URL on the PR
+      checks: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: webapp/dist
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MERIDIAN_WEB_A5829 }}
+          projectId: meridian-web-a5829
+          expires: 7d
+
+  deploy-live:
+    name: Deploy live
+    needs: [check, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: webapp/dist
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MERIDIAN_WEB_A5829 }}
+          projectId: meridian-web-a5829
+          channelId: live
