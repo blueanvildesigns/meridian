@@ -17,8 +17,9 @@ export interface JumpState {
   refName?: string;
 }
 
-const MIN_YEAR = 1900;
-const MAX_YEAR = 2200;
+/** The years a Jump can reach (M1-7); the picker's date field uses the same range. */
+export const MIN_YEAR = 1900;
+export const MAX_YEAR = 2200;
 
 /** Percent-encodes, but leaves ":" and "/" readable (both are allowed in a fragment). */
 function encodeValue(value: string): string {
