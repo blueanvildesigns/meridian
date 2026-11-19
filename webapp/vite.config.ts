@@ -3,6 +3,7 @@ import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { thirdPartyLicenses } from './scripts/thirdPartyLicenses.ts';
 import { THEME_BOOT_SCRIPT } from './src/app/themeBoot.ts';
 
 /** Inlines the theme bootstrap into <head> so the theme is set before first paint. */
@@ -28,7 +29,7 @@ function buildInfo() {
 }
 
 export default defineConfig({
-  plugins: [themeBoot(), react()],
+  plugins: [themeBoot(), react(), thirdPartyLicenses()],
   define: buildInfo(),
   build: {
     target: 'es2023',
