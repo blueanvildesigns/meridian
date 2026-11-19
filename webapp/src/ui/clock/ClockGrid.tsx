@@ -31,6 +31,8 @@ export interface ClockGridProps {
   onMove: (activeId: string, overId: string) => void;
   onRemove: (id: string) => void;
   onAddCity?: () => void;
+  /** "Choose a zone" on an unrecognised card. */
+  onChooseZone?: (id: string) => void;
   /** Move focus to the card with this ID (a new object each time; null ID means none). */
   focusRequest?: { id: string | null } | null;
 }
@@ -68,7 +70,14 @@ function announcements(views: readonly CardView[]): Announcements {
   };
 }
 
-export function ClockGrid({ views, onMove, onRemove, onAddCity, focusRequest }: ClockGridProps) {
+export function ClockGrid({
+  views,
+  onMove,
+  onRemove,
+  onAddCity,
+  onChooseZone,
+  focusRequest,
+}: ClockGridProps) {
   const sensors = useSensors(
     // Mouse and touch separately: a pointer sensor would turn every swipe on a phone into a drag.
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
@@ -102,6 +111,7 @@ export function ClockGrid({ views, onMove, onRemove, onAddCity, focusRequest }: 
               key={view.id}
               view={view}
               onRemove={onRemove}
+              onChooseZone={onChooseZone}
               focusRequest={focusRequest?.id === view.id ? focusRequest : null}
             />
           ))}
@@ -120,10 +130,11 @@ export function ClockGrid({ views, onMove, onRemove, onAddCity, focusRequest }: 
 interface SortableItemProps {
   view: CardView;
   onRemove: (id: string) => void;
+  onChooseZone: ((id: string) => void) | undefined;
   focusRequest: object | null;
 }
 
-function SortableItem({ view, onRemove, focusRequest }: SortableItemProps) {
+function SortableItem({ view, onRemove, onChooseZone, focusRequest }: SortableItemProps) {
   const ok = view.status === 'ok';
   const {
     attributes,
@@ -152,7 +163,12 @@ function SortableItem({ view, onRemove, focusRequest }: SortableItemProps) {
           focusRequest={focusRequest}
         />
       ) : (
-        <UnknownZoneCard view={view} onRemove={onRemove} focusRequest={focusRequest} />
+        <UnknownZoneCard
+          view={view}
+          onRemove={onRemove}
+          onChooseZone={onChooseZone}
+          focusRequest={focusRequest}
+        />
       )}
     </li>
   );

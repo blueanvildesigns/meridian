@@ -1,0 +1,49 @@
+/* Dialog panel (design-spec 2 and 3): 600 wide, radius 20, the dialog shadow; dark mode adds the
+   panel border. Phones get a full-screen sheet. Height is fixed so the panel doesn't jump as
+   search results come and go (canvas AddCity: 560 tall). */
+
+.dialog {
+  width: min(var(--dialog-w), calc(100% - 32px));
+  height: min(560px, calc(100dvh - 48px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-dialog);
+  background: var(--panel);
+  color: var(--fg);
+  box-shadow: var(--dialog-shadow);
+}
+
+/* ::backdrop doesn't inherit custom properties in older engines, so these repeat --backdrop
+   (light #AEB8CC, dark #050A14) at 80%, letting the page show faintly through (M4-6). */
+.dialog::backdrop {
+  background: rgb(174 184 204 / 0.8);
+}
+
+:global(:root[data-theme='dark']) .dialog::backdrop {
+  background: rgb(5 10 20 / 0.8);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* The page behind a modal shouldn't scroll under it. */
+:global(html:has(dialog[open])) {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .dialog {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

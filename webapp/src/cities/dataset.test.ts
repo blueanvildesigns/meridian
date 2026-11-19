@@ -13,8 +13,9 @@ describe('the generated dataset', () => {
   const data = realDataset();
 
   it('stays near the ~400 KB target (M2-10), well inside the 1.5 MB budget', () => {
-    // 393 KB gzip at the 2026-11-18 export; the headroom absorbs normal GeoNames growth.
-    expect(gzipSync(RAW, { level: 9 }).length).toBeLessThan(450_000);
+    // 393 KB gzip at the 2026-11-18 export, 423 KB with the airports and their towns (M4-1, M4-2);
+    // the headroom absorbs normal GeoNames growth.
+    expect(gzipSync(RAW, { level: 9 }).length).toBeLessThan(470_000);
   });
 
   it('credits GeoNames under CC BY 4.0', () => {
@@ -22,7 +23,7 @@ describe('the generated dataset', () => {
     expect(data.source.dumpDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it('has places of 50,000+ people plus capitals (M2-10), each listed once', () => {
+  it('has places of 50,000+ people, capitals and airport towns (M2-10, M4-2), each once', () => {
     expect(data.places.length).toBeGreaterThan(12_000);
     expect(data.places.length).toBeLessThan(15_000);
     expect(new Set(data.places.map((p) => p.geonameId)).size).toBe(data.places.length);
@@ -77,6 +78,34 @@ describe('the generated dataset', () => {
     expect(first).toEqual(expect.arrayContaining(['Shanghai', 'Beijing', 'Mumbai', 'Delhi']));
   });
 
+  it('credits OurAirports, which is public domain (M4-1)', () => {
+    const json = JSON.parse(RAW.toString('utf8')) as { airportSource: unknown };
+    expect(json.airportSource).toMatchObject({ name: 'OurAirports', license: 'Public domain' });
+  });
+
+  it('has thousands of airports, each code once and linked to the place it serves', () => {
+    const { airports, places } = data;
+    expect(airports.length).toBeGreaterThan(2_000);
+    expect(new Set(airports.map((a) => a.code)).size).toBe(airports.length);
+    expect(airports.every((a) => /^[A-Z]{3}$/.test(a.code))).toBe(true);
+    const byId = new Map(places.map((p) => [p.geonameId, p]));
+    const served = (code: string) => {
+      const a = airports.find((x) => x.code === code);
+      const p = a && byId.get(a.geonameId);
+      return p && `${p.name}, ${p.countryCode}`;
+    };
+    expect(served('LHR')).toBe('London, GB');
+    expect(served('STN')).toBe('London, GB');
+    expect(served('JFK')).toBe('New York City, US');
+    expect(served('IST')).toBe('Istanbul, TR');
+    expect(served('HND')).toBe('Tokyo, JP');
+    expect(served('MXP')).toBe('Milan, IT');
+    expect(served('BGY')).toBe('Bergamo, IT');
+    expect(served('IAD')).toBe('Washington, US');
+    // A town under 50,000 kept because its airport is (M4-2).
+    expect(served('TOS')).toBe('Tromsø, NO');
+  });
+
   it('uses CLDR country names where GeoNames differs', () => {
     expect(data.countries.get('TR')).toEqual(['Türkiye', 'Turkey']);
     expect(data.countries.get('US')?.[0]).toBe('United States');
@@ -96,6 +125,15 @@ describe('decodeDataset', () => {
       [2633352, 'York', 'GB', '', 0, 54, -1.1],
     ],
   };
+
+  it('decodes airports, keyed by the place’s GeoNames ID', () => {
+    const d = decodeDataset({ ...minimal, airports: [['LHR', 0]] });
+    expect(d.airports).toEqual([{ code: 'LHR', geonameId: 2643743 }]);
+  });
+
+  it('accepts a file with no airports', () => {
+    expect(decodeDataset(minimal).airports).toEqual([]);
+  });
 
   it('decodes rows into places', () => {
     const d = decodeDataset(minimal);
@@ -133,6 +171,9 @@ describe('decodeDataset', () => {
     ['a row with an unknown country', { ...minimal, cities: [[1, 'X', 'FR', '', 0, 0, 0]] }],
     ['a short row', { ...minimal, cities: [[1, 'X', 'GB']] }],
     ['no source', { ...minimal, source: {} }],
+    ['an airport pointing past the cities', { ...minimal, airports: [['LHR', 2]] }],
+    ['an airport with no code', { ...minimal, airports: [[null, 0]] }],
+    ['airports that are not a list', { ...minimal, airports: {} }],
     ['not an object', 'cities'],
   ])('rejects %s', (_label, json) => {
     expect(() => decodeDataset(json)).toThrow(DatasetError);

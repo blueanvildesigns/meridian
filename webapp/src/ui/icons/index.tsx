@@ -169,3 +169,42 @@ export function EmptyGlobe({ size = 96 }: { size?: number }) {
     </svg>
   );
 }
+
+/** The search field's magnifier (canvas AddCity). */
+export function SearchIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </Icon>
+  );
+}
+
+/** A search with no results (canvas AddCityEmpty). */
+export function NoResultsIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={1.6} {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5M8.5 8.5l5 5M13.5 8.5l-5 5" />
+    </Icon>
+  );
+}
+
+/** "Added" in the add-city results. */
+export function CheckIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2.4} {...props}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </Icon>
+  );
+}
+
+/** The time zone header band (canvas AddCityZone). */
+export function GlobeIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" />
+    </Icon>
+  );
+}
