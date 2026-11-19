@@ -35,6 +35,8 @@ export interface ClockGridProps {
   onChooseZone?: (id: string) => void;
   /** Move focus to the card with this ID (a new object each time; null ID means none). */
   focusRequest?: { id: string | null } | null;
+  /** Faded behind the Jump popover, as canvas JumpPicker draws it. */
+  dimmed?: boolean;
 }
 
 const INSTRUCTIONS =
@@ -77,6 +79,7 @@ export function ClockGrid({
   onAddCity,
   onChooseZone,
   focusRequest,
+  dimmed = false,
 }: ClockGridProps) {
   const sensors = useSensors(
     // Mouse and touch separately: a pointer sensor would turn every swipe on a phone into a drag.
@@ -105,7 +108,7 @@ export function ClockGrid({
       accessibility={accessibility}
     >
       <SortableContext items={views.map((v) => v.id)} strategy={rectSortingStrategy}>
-        <ul className={styles.grid} aria-label="Your clocks">
+        <ul className={`${styles.grid} ${dimmed ? styles.dimmed : ''}`} aria-label="Your clocks">
           {views.map((view) => (
             <SortableItem
               key={view.id}

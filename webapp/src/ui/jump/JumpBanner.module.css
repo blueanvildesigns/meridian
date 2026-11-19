@@ -1,0 +1,108 @@
+/* Jump banner: canvas JumpActive. Colours are the C3 Jump tokens; dark ones are derived (M0-6). */
+
+.banner {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--jump-border);
+  border-radius: 14px;
+  background: var(--jump-bg);
+  color: var(--jump-text);
+  --focus: var(--jump-text);
+}
+
+.icon {
+  flex: none;
+}
+
+.text {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.when {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.note {
+  font-size: var(--size-label);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--target);
+  padding: 0 16px;
+  border: 1px solid var(--jump-border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  color: var(--jump-text);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: color-mix(in srgb, var(--jump-text) 6%, var(--control-bg));
+}
+
+.reset {
+  padding: 0 18px;
+}
+
+/* Shown only when the browser refuses the clipboard (not drawn). */
+.manual {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.manualInput {
+  width: 100%;
+  min-height: var(--target);
+  padding: 0 12px;
+  border: 1px solid var(--jump-border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .buttons {
+    flex: 1 1 100%;
+  }
+
+  .button,
+  .reset {
+    flex: 1 1 auto;
+  }
+}

@@ -8,9 +8,13 @@ import { cardView } from '../ui/clock/cardView';
 import { Controls } from '../ui/Controls';
 import { EmptyState } from '../ui/EmptyState';
 import { GearIcon, InfoIcon, LogoMark } from '../ui/icons';
+import { JumpPicker } from '../ui/jump/JumpPicker';
+import { bannerWhen, referenceCardId, referencePlace } from '../ui/jump/jumpView';
 import { StorageBanner } from '../ui/StorageBanner';
 import { cityKey, defaultName, type NewCity } from '../storage/schema';
+import type { JumpState } from '../time/jumpUrl';
 import { addCity, addLocalTime, moveCity, removeCity, replaceCity } from './actions';
+import { jumpLink, setJumpState, useJumpState } from './jumpLocation';
 import { useStore, type AppStore, type StorageNotice } from './store';
 import { useMinuteClock } from './useMinuteClock';
 import styles from './App.module.css';
@@ -23,6 +27,12 @@ interface FocusRequest {
   id: string | null;
 }
 
+/** The Jump picker, open: the control it hangs from, and the card for "Jump from here" (M6). */
+interface PickerRequest {
+  anchor: HTMLElement | null;
+  fromCardId?: string;
+}
+
 export function App({ store }: { store: AppStore }) {
   const { state, notice } = useStore(store);
   const now = useMinuteClock();
@@ -32,16 +42,41 @@ export function App({ store }: { store: AppStore }) {
   /** The last city added while the dialog was open, to focus if its opener has gone. */
   const lastAdded = useRef<string | null>(null);
 
+  // Jump (spec 4.3): the moment lives in the URL hash (D11). While one shows, the clocks stop at it.
+  const jump = useJumpState();
+  const [picker, setPicker] = useState<PickerRequest | null>(null);
+  /** The card picked as the reference last, to tell apart two with the same name and zone. */
+  const [refHint, setRefHint] = useState<string | null>(null);
+  const [focusBanner, setFocusBanner] = useState<object | null>(null);
+  const [focusJump, setFocusJump] = useState<object | null>(null);
+
   // Read every render: the device zone can change while the page is open (travel, OS settings).
   const zone = deviceZone();
   const hourCycle = resolveHourCycle(state.settings.timeFormat);
+  const refId = jump ? referenceCardId(state.cities, jump, zone, refHint) : null;
+  const shownMs = jump ? jump.instant.epochMilliseconds : now;
   const views = useMemo(() => {
-    const instant = T().Instant.fromEpochMilliseconds(now);
+    const instant = T().Instant.fromEpochMilliseconds(shownMs);
+    const mode = jump ? 'jump' : 'live';
     return state.cities.map((city) =>
-      cardView(city, { instant, deviceZone: zone, hourCycle, mode: 'live' }),
+      cardView(city, { instant, deviceZone: zone, hourCycle, mode, referenceId: refId }),
     );
-  }, [state.cities, now, zone, hourCycle]);
+  }, [state.cities, shownMs, jump, zone, hourCycle, refId]);
   const empty = views.length === 0;
+
+  const applyJump = (next: JumpState, cityId: string | null) => {
+    // Back from the first Jump returns to live; Change replaces the Jump rather than stacking up.
+    setJumpState(next, { replace: jump !== null });
+    setRefHint(cityId);
+    setPicker(null);
+    // Jump to a time has given way to the banner: put focus on what it says.
+    if (!jump) setFocusBanner({});
+  };
+
+  const resetToLive = () => {
+    setJumpState(null);
+    setFocusJump({});
+  };
 
   const remove = (id: string) => {
     const i = state.cities.findIndex((c) => c.id === id);
@@ -116,7 +151,31 @@ export function App({ store }: { store: AppStore }) {
             }}
           />
         )}
-        <Controls empty={empty} onAddCity={openAddCity} />
+        <Controls
+          empty={empty}
+          jump={
+            jump
+              ? {
+                  when: bannerWhen(
+                    jump,
+                    referencePlace(state.cities, jump, zone, refId),
+                    hourCycle,
+                  ),
+                  link: jumpLink(jump),
+                  onChange: (anchor) => {
+                    setPicker({ anchor });
+                  },
+                  onReset: resetToLive,
+                  focusRequest: focusBanner,
+                }
+              : undefined
+          }
+          onJump={(anchor) => {
+            setPicker({ anchor });
+          }}
+          onAddCity={openAddCity}
+          focusJump={focusJump}
+        />
         {empty ? (
           <EmptyState
             onAddCity={openAddCity}
@@ -133,9 +192,27 @@ export function App({ store }: { store: AppStore }) {
             onAddCity={openAddCity}
             onChooseZone={chooseZone}
             focusRequest={focusRequest}
+            dimmed={picker !== null}
           />
         )}
       </main>
+
+      {picker && (
+        <JumpPicker
+          cities={state.cities}
+          deviceZone={zone}
+          hourCycle={hourCycle}
+          now={now}
+          jump={jump}
+          refId={refId}
+          fromCardId={picker.fromCardId}
+          anchor={picker.anchor}
+          onApply={applyJump}
+          onClose={() => {
+            setPicker(null);
+          }}
+        />
+      )}
 
       {addCityMode && (
         <AddCityDialog

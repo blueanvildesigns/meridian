@@ -48,13 +48,14 @@ export function ClockCard({
   return (
     <article
       ref={ref}
-      className={`${styles.card} ${view.daytime ? styles.day : styles.night}`}
+      className={`${styles.card} ${view.daytime ? styles.day : styles.night} ${view.reference ? styles.reference : ''}`}
       aria-labelledby={nameId}
       tabIndex={-1}
     >
       <h2 id={nameId} className={styles.name}>
         {view.name}
       </h2>
+      {view.reference && <p className={styles.refTag}>Jump reference</p>}
       <p className={styles.period}>
         {view.daytime ? <SunIcon size={18} /> : <MoonIcon size={18} />}
         <span className={styles.periodLabel}>{view.daytime ? 'Daytime' : 'Night'}</span>

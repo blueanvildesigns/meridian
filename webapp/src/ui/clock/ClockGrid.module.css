@@ -10,6 +10,13 @@
   gap: var(--grid-gap);
 }
 
+/* Behind the Jump popover (canvas JumpPicker); phones dim the whole page instead. */
+@media (min-width: 641px) {
+  .dimmed {
+    opacity: 0.55;
+  }
+}
+
 /* Each cell stretches its card to the row's height. */
 .item {
   display: flex;
@@ -196,6 +203,34 @@
   white-space: nowrap;
 }
 
+/* The Jump reference (canvas JumpActive, decision C6): a tag and a 2px border, with the padding
+   trimmed by the extra pixel so nothing inside moves. The board draws the tag top right, where
+   these cards have their drag handle and menu, so it sits beside the name instead (M5-6). */
+.reference {
+  grid-template-areas:
+    'period actions'
+    'name tag'
+    'sub sub'
+    'time chip'
+    'details details';
+  padding: 15px 17px 17px;
+  border: 2px solid var(--ref-border);
+}
+
+.refTag {
+  grid-area: tag;
+  align-self: center;
+  margin: 0;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--ref-tag-bg);
+  color: var(--ref-tag-fg);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
 /* ---- Unrecognised zone ---- */
 
 .unknown {
@@ -289,6 +324,19 @@
 
   .period {
     min-height: 0;
+  }
+
+  .reference {
+    grid-template-areas:
+      'tag tag tag'
+      'period name chip'
+      'time time details';
+    grid-template-rows: auto auto auto;
+    padding: 13px 15px;
+  }
+
+  .refTag {
+    justify-self: start;
   }
 
   /* Icon only on phones, as drawn; the word stays for screen readers. */

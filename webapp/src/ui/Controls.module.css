@@ -112,3 +112,29 @@
     white-space: normal;
   }
 }
+
+/* Jump showing (canvas JumpActive): the banner takes the status's place and stretches; there's no
+   Jump button. On phones the bar keeps Add city alone, full width with its whole name. */
+.jumping .actions {
+  flex: none;
+}
+
+@media (max-width: 640px) {
+  .jumping {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hasClocks.jumping .add {
+    flex: 1 1 0;
+  }
+
+  .hasClocks.jumping .addWord {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+  }
+}
