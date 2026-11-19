@@ -234,6 +234,33 @@ test.describe('reflow at 320 px', () => {
   });
 });
 
+test('screen readers get the card’s details as separate words', async ({
+  page,
+  browserName,
+  isMobile,
+}) => {
+  test.skip(browserName !== 'chromium', 'Reads Chromium’s own accessibility tree.');
+  await seed(page, [LOCAL, LONDON]);
+  await page.goto('/');
+  await expect(card(page, 'London')).toBeVisible();
+  const cdp = await page.context().newCDPSession(page);
+  const { nodes } = (await cdp.send('Accessibility.getFullAXTree')) as {
+    nodes: { ignored: boolean; role?: { value: string }; name?: { value: string } }[];
+  };
+  const texts = nodes
+    .filter((n) => !n.ignored && n.role?.value === 'StaticText')
+    .map((n) => n.name?.value ?? '');
+  const at = texts.indexOf('Wed, Nov 18');
+  // A space only in the markup never reaches the tree, and readers then run neighbouring words
+  // together ("GMTUTC+0:00"). Each dot carries its own spaces; "+6h" is its own block when wide.
+  // The phone line's dot has no-break spaces, so "· +6h" never wraps away from the offset.
+  expect(texts.slice(at, at + 5)).toEqual(
+    isMobile
+      ? ['Wed, Nov 18', ' · GMT', 'UTC+0:00', '\u00a0·\u00a0', '+6h']
+      : ['Wed, Nov 18', ' · GMT', ' · ', 'UTC+0:00', '+6h'],
+  );
+});
+
 test('reduced motion stops the reordering animation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await seed(page, [LOCAL, LONDON]);

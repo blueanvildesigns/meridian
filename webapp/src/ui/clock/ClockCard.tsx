@@ -215,14 +215,12 @@ export function ClockCard({
             {view.date}
             {view.abbreviation && ` · ${view.abbreviation}`}
           </span>
-          <span className={styles.sep} aria-hidden="true">
-            {' · '}
-          </span>
+          {/* Not hidden from screen readers: a space only in markup doesn't reach them, so the
+              dot's spaces are what keep "CST" and "UTC−6:00" apart (the date's dot is read too). */}
+          <span className={styles.sep}>{' · '}</span>
           <span className={styles.offset}>{view.offset}</span>
         </span>
-        <span className={styles.sepPhone} aria-hidden="true">
-          {SEP}
-        </span>
+        <span className={styles.sepPhone}>{SEP}</span>
         <span className={styles.diff}>{view.difference}</span>
       </p>
       <div className={styles.actions}>
