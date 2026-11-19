@@ -23,6 +23,37 @@ test('makes no third-party requests', async ({ page, baseURL }) => {
   expect(foreign).toEqual([]);
 });
 
+test('loads the Latin Extended fonts only for text that needs them (M7-2)', async ({ page }) => {
+  const fonts: string[] = [];
+  page.on('request', (req) => {
+    const file = new URL(req.url()).pathname.split('/').pop() ?? '';
+    if (file.endsWith('.woff2')) fonts.push(file.replace(/-normal-.*$/, ''));
+  });
+  const settle = async () => {
+    await page.waitForLoadState('networkidle');
+    await page.evaluate(() => document.fonts.ready);
+  };
+  await page.goto('/');
+  await settle();
+  // The five weights in use (Serif 500/600, Sans 400/500/600), Latin only.
+  expect(fonts.toSorted()).toEqual([
+    'ibm-plex-sans-latin-400',
+    'ibm-plex-sans-latin-500',
+    'ibm-plex-sans-latin-600',
+    'ibm-plex-serif-latin-500',
+    'ibm-plex-serif-latin-600',
+  ]);
+  // A name with Polish letters needs Latin Extended, in the weight it's drawn in.
+  await page.evaluate(() => {
+    const name = document.createElement('p');
+    name.style.fontWeight = '500';
+    name.textContent = 'Łódź';
+    document.body.append(name);
+  });
+  await settle();
+  expect(fonts.filter((f) => f.includes('latin-ext'))).toEqual(['ibm-plex-sans-latin-ext-500']);
+});
+
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`${scheme} system theme`, () => {
     test.use({ colorScheme: scheme });

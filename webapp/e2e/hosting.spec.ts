@@ -36,6 +36,38 @@ test('answers a missing asset with 404, not the app shell', async ({ request }) 
   expect(await res.text()).not.toContain('id="root"');
 });
 
+test('ships the third-party licences, and each script points to them (M7-3)', async ({
+  page,
+  request,
+}) => {
+  const res = await request.get('/third-party-licenses.txt');
+  expect(res.status()).toBe(200);
+  expect(res.headers()['content-type']).toContain('text/plain');
+  const text = await res.text();
+  for (const name of [
+    'react 19',
+    '@dnd-kit/core',
+    'temporal-polyfill',
+    '@fontsource/ibm-plex-sans',
+  ]) {
+    expect(text).toContain(name);
+  }
+  expect(text).toContain('SIL OPEN FONT LICENSE');
+
+  const scripts: string[] = [];
+  page.on('response', (r) => {
+    if (r.request().resourceType() === 'script') scripts.push(r.url());
+  });
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  expect(scripts.length).toBeGreaterThan(0);
+  for (const url of scripts) {
+    expect((await (await request.get(url)).text()).split('\n')[0], url).toBe(
+      '/*! Third-party licences: /third-party-licenses.txt */',
+    );
+  }
+});
+
 test('runs under the production CSP with no violations', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __cspViolations: string[] };
