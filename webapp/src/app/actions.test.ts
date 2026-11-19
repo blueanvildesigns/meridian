@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, type AppState, type NewCity } from '../storage/schema';
 import { KOLKATA, LONDON, NOWHERE, TOKYO } from '../test/places';
-import { addCity, addLocalTime, moveCity, removeCity, replaceCity } from './actions';
+import {
+  addCity,
+  addLocalTime,
+  moveCity,
+  moveCityBy,
+  removeCity,
+  renameCity,
+  replaceCity,
+  restoreCity,
+} from './actions';
 
 const state = (cities: AppState['cities']): AppState => ({
   cities,
@@ -123,5 +132,65 @@ describe('replaceCity (D14)', () => {
   it('does nothing if the city is already elsewhere on the list, or the entry is gone', () => {
     expect(replaceCity(s, 'nowhere', asNew(TOKYO))).toBe(s);
     expect(replaceCity(s, 'gone', asNew(KOLKATA))).toBe(s);
+  });
+});
+
+describe('moveCityBy (card menu)', () => {
+  const s = state([LONDON, KOLKATA, TOKYO]);
+
+  it('moves a card one place up or down', () => {
+    expect(ids(moveCityBy(s, 'kolkata', -1))).toEqual(['kolkata', 'london', 'tokyo']);
+    expect(ids(moveCityBy(s, 'kolkata', 1))).toEqual(['london', 'tokyo', 'kolkata']);
+  });
+
+  it('does nothing at either end or for an unknown ID', () => {
+    expect(moveCityBy(s, 'london', -1)).toBe(s);
+    expect(moveCityBy(s, 'tokyo', 1)).toBe(s);
+    expect(moveCityBy(s, 'gone', 1)).toBe(s);
+  });
+});
+
+describe('restoreCity (Undo)', () => {
+  it('puts the city back where it was', () => {
+    const s = state([LONDON, TOKYO]);
+    expect(ids(restoreCity(s, KOLKATA, 1))).toEqual(['london', 'kolkata', 'tokyo']);
+    expect(ids(restoreCity(s, KOLKATA, 0))).toEqual(['kolkata', 'london', 'tokyo']);
+  });
+
+  it('goes at the end when the list has shrunk meanwhile', () => {
+    expect(ids(restoreCity(state([TOKYO]), LONDON, 4))).toEqual(['tokyo', 'london']);
+  });
+
+  it('does nothing if the city is back on the list already', () => {
+    const s = state([LONDON, TOKYO]);
+    expect(restoreCity(s, LONDON, 0)).toBe(s);
+    expect(restoreCity(s, { ...LONDON, id: 'london-again' }, 0)).toBe(s);
+  });
+});
+
+describe('renameCity (D15)', () => {
+  it('sets a tidied name', () => {
+    const next = renameCity(state([LONDON]), 'london', '  London   office ');
+    expect(next.cities[0]).toEqual({ ...LONDON, customName: 'London office' });
+  });
+
+  it('cuts a long name to 60 characters', () => {
+    const next = renameCity(state([LONDON]), 'london', 'x'.repeat(80));
+    expect(next.cities[0]?.customName).toHaveLength(60);
+  });
+
+  it('goes back to the city’s own name when emptied or set to it', () => {
+    const renamed = state([{ ...LONDON, customName: 'Office' }]);
+    expect(renameCity(renamed, 'london', '   ').cities[0]).toEqual(LONDON);
+    expect(renameCity(renamed, 'london', 'London').cities[0]).toEqual(LONDON);
+    expect(
+      renameCity(state([{ id: 'me', kind: 'local', customName: 'Home' }]), 'me', '').cities[0],
+    ).toEqual({ id: 'me', kind: 'local' });
+  });
+
+  it('returns the same state when nothing changes', () => {
+    const s = state([LONDON, TOKYO]);
+    expect(renameCity(s, 'london', 'London')).toBe(s);
+    expect(renameCity(s, 'gone', 'Anything')).toBe(s);
   });
 });
