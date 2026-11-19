@@ -65,6 +65,18 @@ const pairs: [string, string, number][] = [
   ['accent', 'page', UI],
   ['focus', 'page', UI],
   ['focus', 'surface', UI],
+  // Dialogs and add-city results
+  ['fg', 'panel', TEXT],
+  ['muted', 'panel', TEXT],
+  ['accent-text', 'panel', TEXT], // "Added"
+  ['control-border', 'panel', UI], // search field and Add buttons
+  ['accent', 'panel', UI], // focused search field
+  ['focus', 'panel', UI],
+  ['tag-fg', 'tag-bg', TEXT],
+  ['fg', 'row-active-bg', TEXT],
+  ['muted', 'row-active-bg', TEXT],
+  ['accent', 'row-active-bg', UI], // the active result's ring
+  ['tag-fg', 'row-active-bg', TEXT], // a tag's text if the pill blends into the active row
   // Day card
   ['day-card-fg', 'day-card-bg', TEXT],
   ['day-card-muted', 'day-card-bg', TEXT],

@@ -13,10 +13,17 @@
   --page: #eef2f8;
   --surface: #ffffff;
   --panel: #ffffff;
+  --panel-border: transparent;
   --backdrop: #aeb8cc;
   --fg: #14213d;
   --muted: #4a5a75;
   --line: #d5ddea;
+  --line-subtle: #e3e9f3; /* canvas AddCityPhone: dividers between search results */
+
+  /* Add-city results: canvas AddCity */
+  --tag-bg: #e6ecff; /* match tags ("Airport IST") and the time zone header band */
+  --tag-fg: #1d3ab0;
+  --row-active-bg: #f3f6fb; /* the result Up/Down has reached, ringed in --accent */
 
   /* Accent and controls */
   --accent: #2f4bd0;
@@ -102,10 +109,16 @@
   --page: #0b1426;
   --surface: #14213d;
   --panel: #14213d;
+  --panel-border: #2c3c63;
   --backdrop: #050a14;
   --fg: #f4f7ff;
   --muted: #b9c6e0;
   --line: #2c3c63;
+  --line-subtle: #22325a; /* derived */
+
+  --tag-bg: #27386a; /* derived: the night chip */
+  --tag-fg: #d2e1ff; /* derived */
+  --row-active-bg: #1e2e52; /* derived */
 
   --accent: #8fb0ff;
   --on-accent: #0b1426;
