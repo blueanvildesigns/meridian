@@ -257,7 +257,9 @@ export function AddCityDialog({
           <p className={styles.messageText}>{HINT}</p>
         </div>
       ) : (
-        <div className={styles.results}>
+        // Out of the Tab order: browsers make a scrolling box a Tab stop of its own, but the arrow
+        // keys in the field already move through the results and scroll them into view.
+        <div className={styles.results} tabIndex={-1}>
           {/* Always rendered, hidden when empty, so the field's aria-controls always resolves. */}
           <div
             id={listId}
