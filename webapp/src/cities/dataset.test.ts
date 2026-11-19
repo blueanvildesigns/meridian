@@ -13,8 +13,8 @@ describe('the generated dataset', () => {
   const data = realDataset();
 
   it('stays near the ~400 KB target (M2-10), well inside the 1.5 MB budget', () => {
-    // 393 KB gzip at the 2026-11-18 export, then about 416 KB with airports (M4-1); the headroom
-    // absorbs normal GeoNames growth.
+    // 393 KB gzip at the 2026-11-18 export, 423 KB with the airports and their towns (M4-1, M4-2);
+    // the headroom absorbs normal GeoNames growth.
     expect(gzipSync(RAW, { level: 9 }).length).toBeLessThan(470_000);
   });
 
