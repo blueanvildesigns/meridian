@@ -4,7 +4,8 @@ import { STORAGE_KEY, type AppState, type StoredCity } from '../storage/schema';
 import { loadState, serializeState } from '../storage/storage';
 import { fakeStorage } from '../storage/testStorage';
 import { LONDON, NOWHERE, TOKYO } from '../test/places';
-import { App, KOFI_URL } from './App';
+import { App } from './App';
+import { KOFI_URL } from './links';
 import { createStore } from './store';
 
 function renderApp(cities: StoredCity[] | null = [LONDON, TOKYO]) {
