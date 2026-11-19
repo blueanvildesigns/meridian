@@ -3,7 +3,7 @@
 Status: planned 2026-11-18. Part of the design plan; behaviour lives in `docs/spec.md` section 7.
 
 ## 1. Decisions
-- Repo stays on GitHub. License: MIT (sole authorship still to be confirmed before the first public release).
+- Repo stays on GitHub. License: MIT, copyright Blue Anvil Designs (sole authorship confirmed 2026-11-18, decision R-6).
 - Hosting: Firebase Hosting (Google's infrastructure, part of the user's GCP/Firebase account).
 - Live URL: `https://meridian.blueanvildesigns.io` (domain already purchased).
 - Deploys: GitHub Actions. Every PR gets a temporary preview URL; merging to `main` deploys live.
@@ -29,7 +29,7 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 ### Spark or Blaze
 - Spark: guaranteed $0, but fails closed (site goes down if the monthly limit is hit) and cannot be extended without upgrading.
 - Blaze: same free quota, no card-free option, fails open (you pay if traffic is high). A cost-limit can't be set natively; budget alerts only warn.
-- Plan: start on Spark for development and the placeholder site. Before public launch, decide (Graham's call). Lean: Blaze with a $5 budget alert, because an outage on a busy day is worse than a few dollars, and the app is cache-friendly. If choosing Blaze, the alert is mandatory.
+- Plan: start on Spark for development and the placeholder site. **Decided 2026-11-18 (R-8): Blaze with a $5 budget alert**, switched on before launch, because an outage on a busy day is worse than a few dollars, and the app is cache-friendly. The alert is mandatory.
 
 ## 3. Keep traffic and cost low (requirements for the build)
 - Static assets served with Brotli/gzip (Firebase compresses automatically; verify).
@@ -63,7 +63,7 @@ Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are 
 5. Only change records for the `meridian` subdomain. Leave the apex `blueanvildesigns.io` and the existing marketing site alone.
 6. If the subdomain has A or CNAME records pointing somewhere else, Firebase can't issue the certificate; remove those first.
 7. Wait for verification and the certificate. Docs say up to 24 hours after DNS points to Firebase; usually a few hours. Start this early, in M0, so it is not on the critical path.
-8. Optional: redirect `meridian.blueanvildesigns.com` and `.dev` to the `.io` address (the wizard has a redirect option). Decide later.
+8. Redirect `meridian.blueanvildesigns.com` and `.dev` to the `.io` address (the wizard has a redirect option). **Decided 2026-11-18 (R-12): yes, both.** Same rule: only the `meridian` host on each domain.
 
 ## 6. CI/CD (GitHub Actions)
 Implemented as the `deploy-preview` and `deploy-live` jobs in `.github/workflows/webapp-ci.yml` (M0-15). Firebase project `meridian-web-a5829`. Original outline:
@@ -86,12 +86,13 @@ Go live when all of the following are true:
 - Milestones M0 to M5 done (clock list, add city, Jump), plus the minimum of M6 that launch requires:
   - About page with the GeoNames CC BY 4.0 credit and MIT notice (attribution is a licence requirement)
   - Storage-unavailable and unrecognized-zone handling (so a failure never breaks the page)
+  - Card menu: Remove with Undo, and Move up/down (the keyboard alternative to drag). Rename and Jump from here may follow in 1.1 (R-3).
   - Settings with time format and dark mode (may slip to a 1.1 release if time is short; decide at M5)
 - Time-math test suite passes, including the old app's DST regression cases.
 - Accessibility checks pass (contrast, axe, keyboard-only walkthrough).
 - Built bundle size within the budget in section 3; real figures recorded here.
 - Safari, Chrome and Firefox smoke-tested (including the Temporal fallback path).
-- Billing decision made (Spark or Blaze) and, if Blaze, budget alert in place.
+- Blaze plan on, with the $5 budget alert in place (R-8).
 - Remove noindex only at launch.
 
 ## 9. Order of work for hosting
@@ -110,7 +111,7 @@ Go live when all of the following are true:
 | Service account key in GitHub | Use the CLI-generated secret; limit the account to Hosting deploy role |
 
 ## 11. Open items
-- Spark vs Blaze (Graham).
-- Whether to redirect the `.com` and `.dev` domains.
+- ~~Spark vs Blaze.~~ Blaze with a $5 alert, before launch (R-8).
+- ~~Whether to redirect the `.com` and `.dev` domains.~~ Yes, both (R-12); owner to set up.
 - ~~Repo public from the start, or private until launch.~~ Private until launch (M0-17). GitHub Pages unpublished (M0-27).
-- Confirm sole authorship before the first public MIT release.
+- ~~Confirm sole authorship before the first public MIT release.~~ Confirmed (R-6).

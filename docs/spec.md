@@ -86,6 +86,9 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 
 ## 8. Open questions
 
+Most of these are now settled; see `docs/decisions-log.md` (owner rulings R-1 to R-13, 2026-11-18).
+
+
 - Spark vs Blaze billing plan for launch; redirects for the .com/.dev domains; repo public or private until launch (see `docs/hosting-plan.md`).
 - Safari Temporal status and polyfill choice.
 - GeoNames filter threshold and alias source.

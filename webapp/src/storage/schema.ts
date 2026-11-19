@@ -63,8 +63,13 @@ export interface AppState {
   settings: Settings;
 }
 
+/**
+ * A first visit starts with one My Local Time card (owner ruling on D22). The same applies after
+ * unreadable data is set aside, and in memory-only mode, so nobody lands on an empty list unless
+ * they emptied it themselves.
+ */
 export function defaultState(): AppState {
-  return { cities: [], settings: { ...DEFAULT_SETTINGS } };
+  return { cities: [{ id: newCityId(), kind: 'local' }], settings: { ...DEFAULT_SETTINGS } };
 }
 
 /** Identity for de-duplication (D3): one per place, one My Local Time, one per bare zone. */
