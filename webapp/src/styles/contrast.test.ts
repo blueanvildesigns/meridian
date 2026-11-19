@@ -81,6 +81,7 @@ const pairs: [string, string, number][] = [
   ['warn-text', 'warn-bg', TEXT],
   ['warn-link', 'warn-bg', TEXT],
   ['warn-icon', 'warn-bg', UI],
+  ['warn-accent', 'page', UI], // dashed border of the unrecognized-zone card (darkened, M0-5)
   // Jump
   ['jump-text', 'jump-bg', TEXT],
   ['jump-text', 'control-bg', TEXT], // Copy link / Change buttons: jump-text on white (light)
@@ -104,35 +105,6 @@ describe.each(Object.entries(themes))('%s theme contrast', (_name, theme) => {
       .filter((r) => r.ratio < r.min)
       .map((r) => `${r.pair}: ${r.ratio.toFixed(2)} < ${r.min}`);
     expect(failures).toEqual([]);
-  });
-});
-
-// Known shortfalls kept on purpose. Each entry pins the measured ratio so any change is noticed,
-// and must be listed in docs/decisions-log.md.
-const exceptions: {
-  theme: 'light' | 'dark';
-  pair: [string, string];
-  ratio: number;
-  why: string;
-}[] = [
-  {
-    theme: 'light',
-    pair: ['warn-accent', 'page'],
-    ratio: 2.66,
-    why: 'Pinned design-spec value. Dashed border is decorative: the unrecognized-zone state is also conveyed by text and an icon, so WCAG 1.4.11 does not require 3:1. Flagged to the owner.',
-  },
-];
-
-describe('documented contrast exceptions', () => {
-  it.each(exceptions)('$theme: $pair.0 on $pair.1 stays at $ratio', ({ theme, pair, ratio }) => {
-    const t = themes[theme];
-    expect(contrast(t[pair[0]] ?? '', t[pair[1]] ?? '')).toBeCloseTo(ratio, 2);
-  });
-
-  it('dark theme warn-accent meets 3:1 without an exception', () => {
-    expect(
-      contrast(themes.dark['warn-accent'] ?? '', themes.dark.page ?? ''),
-    ).toBeGreaterThanOrEqual(UI);
   });
 });
 

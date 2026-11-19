@@ -59,7 +59,8 @@
   --warn-text: #4a2f00;
   --warn-icon: #8a4200;
   --warn-link: #1d3ab0;
-  --warn-accent: #c58a1b; /* dashed border of the unrecognized-zone card */
+  --warn-accent: #a86f0c; /* dashed border of the unrecognized-zone card; darkened from the
+                            design-spec's #C58A1B to reach 3:1 (owner, M0-5) */
 
   /* Jump banner and reference tag: canvas JumpActive (C3, C6) */
   --jump-bg: #fff4e5;
