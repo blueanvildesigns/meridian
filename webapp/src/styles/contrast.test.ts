@@ -101,6 +101,14 @@ const pairs: [string, string, number][] = [
   ['jump-text', 'control-bg', TEXT], // Copy link / Change buttons: jump-text on white (light)
   ['ref-tag-fg', 'ref-tag-bg', TEXT],
   ['ref-border', 'page', UI],
+  ['jump-border', 'jump-bg', UI], // "Use 3:00 AM instead" in the skipped-time alert
+  // Jump picker
+  ['jump-text', 'panel', TEXT], // a field's error message
+  ['jump-border', 'panel', UI], // the border of a field in error, or a skipped time
+  ['fg', 'tag-bg', TEXT], // repeated time: the question and its answers
+  ['muted', 'tag-bg', TEXT], // "UTC−4:00, the first time"
+  ['tag-fg', 'panel', TEXT], // "Which 1:30 AM?": the legend straddles the box's border
+  ['accent', 'tag-bg', UI], // the box's border and the radio buttons
 ];
 
 describe.each(Object.entries(themes))('%s theme contrast', (_name, theme) => {

@@ -22,6 +22,8 @@ export interface ClockContext {
   deviceZone: string;
   hourCycle: HourCycle;
   mode: DayLabelMode;
+  /** The Jump reference card's ID, tagged "Jump reference" (spec 4.3). */
+  referenceId?: string | null;
 }
 
 interface ViewBase {
@@ -43,6 +45,8 @@ export interface ClockView extends ViewBase {
   offset: string;
   difference: string;
   daytime: boolean;
+  /** This card is what the Jump is measured from. */
+  reference: boolean;
 }
 
 /** The saved zone isn't one this browser knows (spec 4.6). */
@@ -100,5 +104,6 @@ export function cardView(city: StoredCity, ctx: ClockContext): CardView {
     offset: formatOffset(snapshot.offsetNanoseconds),
     difference: formatDifference(snapshot.minutesAhead),
     daytime: isDaytime(ctx.instant, zone, coordinates),
+    reference: city.id === ctx.referenceId,
   };
 }

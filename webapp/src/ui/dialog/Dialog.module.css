@@ -47,3 +47,53 @@
     box-shadow: none;
   }
 }
+
+/* ---- Popover (canvas JumpPicker) and bottom sheet (JumpPhone) ----
+   Dialog.tsx sets --popover-left and --popover-top from the anchor. The page stays visible behind
+   it on wide screens (the backdrop only catches clicks); phones dim it, as JumpPhone draws. */
+
+.dialog.popover {
+  inset: auto;
+  top: var(--popover-top, 16px);
+  left: var(--popover-left, 16px);
+  width: min(440px, calc(100% - 32px));
+  height: auto;
+  max-height: calc(100dvh - 32px);
+  margin: 0;
+  overflow-y: auto;
+  border: 1px solid var(--popover-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--popover-shadow);
+}
+
+.dialog.popover::backdrop,
+:global(:root[data-theme='dark']) .dialog.popover::backdrop {
+  background: transparent;
+}
+
+.popover .panel {
+  height: auto;
+}
+
+@media (max-width: 640px) {
+  .dialog.popover {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border: 0;
+    border-radius: 24px 24px 0 0;
+    box-shadow: var(--sheet-shadow);
+  }
+
+  /* --sheet-backdrop (light rgba(20 33 61 / 0.55) from the board; dark derived), repeated
+     literally for engines whose ::backdrop doesn't inherit custom properties. */
+  .dialog.popover::backdrop {
+    background: rgb(20 33 61 / 0.55);
+  }
+
+  :global(:root[data-theme='dark']) .dialog.popover::backdrop {
+    background: rgb(5 10 20 / 0.7);
+  }
+}

@@ -22,8 +22,12 @@
   border: 0;
 }
 
-.primary:hover:not(:disabled) {
-  background: var(--accent-text);
+/* Hover only where there's a real pointer: a tap leaves a "hover" behind on touch screens, which
+   would show on whatever opens under the finger (the Jump sheet's Cancel sits where Jump was). */
+@media (hover: hover) {
+  .primary:hover:not(:disabled) {
+    background: var(--accent-text);
+  }
 }
 
 .primary:disabled {
@@ -39,8 +43,10 @@
   border: 1px solid var(--control-border);
 }
 
-.secondary:hover {
-  background: color-mix(in srgb, var(--fg) 6%, var(--control-bg));
+@media (hover: hover) {
+  .secondary:hover {
+    background: color-mix(in srgb, var(--fg) 6%, var(--control-bg));
+  }
 }
 
 /* Smaller text, as on the unrecognised-zone card (canvas ErrorZone). */

@@ -4,9 +4,37 @@
 //
 // Mount it to open it and unmount it to close it: the parent owns whether it's showing. The
 // element marked `data-autofocus` gets focus on opening; otherwise the browser picks the first.
+//
+// The "popover" variant (Jump, design-spec 3) is the same modal dialog drawn as a card below the
+// control that opened it, with the page left visible, and as a bottom sheet on phones (M5-2).
 
 import { useEffectEvent, useLayoutEffect, useRef, type ReactNode } from 'react';
 import styles from './Dialog.module.css';
+
+/** Room between a popover and its anchor (canvas JumpPicker: 18 px below the button). */
+const ANCHOR_GAP = 18;
+/** A popover keeps this far from the window's edges. */
+const EDGE = 16;
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+
+/**
+ * Puts a popover under its anchor, right edges lined up, kept inside the window; centred if the
+ * anchor has gone. The CSS reads the result only on wide screens: phones get a bottom sheet.
+ */
+function placePopover(dialog: HTMLDialogElement, anchor: HTMLElement | null) {
+  const width = document.documentElement.clientWidth;
+  const height = window.innerHeight;
+  const box = dialog.getBoundingClientRect();
+  const at = anchor?.isConnected ? anchor.getBoundingClientRect() : null;
+  const left = at ? at.right - box.width : (width - box.width) / 2;
+  const top = at ? at.bottom + ANCHOR_GAP : (height - box.height) / 2;
+  dialog.style.setProperty('--popover-left', `${clamp(left, EDGE, width - EDGE - box.width)}px`);
+  dialog.style.setProperty(
+    '--popover-top',
+    `${Math.max(EDGE, Math.min(top, height - EDGE - box.height))}px`,
+  );
+}
 
 export interface DialogProps {
   /** ID of the element that names the dialog, usually its heading. */
@@ -20,6 +48,10 @@ export interface DialogProps {
    * somewhere sensible.
    */
   onOpenerGone?: () => void;
+  /** "panel" (centred, fixed size) or "popover" (under `anchor`; a bottom sheet on phones). */
+  variant?: 'panel' | 'popover';
+  /** The control a popover hangs from. */
+  anchor?: HTMLElement | null;
   className?: string | undefined;
   children: ReactNode;
 }
@@ -29,12 +61,33 @@ export function Dialog({
   describedBy,
   onClose,
   onOpenerGone,
+  variant = 'panel',
+  anchor = null,
   className,
   children,
 }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const pressedBackdrop = useRef(false);
   const openerGone = useEffectEvent(() => onOpenerGone?.());
+
+  // Placed before the first paint, and again whenever its size (an alert appearing) or the
+  // window's changes. The page behind can't scroll, so the anchor only moves on a resize.
+  useLayoutEffect(() => {
+    const dialog = ref.current;
+    if (variant !== 'popover' || !dialog) return;
+    const place = () => {
+      placePopover(dialog, anchor);
+    };
+    place();
+    // Every supported browser has ResizeObserver; the unit tests' DOM doesn't.
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(place) : null;
+    observer?.observe(dialog);
+    window.addEventListener('resize', place);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', place);
+    };
+  }, [variant, anchor]);
 
   useLayoutEffect(() => {
     const dialog = ref.current;
@@ -58,7 +111,7 @@ export function Dialog({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={ref}
-      className={`${styles.dialog} ${className ?? ''}`}
+      className={`${styles.dialog} ${variant === 'popover' ? styles.popover : ''} ${className ?? ''}`}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       // Esc fires `cancel` then `close`; letting the browser close it and reporting that covers

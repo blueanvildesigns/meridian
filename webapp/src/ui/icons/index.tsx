@@ -208,3 +208,42 @@ export function GlobeIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** The select's arrow in the Jump picker. */
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M6 9l6 6 6-6" />
+    </Icon>
+  );
+}
+
+/** Jump picker, skipped time (canvas JumpPickerGap). */
+export function AlertTriangleIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M12 3l10 18H2L12 3z" />
+      <path d="M12 10v5M12 18v.01" />
+    </Icon>
+  );
+}
+
+/** Copy link (canvas JumpActive). */
+export function LinkIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </Icon>
+  );
+}
+
+/** Reset to live (canvas JumpActive). */
+export function ResetIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v5h5" />
+    </Icon>
+  );
+}

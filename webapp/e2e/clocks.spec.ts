@@ -329,6 +329,22 @@ test.describe('error states', () => {
     });
   }
 
+  test('says once that saved data couldn’t be read (R-17)', async ({ page }) => {
+    await page.clock.setFixedTime(BOARD_TIME);
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('meridian', '{not json');
+    });
+    await page.reload();
+    await expect(page.getByRole('alert')).toContainText(
+      'Your saved cities and settings couldn’t be read',
+    );
+    await expect(card(page, 'My Local Time')).toBeVisible();
+    await page.reload();
+    await expect(card(page, 'My Local Time')).toBeVisible();
+    await expect(page.getByRole('alert')).toHaveCount(0);
+  });
+
   for (const scheme of ['light', 'dark'] as const) {
     test(`the unrecognised-zone card has no axe violations (${scheme})`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });

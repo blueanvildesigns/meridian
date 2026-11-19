@@ -53,3 +53,17 @@ export const NOWHERE: PlaceCity = {
   lat: 18.6,
   lon: -134,
 };
+
+/** For DST cases: New York's clocks skip 2:00–3:00 AM on 2027-03-14 and repeat 1:00–2:00 AM on 2027-11-07. */
+export const NEW_YORK: PlaceCity = {
+  id: 'new-york',
+  kind: 'place',
+  zone: 'America/New_York',
+  geonameId: 5128581,
+  name: 'New York City',
+  countryCode: 'US',
+  country: 'United States',
+  region: 'New York',
+  lat: 40.7,
+  lon: -74,
+};
