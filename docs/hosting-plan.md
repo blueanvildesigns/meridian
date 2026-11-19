@@ -47,6 +47,7 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 | M3 (2026-11-18) | **99.8 KB / 86.3 KB** (312 KB raw), plus the Temporal polyfill only where Temporal is missing (Safari): 19.3 KB / 17.5 KB | 4.2 KB | unchanged | unchanged (not fetched until add-city, M4) | Clock list live: dnd-kit for reordering (M3-6) and the bundled zone table now in the initial bundle. About a third of the 300 KB budget. |
 | M4 (2026-11-18) | **108.1 KB / 92.1 KB** (332 KB raw), plus the polyfill where Temporal is missing (unchanged) | 5.4 KB | unchanged | **423 KB gzip / 316 KB Brotli** (1,018 KB raw), fetched when add-city first opens | Add city live: the search, dataset decoding and dialog join the initial bundle (M4-12). The dataset gains 2,690 airport codes and 488 airport towns (M4-1, M4-2), passing D18's ~400 KB target in gzip. Firebase serves it as Brotli, 316,179 bytes on the live site (checked 2026-11-19, the same as the local quality-11 figure), and the target is now measured as sent (R-14). |
 | M5 (2026-11-19) | **115.0 KB / 97.8 KB** (352 KB raw), plus the polyfill where Temporal is missing (unchanged) | 7.0 KB | unchanged | unchanged | Jump live: picker with its time list, banner and URL-hash state in the initial bundle, no new dependencies (M5-11). |
+| M6 (2026-11-19) | **119.3 KB / 101.3 KB** (367 KB raw), plus the polyfill where Temporal is missing (unchanged) | 8.3 KB | unchanged | unchanged | Card menu, rename, Undo toast, Settings and About in the initial bundle, no new dependencies (M6-13). Still well under the 300 KB budget. |
 
 ## 4. Firebase configuration
 Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are mirrored locally by `webapp/scripts/serve-dist.ts`, and e2e runs against that. It was checked on a real preview channel too (M0-20, M0-21): the rewrite now covers only extensionless paths, and Firebase overrides `Strict-Transport-Security`. Decisions M0-12 to M0-16 and M0-20 to M0-21 in `docs/decisions-log.md`. Original outline:
@@ -89,8 +90,8 @@ Go live when all of the following are true:
 - Milestones M0 to M5 done (clock list, add city, Jump), plus the minimum of M6 that launch requires:
   - About page with the GeoNames CC BY 4.0 credit and MIT notice (attribution is a licence requirement)
   - Storage-unavailable and unrecognized-zone handling (so a failure never breaks the page)
-  - Card menu: Remove with Undo, and Move up/down (the keyboard alternative to drag). Rename and Jump from here may follow in 1.1 (R-3).
-  - Settings with time format and dark mode (may slip to a 1.1 release if time is short; decide at M5)
+  - Card menu: Remove with Undo, and Move up/down (the keyboard alternative to drag). Rename and Jump from here may follow in 1.1 (R-3); M6 builds them too.
+  - Settings with time format and dark mode (built in M6)
 - Time-math test suite passes, including the old app's DST regression cases.
 - Accessibility checks pass (contrast, axe, keyboard-only walkthrough).
 - Built bundle size within the budget in section 3; real figures recorded here.
