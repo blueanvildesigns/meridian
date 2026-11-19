@@ -60,7 +60,7 @@ Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are 
   - `/assets/**`: `Cache-Control: public, max-age=31536000, immutable`
   - `/index.html` and `/`: `Cache-Control: no-cache`
   - Security headers: Content-Security-Policy (self only, plus whatever the build needs), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restricting unused features. Test CSP against the production build.
-- Add `robots.txt` and a `<meta name="robots" content="noindex">` until public launch.
+- Add `robots.txt` and a `<meta name="robots" content="noindex">` until public launch. **Removed at launch (2026-11-19, R-25)**; the not-found page keeps its noindex.
 - **Final at M7 (M7-6):** the headers above stay as they are. Only the three noindex pieces change, in the launch PR (`docs/launch-checklist.md` section 3).
 
 ## 5. Custom domain setup (one-time, Graham)
@@ -101,14 +101,14 @@ Go live when all of the following are true:
 - Built bundle size within the budget in section 3; real figures recorded here.
 - Safari, Chrome and Firefox smoke-tested (including the Temporal fallback path).
 - Blaze plan on, with the $5 budget alert in place (R-8).
-- Remove noindex only at launch.
+- Remove noindex only at launch. **Done 2026-11-19.**
 
 Where each item stands, and the remaining steps in order: `docs/launch-checklist.md`.
 
 ## 9. Order of work for hosting
 - M0: Firebase project, domain connected and certificate issued, workflows generated, a placeholder page deployed to the real domain (noindex). This proves the pipeline early. **Done 2026-11-18** (PR 21; decisions M0-15 and M0-20 to M0-27).
 - Each milestone: PR preview for review.
-- M7: measure bundle and transfer, set the final headers, make the billing decision, run the launch gate, remove noindex, announce. **Measured and headers settled 2026-11-19 (PR 29).** The billing switch, the screen-reader pass, the redirects and the launch PR follow `docs/launch-checklist.md`.
+- M7: measure bundle and transfer, set the final headers, make the billing decision, run the launch gate, remove noindex, announce. **Measured and headers settled 2026-11-19 (PR 29).** The billing switch, the screen-reader pass, the redirects and the launch PR follow `docs/launch-checklist.md`. **Launched 2026-11-19** (noindex removed, root README rewritten for the web app).
 
 ## 10. Risks
 | Risk | Mitigation |

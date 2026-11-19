@@ -2,7 +2,7 @@
 
 A world clock for planning across time zones. Keep a list of cities and see each one's time, day and offset at a glance. Jump to any moment to see it everywhere at once, and share that moment as a link.
 
-Live at <https://meridian.blueanvildesigns.io>. It's kept out of search engines until launch: see [`../docs/launch-checklist.md`](../docs/launch-checklist.md).
+Live at <https://meridian.blueanvildesigns.io>.
 
 This is the web rewrite of the Meridian Flutter app. Spec: [`../docs/spec.md`](../docs/spec.md). Design: [`../docs/design-spec.md`](../docs/design-spec.md). Hosting and budgets: [`../docs/hosting-plan.md`](../docs/hosting-plan.md). Every decision made along the way: [`../docs/decisions-log.md`](../docs/decisions-log.md).
 

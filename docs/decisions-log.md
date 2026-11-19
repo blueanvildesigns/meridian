@@ -220,6 +220,13 @@ The release work from the plan: the accessibility pass, sizes against the budget
 | M7-7 | **Left as they are, from the keyboard pass.** (a) On phones, Tab reaches the Jump and Add bar before the cards, though it's drawn along the bottom. That's the page order, the bar holds the main actions, and moving it in the page would change the wide layout's order. (b) Firefox stops once on a dialog itself when Tab comes back round from the browser's own controls; that's how Firefox treats a scrolling box. (c) Undo comes after the remaining cards and Add a city in the Tab order, so with many cards it takes a while to reach. The 8 seconds start at once and wait only once focus is in the toast (M6-5), and D15 rules out a shortcut. Screen readers hear "London removed" straight away. Worth watching in the screen-reader pass. | Default | Confirmed (owner, R-26) |
 | M7-8 | **The root README stays the Flutter app's for now**, since the Flutter app is off limits. GitHub shows it first once the repo is public, so the launch checklist asks whether to point it at the web app. **Superseded by R-27:** the launch PR rewrites it for the web app. | Default | Superseded (owner, R-27) |
 
+## Launch (2026-11-19)
+
+| ID | Decision | Source | Status |
+|---|---|---|---|
+| L-1 | **Launched.** After the owner's checklist steps (R-25), the launch PR removed the three noindex pieces of M0-16: the meta tag in `index.html`, `robots.txt`'s `Disallow: /` (it now allows everything), and the `X-Robots-Tag` header. The tests now check the site is indexable. The not-found page keeps its own noindex, and Firebase still sends `X-Robots-Tag: noindex` on `web.app` preview links (M0-21). | Owner | Confirmed (R-25) |
+| L-2 | **The root README is about the web app now** (R-27): what it is, the live link, privacy, where the code is, a line saying the Flutter app is still in the repo, and both licences (MIT for the web app, GPL v3 for the Flutter app). The old README's "Website" link went to the GitHub Pages site unpublished in M0-27, so it points to blueanvildesigns.com now (R-20). The Flutter app itself is untouched. | Owner | Confirmed (R-27) |
+
 ## Owner rulings (2026-11-18)
 
 Settled in one Q&A round after M2 merged. Each entry above now points here.
