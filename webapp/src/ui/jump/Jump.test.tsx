@@ -118,6 +118,155 @@ describe('Jump picker', () => {
   });
 });
 
+describe('time list', () => {
+  const times = () => screen.queryByRole('listbox', { name: 'Times' });
+  const labels = () =>
+    within(times() ?? document.body)
+      .queryAllByRole('option')
+      .map((o) => o.textContent);
+  const highlighted = () =>
+    within(times() ?? document.body).getByRole('option', { selected: true });
+  const key = (name: string) => fireEvent.keyDown(field('Time'), { key: name });
+
+  it('opens on the half hour before the time in the field, and Enter picks', () => {
+    renderApp();
+    openPicker();
+    expect(field('Time')).toHaveRole('combobox');
+    expect(field('Time')).toHaveAttribute('aria-expanded', 'false');
+    expect(times()).toBeNull();
+
+    key('ArrowDown');
+    expect(field('Time')).toHaveAttribute('aria-expanded', 'true');
+    expect(labels()).toHaveLength(48);
+    expect(highlighted()).toHaveTextContent('9:30 PM');
+    expect(field('Time')).toHaveAttribute('aria-activedescendant', highlighted().id);
+
+    key('ArrowDown');
+    expect(highlighted()).toHaveTextContent('10:00 PM');
+    expect(key('Enter')).toBe(false);
+    expect(field('Time')).toHaveValue('10:00 PM');
+    expect(times()).toBeNull();
+    expect(picker()).toBeInTheDocument();
+    expect(window.location.hash).toBe('');
+  });
+
+  it('stops at either end', () => {
+    renderApp();
+    openPicker();
+    fireEvent.change(field('Time'), { target: { value: '11:30 PM' } });
+    key('ArrowDown');
+    expect(highlighted()).toHaveTextContent('11:30 PM');
+    key('ArrowDown');
+    expect(highlighted()).toHaveTextContent('11:30 PM');
+    key('Escape');
+    fireEvent.change(field('Time'), { target: { value: '12:10 AM' } });
+    key('ArrowUp');
+    expect(highlighted()).toHaveTextContent('12:00 AM');
+    key('ArrowUp');
+    expect(highlighted()).toHaveTextContent('12:00 AM');
+  });
+
+  it('narrows as you type, and Enter on the time typed is left to Apply', () => {
+    renderApp();
+    openPicker();
+    fireEvent.change(field('Time'), { target: { value: '8:3' } });
+    expect(labels()).toEqual(['8:30 AM', '8:30 PM']);
+    expect(highlighted()).toHaveTextContent('8:30 AM');
+    key('ArrowDown');
+    expect(key('Enter')).toBe(false);
+    expect(field('Time')).toHaveValue('8:30 PM');
+
+    fireEvent.change(field('Time'), { target: { value: '8pm' } });
+    expect(labels()).toEqual(['8:00 PM', '8:30 PM']);
+    expect(highlighted()).toHaveTextContent('8:00 PM');
+    // Not cancelled, so the form applies it; the list closes.
+    expect(key('Enter')).toBe(true);
+    expect(times()).toBeNull();
+  });
+
+  it('closes once the typing comes down to one time, the one typed', () => {
+    renderApp();
+    openPicker();
+    fireEvent.change(field('Time'), { target: { value: '8:00 a' } });
+    expect(times()).toBeNull();
+    fireEvent.change(field('Time'), { target: { value: '8:00' } });
+    expect(labels()).toEqual(['8:00 AM', '8:00 PM']);
+  });
+
+  it('has nothing to offer for a time off the half hour, which still works', () => {
+    renderApp();
+    openPicker();
+    fireEvent.change(field('Time'), { target: { value: '8:15 pm' } });
+    expect(field('Time')).toHaveAttribute('aria-expanded', 'false');
+    expect(field('Time')).not.toHaveAttribute('aria-activedescendant');
+    expect(key('Enter')).toBe(true);
+    expect(apply()).toBeEnabled();
+  });
+
+  it('Esc closes the list, not the picker', () => {
+    renderApp();
+    openPicker();
+    key('ArrowDown');
+    expect(key('Escape')).toBe(false);
+    expect(times()).toBeNull();
+    expect(picker()).toBeInTheDocument();
+    // With the list closed, Esc is the picker's.
+    expect(key('Escape')).toBe(true);
+  });
+
+  it('the button opens and closes it, and a click picks', () => {
+    renderApp();
+    openPicker();
+    const toggle = within(picker()).getByRole('button', { name: 'Show times' });
+    expect(toggle).toHaveAttribute('tabindex', '-1');
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(field('Time')).toHaveFocus();
+    fireEvent.click(within(times() as HTMLElement).getByRole('option', { name: '7:00 AM' }));
+    expect(field('Time')).toHaveValue('7:00 AM');
+    expect(times()).toBeNull();
+
+    fireEvent.click(toggle);
+    expect(highlighted()).toHaveTextContent('7:00 AM');
+    // The time in the field is ticked.
+    expect(highlighted().querySelector('svg')).not.toBeNull();
+    fireEvent.click(toggle);
+    expect(times()).toBeNull();
+  });
+
+  it('a tap on the button leaves the keyboard down; a press elsewhere closes it', () => {
+    renderApp();
+    openPicker();
+    const toggle = within(picker()).getByRole('button', { name: 'Show times' });
+    fireEvent.pointerDown(toggle, { pointerType: 'touch' });
+    fireEvent.click(toggle);
+    expect(times()).not.toBeNull();
+    expect(field('Time')).not.toHaveFocus();
+
+    fireEvent.pointerDown(within(picker()).getByRole('heading', { name: 'Jump to a time' }));
+    expect(times()).toBeNull();
+  });
+
+  it('closes, and tidies the time, when focus leaves the field', () => {
+    renderApp();
+    openPicker();
+    fireEvent.change(field('Time'), { target: { value: '8p' } });
+    expect(times()).not.toBeNull();
+    fireEvent.blur(field('Time'));
+    expect(times()).toBeNull();
+    expect(field('Time')).toHaveValue('8:00 PM');
+  });
+
+  it('lists the 24-hour clock in 24-hour format', () => {
+    renderApp([LOCAL, LONDON, TOKYO], '24');
+    openPicker();
+    expect(field('Time')).toHaveValue('21:43');
+    key('ArrowUp');
+    expect(highlighted()).toHaveTextContent('21:30');
+    expect(labels().slice(0, 2)).toEqual(['00:00', '00:30']);
+  });
+});
+
 describe('a skipped or repeated time', () => {
   it('a skipped time explains itself, offers the fix and holds Apply (canvas JumpPickerGap)', () => {
     renderApp([LOCAL, { ...NEW_YORK, customName: 'New York' }]);

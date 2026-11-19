@@ -1,5 +1,6 @@
 // The Jump picker (spec 4.3; canvas JumpPicker, JumpPickerGap, JumpPickerOverlap, JumpPhone): a
-// city, a date and a time, the UTC equivalent, then Apply. A skipped time explains itself and
+// city, a date and a time (typed, or picked from a list every half hour), the UTC equivalent, then
+// Apply. A skipped time explains itself and
 // offers the first real time after it, with Apply off until it's fixed; a repeated time asks which
 // one, the first preselected. A popover under the button on wide screens, a bottom sheet on phones.
 
@@ -12,7 +13,7 @@ import { parseTimeText } from '../../time/timeText';
 import { resolveWallTime } from '../../time/wallTime';
 import buttons from '../buttons.module.css';
 import { Dialog } from '../dialog/Dialog';
-import { AlertTriangleIcon, ChevronDownIcon, ClockIcon, CloseIcon } from '../icons';
+import { AlertTriangleIcon, ChevronDownIcon, CloseIcon } from '../icons';
 import {
   gapText,
   initialReferenceKey,
@@ -24,6 +25,7 @@ import {
   type ReferenceOption,
 } from './jumpView';
 import styles from './JumpPicker.module.css';
+import { TimeCombobox } from './TimeCombobox';
 
 export interface JumpPickerProps {
   cities: readonly StoredCity[];
@@ -271,38 +273,30 @@ export function JumpPicker({
             <label htmlFor={ids.time} className={styles.label}>
               Time
             </label>
-            <div className={`${styles.box} ${timeError || gap ? styles.invalid : ''}`}>
-              <ClockIcon size={18} className={styles.boxIcon} />
-              <input
-                ref={timeInput}
-                id={ids.time}
-                type="text"
-                className={styles.input}
-                required
-                value={fields.time}
-                aria-invalid={timeError || gap ? true : undefined}
-                aria-describedby={timeDescription || undefined}
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck={false}
-                enterKeyHint="go"
-                onKeyDown={(e) => {
-                  // Apply is off while the time can't be read; say why instead of doing nothing.
-                  if (e.key === 'Enter') setTouched((t) => ({ ...t, time: true }));
-                }}
-                onChange={(e) => {
-                  edit({ time: e.target.value });
-                }}
-                onBlur={() => {
-                  setTouched((t) => ({ ...t, time: true }));
-                  // Tidy what was typed into the app's own format: "8pm" → "8:00 PM".
-                  if (typed) {
-                    const tidy = formatClockInline(typed.hour, typed.minute, hourCycle);
-                    if (tidy !== fields.time) setFields((f) => ({ ...f, time: tidy }));
-                  }
-                }}
-              />
-            </div>
+            <TimeCombobox
+              id={ids.time}
+              inputRef={timeInput}
+              value={fields.time}
+              hourCycle={hourCycle}
+              invalid={Boolean(timeError || gap)}
+              describedBy={timeDescription || undefined}
+              boxClassName={`${styles.box} ${timeError || gap ? styles.invalid : ''}`}
+              onChange={(text) => {
+                edit({ time: text });
+              }}
+              // Apply is off while the time can't be read; say why instead of doing nothing.
+              onEnter={() => {
+                setTouched((t) => ({ ...t, time: true }));
+              }}
+              onBlur={() => {
+                setTouched((t) => ({ ...t, time: true }));
+                // Tidy what was typed into the app's own format: "8pm" → "8:00 PM".
+                if (typed) {
+                  const tidy = formatClockInline(typed.hour, typed.minute, hourCycle);
+                  if (tidy !== fields.time) setFields((f) => ({ ...f, time: tidy }));
+                }
+              }}
+            />
             {timeError && (
               <p id={ids.timeError} className={styles.error}>
                 {timeError}
