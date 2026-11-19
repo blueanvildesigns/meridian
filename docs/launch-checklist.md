@@ -54,16 +54,17 @@ Only the `meridian` host on each domain. Never change an apex record or the mark
 4. Repeat for `meridian.blueanvildesigns.dev`. (.dev only works over HTTPS, so that address won't load at all until Firebase's certificate is issued.)
 5. Wait for the console to show both as connected (usually a few hours, up to 24). Then tell me, and I'll check each one redirects to the .io address.
 
-### 2.5 Decide two things for when the repo goes public
+### 2.5 Make the repo public, at launch
 1. **Repo visibility.** It stays private until launch (M0-17). To make it public: GitHub > the repo > **Settings** > **General** > **Danger Zone** > **Change visibility**. I checked the history for keys and tokens and found none; the Firebase deploy key is a GitHub secret, not in the repo. Pull requests from forks never get the deploy key or a preview.
-2. **The root README** still describes the Flutter app, and it's the first thing visitors see. I've left it alone because the Flutter app is off limits for now (M7-8). Say if you'd like it to point to the web app (`webapp/README.md`) at launch.
+2. **The root README** is the first thing visitors see. The launch PR rewrites it for the web app, with a line saying the original Flutter app is still in the repo (R-27).
 
 ## 3. Launch (Claude, after section 2)
-When you say "launch", I'll open one small PR that:
+When you say "launch" (after section 2, R-25), I'll open one small PR that:
 - removes the noindex meta tag from `webapp/index.html` and the comment above it,
 - makes `webapp/public/robots.txt` allow everything,
 - removes the `X-Robots-Tag` header from `firebase.json`,
-- turns the pre-launch test in `e2e/hosting.spec.ts` into a check that the site is indexable.
+- turns the pre-launch test in `e2e/hosting.spec.ts` into a check that the site is indexable,
+- rewrites the root `README.md` for the web app: what it is, the live link, privacy, a pointer to `webapp/README.md`, and a line saying the original Flutter app is still in the repo (R-27). The Flutter app itself isn't touched.
 
 The not-found page keeps its noindex. Preview links stay out of search: on Firebase's own `web.app` addresses Firebase adds `X-Robots-Tag: noindex` itself (M0-21).
 
