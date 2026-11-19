@@ -1,4 +1,4 @@
-import { gzipSync } from 'node:zlib';
+import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -12,9 +12,12 @@ const RAW = readFileSync(resolve('src/cities/data/cities.v1.json'));
 describe('the generated dataset', () => {
   const data = realDataset();
 
-  it('stays near the ~400 KB target (M2-10), well inside the 1.5 MB budget', () => {
-    // 393 KB gzip at the 2026-11-18 export, 423 KB with the airports and their towns (M4-1, M4-2);
-    // the headroom absorbs normal GeoNames growth.
+  it('stays under 400 KB as sent (R-14), well inside the 1.5 MB budget', () => {
+    // Firebase sends it Brotli-compressed, the same size as quality 11 here: 316 KB at M4 and M7.
+    const sent = brotliCompressSync(RAW, { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } });
+    expect(sent.length).toBeLessThan(400_000);
+    // Gzip, for browsers that don't take Brotli: 393 KB at the 2026-11-18 export, 423 KB with the
+    // airports and their towns (M4-1, M4-2); the headroom absorbs normal GeoNames growth.
     expect(gzipSync(RAW, { level: 9 }).length).toBeLessThan(470_000);
   });
 
