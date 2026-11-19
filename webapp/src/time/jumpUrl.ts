@@ -1,10 +1,13 @@
 // Jump state in the URL hash (decision D11), so a link reproduces the moment and is never sent
 // to a server. The instant is stored, not the wall time, so a chosen occurrence of a repeated
 // time survives the round trip.
-// Format: #at=2027-03-14T07:30:00Z&ref=America/New_York&name=New+York
+// Format: #at=2027-03-14T07:30:00Z&ref=America/New_York&name=New%20York
 
 import { T } from './temporal';
+import { cleanName } from '../text/name';
 import { canonicalZone } from './zones';
+
+export { MAX_NAME_LENGTH } from '../text/name';
 
 export interface JumpState {
   instant: Temporal.Instant;
@@ -14,25 +17,8 @@ export interface JumpState {
   refName?: string;
 }
 
-export const MAX_NAME_LENGTH = 60;
 const MIN_YEAR = 1900;
 const MAX_YEAR = 2200;
-
-function cleanName(raw: string | null): string | undefined {
-  if (raw === null) return undefined;
-  // Whitespace (including newlines and tabs) becomes one space, other control characters go.
-  const name = raw
-    .replace(/\s+/g, ' ')
-    .replace(/\p{Cc}/gu, '')
-    .trim();
-  if (name === '') return undefined;
-  // Cut on grapheme boundaries so an emoji or combining accent is never split.
-  const graphemes = Array.from(new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(name));
-  return graphemes
-    .slice(0, MAX_NAME_LENGTH)
-    .map((g) => g.segment)
-    .join('');
-}
 
 /** Percent-encodes, but leaves ":" and "/" readable (both are allowed in a fragment). */
 function encodeValue(value: string): string {

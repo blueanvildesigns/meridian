@@ -16,5 +16,13 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "e2e", "scripts", "src/app/themeBoot.ts"]
+  "include": [
+    "vite.config.ts",
+    "playwright.config.ts",
+    "e2e",
+    "scripts",
+    "src/app/themeBoot.ts",
+    "src/cities/fold.ts",
+    "src/time/zones.ts"
+  ]
 }

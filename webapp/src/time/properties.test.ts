@@ -1,8 +1,10 @@
-// Property tests: the time core's invariants, over every zone this engine knows and instants
-// across 2026–2030. The real dataset's zones replace Intl.supportedValuesOf here once M2 lands;
-// supportedValuesOf is a superset in practice, so this is the stricter test.
+// Property tests: the time core's invariants, over every zone the app can meet and instants across
+// 2026–2030. Zones: the city dataset's (current names such as Asia/Kolkata) plus everything the
+// engine lists. Node's Intl.supportedValuesOf still uses legacy names for 16 zones (Asia/Calcutta),
+// so neither list alone covers the other.
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
+import { DATASET_ZONES } from '../cities/zoneData';
 import { zoneAbbreviation } from './abbreviation';
 import { decodeJump, encodeJump } from './jumpUrl';
 import { calendarDayDiff } from './relativeDay';
@@ -10,7 +12,7 @@ import { zoneSnapshot } from './snapshot';
 import { T } from './temporal';
 import { nextOccurrence, resolveWallTime } from './wallTime';
 
-const ZONES = [...Intl.supportedValuesOf('timeZone'), 'UTC'];
+const ZONES = [...new Set([...DATASET_ZONES, ...Intl.supportedValuesOf('timeZone'), 'UTC'])];
 const FROM = Date.UTC(2026, 0, 1);
 const TO = Date.UTC(2031, 0, 1);
 const RUNS = { numRuns: 1000 };
