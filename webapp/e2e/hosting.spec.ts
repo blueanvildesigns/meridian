@@ -2,12 +2,12 @@ import { expect, test } from './fixtures';
 
 // These run against scripts/serve-dist.ts, which applies firebase.json's headers and rewrites.
 
-test('serves the shell with security headers, noindex and no caching', async ({ request }) => {
+test('serves the shell with security headers and no caching', async ({ request }) => {
   const res = await request.get('/');
   const h = res.headers();
   expect(h['content-security-policy']).toContain("default-src 'self'");
   expect(h['x-content-type-options']).toBe('nosniff');
-  expect(h['x-robots-tag']).toContain('noindex');
+  expect(h['x-robots-tag']).toBeUndefined();
   expect(h['cache-control']).toBe('no-cache');
 });
 
@@ -92,9 +92,11 @@ test('runs under the production CSP with no violations', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('asks search engines not to index the pre-launch site', async ({ page, request }) => {
+test('lets search engines index the app, but not the not-found page', async ({ page, request }) => {
   await page.goto('/');
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
   const robots = await request.get('/robots.txt');
-  expect(await robots.text()).toContain('Disallow: /');
+  expect(await robots.text()).toBe('User-agent: *\nAllow: /\n');
+  await page.goto('/missing.txt');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 });

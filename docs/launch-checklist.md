@@ -1,6 +1,6 @@
 # Meridian Web: launch checklist
 
-Status: prepared at M7 (2026-11-19). The gate itself is `docs/hosting-plan.md` section 8; this file says where each item stands and what's left, in order. Steps marked **Graham** are console, device or decision steps I can't do. Steps marked **Claude** are mine.
+Status: prepared at M7 (2026-11-19). **Launched 2026-11-19**: the owner did section 2's checks and said "launch", and the launch PR removed the noindex. The .com and .dev redirects (2.4) and making the repo public (2.5) are still the owner's to do. The gate itself is `docs/hosting-plan.md` section 8; this file says where each item stands and what's left, in order. Steps marked **Graham** are console, device or decision steps I can't do. Steps marked **Claude** are mine.
 
 ## 1. Where the gate stands
 
@@ -15,11 +15,11 @@ Status: prepared at M7 (2026-11-19). The gate itself is `docs/hosting-plan.md` s
 | Contrast, both themes | Done | `src/styles/contrast.test.ts`: every token pair, no exceptions (R-7) |
 | axe on every screen, both themes | Done | Every spec in `webapp/e2e/`. `e2e/a11y.spec.ts` lists where each screen is checked. |
 | Keyboard-only walkthrough | Done | `e2e/a11y.spec.ts` (a whole session by keyboard, Tab order, focus rings), plus a manual pass (M7-1) |
-| One screen-reader pass | **Graham**, step 2.1 | I can't drive a real screen reader. |
+| One screen-reader pass | Done by the owner before launch (R-25) | Step 2.1 |
 | Bundle within budget | Done | 101 KB Brotli initial JS against 300 KB. First visit 221 KB as sent. `docs/hosting-plan.md` section 3. |
-| Safari, Chrome and Firefox, including the Temporal fallback | CI done; **Graham** for a real Safari, step 2.2 | Playwright runs Chromium, Firefox, WebKit without Temporal (Safari's path) and a phone on every PR. |
-| Blaze with a $5 budget alert (R-8) | **Graham**, step 2.3 | |
-| Remove noindex | **Claude**, step 3, last | |
+| Safari, Chrome and Firefox, including the Temporal fallback | Done: CI, and real Safari by the owner (R-25) | Playwright runs Chromium, Firefox, WebKit without Temporal (Safari's path) and a phone on every PR. Step 2.2. |
+| Blaze with a $5 budget alert (R-8) | Done by the owner (R-25) | Billing enabled on `meridian-web-a5829`, checked with `gcloud billing projects describe` on 2026-11-19. The budget itself I can't read from here. |
+| Remove noindex | Done at launch | The launch PR (section 3). |
 
 ## 2. Graham's steps
 
