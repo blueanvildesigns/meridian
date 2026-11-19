@@ -1,0 +1,315 @@
+/* Jump picker: canvas JumpPicker, JumpPickerGap and JumpPickerOverlap (popover, 440 wide) and
+   JumpPhone (bottom sheet). Values from the boards; colours from tokens.css. */
+
+.dialog {
+  font-family: var(--font-sans);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px 20px;
+}
+
+.grabber {
+  display: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.lede {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+}
+
+.close {
+  margin: -8px -10px 0 0;
+  color: var(--fg);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--muted);
+  font-size: var(--size-label);
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dateField {
+  flex: 1 1 0;
+}
+
+.timeField {
+  flex: none;
+  width: 140px;
+}
+
+/* Inputs: a 1px control border that becomes a 2px accent ring while focused (as add-city's
+   search field). The ring is the focus indicator, so the inner controls drop their outline. */
+.box,
+.select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-size: 16px;
+}
+
+.box:focus-within,
+.select:focus-visible {
+  border-color: var(--accent);
+  outline: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.invalid,
+.invalid:focus-within {
+  border-color: var(--jump-border);
+}
+
+.invalid:focus-within {
+  box-shadow: inset 0 0 0 1px var(--jump-border);
+}
+
+.boxIcon {
+  flex: none;
+  color: var(--muted);
+}
+
+.input {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+}
+
+.input:focus-visible,
+.dateInput:focus-visible {
+  outline: 0;
+}
+
+.dateInput {
+  min-width: 0;
+}
+
+.selectBox {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  translate: 0 -50%;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.error {
+  margin: 0;
+  color: var(--jump-text);
+  font-size: var(--size-label);
+  line-height: 1.4;
+}
+
+/* Skipped time: canvas JumpPickerGap. */
+.gap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--jump-border);
+  border-radius: 12px;
+  background: var(--jump-bg);
+  color: var(--jump-text);
+  --focus: var(--jump-text);
+}
+
+.gapText {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.gapIcon {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* 44 tall, not the board's 40, for the minimum target size (design-spec 1). */
+.gapFix {
+  align-self: flex-start;
+  min-height: var(--target);
+  padding: 0 16px;
+  border: 1px solid var(--jump-border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  color: var(--jump-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Repeated time: canvas JumpPickerOverlap. */
+.overlap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--tag-bg);
+  color: var(--fg);
+}
+
+.legend {
+  padding: 0 6px;
+  color: var(--tag-fg);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.overlapText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--target);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.choiceDetail {
+  color: var(--muted);
+}
+
+.utc {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel {
+  background: transparent;
+}
+
+.apply {
+  padding: 0 28px;
+}
+
+/* Bottom sheet: canvas JumpPhone. */
+@media (max-width: 640px) {
+  .form {
+    padding: 10px 16px max(24px, env(safe-area-inset-bottom));
+  }
+
+  /* Drawn as the sheet's handle; decorative (Close, Cancel, Esc and the backdrop close it). */
+  .grabber {
+    display: block;
+    align-self: center;
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--sheet-handle);
+  }
+
+  .heading {
+    padding-top: 2px;
+  }
+
+  .title {
+    font-size: var(--size-dialog-title);
+  }
+
+  .close {
+    margin: -6px -8px 0 0;
+  }
+
+  .timeField {
+    width: 128px;
+  }
+
+  .box {
+    gap: 8px;
+  }
+
+  .cancel,
+  .apply {
+    flex: 1 1 0;
+    min-height: 48px;
+    border-radius: 12px;
+    font-size: 16px;
+  }
+}

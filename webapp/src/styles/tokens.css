@@ -77,6 +77,12 @@
   --ref-tag-fg: #ffffff;
   --ref-border: #2f4bd0;
 
+  /* Jump picker: canvas JumpPicker (popover) and JumpPhone (bottom sheet) */
+  --popover-border: #d5ddea;
+  --popover-shadow: 0 18px 48px rgba(20, 33, 61, 0.25);
+  --sheet-shadow: 0 -12px 40px rgba(20, 33, 61, 0.3);
+  --sheet-handle: #b9c6e0;
+
   /* Type */
   --font-serif: 'IBM Plex Serif', Georgia, serif;
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
@@ -165,6 +171,11 @@
   --ref-tag-bg: #8fb0ff; /* derived */
   --ref-tag-fg: #0b1426; /* derived */
   --ref-border: #8fb0ff; /* derived */
+
+  --popover-border: #2c3c63; /* design-spec: dialog panel border */
+  --popover-shadow: 0 18px 48px rgba(0, 0, 0, 0.5); /* derived */
+  --sheet-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5); /* derived */
+  --sheet-handle: #4a5a75; /* derived */
 }
 
 @media (max-width: 640px) {
