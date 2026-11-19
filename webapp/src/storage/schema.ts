@@ -58,6 +58,9 @@ export interface PlaceCity extends CityBase {
 
 export type StoredCity = LocalCity | ZoneCity | PlaceCity;
 
+/** A city about to be added: everything but the entry ID. */
+export type NewCity = Omit<LocalCity, 'id'> | Omit<ZoneCity, 'id'> | Omit<PlaceCity, 'id'>;
+
 export interface AppState {
   cities: StoredCity[];
   settings: Settings;
@@ -73,7 +76,7 @@ export function defaultState(): AppState {
 }
 
 /** Identity for de-duplication (D3): one per place, one My Local Time, one per bare zone. */
-export function cityKey(city: StoredCity): string {
+export function cityKey(city: NewCity | StoredCity): string {
   switch (city.kind) {
     case 'local':
       return 'local';
@@ -84,7 +87,7 @@ export function cityKey(city: StoredCity): string {
   }
 }
 
-export function defaultName(city: StoredCity): string {
+export function defaultName(city: NewCity | StoredCity): string {
   switch (city.kind) {
     case 'local':
       return LOCAL_TIME_NAME;
