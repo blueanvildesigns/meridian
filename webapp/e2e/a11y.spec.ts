@@ -106,7 +106,10 @@ test.describe('keyboard only', () => {
     await tabTo(page, button(page, 'Settings'), { back: true });
     await page.keyboard.press('Enter');
     await expect(page.getByRole('radio', { name: 'Browser default' })).toBeFocused();
-    await page.keyboard.press('ArrowLeft');
+    // Rightwards: WebKit doesn't wrap from the first choice to the last, Chromium and Firefox do.
+    await page.keyboard.press('ArrowRight');
+    await expect(page.getByRole('radio', { name: '12-hour' })).toBeChecked();
+    await page.keyboard.press('ArrowRight');
     await expect(page.getByRole('radio', { name: '24-hour' })).toBeChecked();
     await expect(card(page, 'My Local Time')).toContainText('21:43');
     await page.keyboard.press('Escape');
