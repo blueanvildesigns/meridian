@@ -29,6 +29,14 @@ export function resolveTheme(appearance: Appearance, systemPrefersDark: boolean)
   return appearance;
 }
 
+export function systemPrefersDark(): boolean {
+  try {
+    return window.matchMedia(DARK_QUERY).matches;
+  } catch {
+    return false;
+  }
+}
+
 export function applyTheme(theme: Theme, root: HTMLElement = document.documentElement): void {
   root.setAttribute('data-theme', theme);
 }

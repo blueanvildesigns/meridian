@@ -82,6 +82,8 @@ const pairs: [string, string, number][] = [
   ['warn-link', 'warn-bg', TEXT],
   ['warn-icon', 'warn-bg', UI],
   ['warn-accent', 'page', UI], // dashed border of the unrecognized-zone card (darkened, M0-5)
+  ['warn-accent', 'surface', UI], // the same border against the card itself
+  ['warn-icon', 'surface', TEXT], // "Time zone not recognized" label on the card
   // Jump
   ['jump-text', 'jump-bg', TEXT],
   ['jump-text', 'control-bg', TEXT], // Copy link / Change buttons: jump-text on white (light)

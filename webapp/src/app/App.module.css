@@ -57,6 +57,21 @@
 
 .main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 640px) {
+  .page,
+  .main {
+    gap: 16px;
+  }
+
+  /* Room for the fixed action bar (Controls.module.css) so the footer can scroll clear of it. */
+  .withBar {
+    padding-bottom: calc(12px + 48px + max(24px, env(safe-area-inset-bottom)) + 1px + 16px);
+  }
 }
 
 .footer {
@@ -79,9 +94,11 @@
 .footerLinks a,
 .linkButton {
   font-weight: 500;
+  min-width: var(--target);
   min-height: var(--target);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 }
 
 .linkButton {
