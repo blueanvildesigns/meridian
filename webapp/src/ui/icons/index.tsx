@@ -247,3 +247,59 @@ export function ResetIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Card menu (canvas CardMenu): Rename. */
+export function PencilIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M4 20h4L19 9l-4-4L4 16v4z" />
+      <path d="M13.5 6.5l4 4" />
+    </Icon>
+  );
+}
+
+/** Card menu: Move up. */
+export function ArrowUpIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M12 19V5M6 11l6-6 6 6" />
+    </Icon>
+  );
+}
+
+/** Card menu: Move down. */
+export function ArrowDownIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M12 5v14M6 13l6 6 6-6" />
+    </Icon>
+  );
+}
+
+/** Card menu: Remove. */
+export function TrashIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" />
+    </Icon>
+  );
+}
+
+/** Settings, Appearance: System (canvas Settings). */
+export function MonitorIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M8 20h8M12 16v4" />
+    </Icon>
+  );
+}
+
+/** About: Support on Ko-fi (canvas About). */
+export function HeartIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1L12 21.5l8.8-8.8a5 5 0 0 0 0-7.1z" />
+    </Icon>
+  );
+}

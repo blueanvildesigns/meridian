@@ -11,7 +11,7 @@
 import { useEffectEvent, useLayoutEffect, useRef, type ReactNode } from 'react';
 import styles from './Dialog.module.css';
 
-/** Room between a popover and its anchor (canvas JumpPicker: 18 px below the button). */
+/** Room between a popover and its anchor, unless the caller says (canvas JumpPicker: 18 px). */
 const ANCHOR_GAP = 18;
 /** A popover keeps this far from the window's edges. */
 const EDGE = 16;
@@ -22,13 +22,13 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
  * Puts a popover under its anchor, right edges lined up, kept inside the window; centred if the
  * anchor has gone. The CSS reads the result only on wide screens: phones get a bottom sheet.
  */
-function placePopover(dialog: HTMLDialogElement, anchor: HTMLElement | null) {
+function placePopover(dialog: HTMLDialogElement, anchor: HTMLElement | null, gap: number) {
   const width = document.documentElement.clientWidth;
   const height = window.innerHeight;
   const box = dialog.getBoundingClientRect();
   const at = anchor?.isConnected ? anchor.getBoundingClientRect() : null;
   const left = at ? at.right - box.width : (width - box.width) / 2;
-  const top = at ? at.bottom + ANCHOR_GAP : (height - box.height) / 2;
+  const top = at ? at.bottom + gap : (height - box.height) / 2;
   dialog.style.setProperty('--popover-left', `${clamp(left, EDGE, width - EDGE - box.width)}px`);
   dialog.style.setProperty(
     '--popover-top',
@@ -52,6 +52,10 @@ export interface DialogProps {
   variant?: 'panel' | 'popover';
   /** The control a popover hangs from. */
   anchor?: HTMLElement | null;
+  /** Room between a popover and its anchor (18 px; the card menu hangs straight off its button). */
+  gap?: number;
+  /** A panel as tall as its content (Settings, About), not add-city's fixed height. */
+  fit?: boolean;
   className?: string | undefined;
   children: ReactNode;
 }
@@ -63,6 +67,8 @@ export function Dialog({
   onOpenerGone,
   variant = 'panel',
   anchor = null,
+  gap = ANCHOR_GAP,
+  fit = false,
   className,
   children,
 }: DialogProps) {
@@ -76,7 +82,7 @@ export function Dialog({
     const dialog = ref.current;
     if (variant !== 'popover' || !dialog) return;
     const place = () => {
-      placePopover(dialog, anchor);
+      placePopover(dialog, anchor, gap);
     };
     place();
     // Every supported browser has ResizeObserver; the unit tests' DOM doesn't.
@@ -87,7 +93,7 @@ export function Dialog({
       observer?.disconnect();
       window.removeEventListener('resize', place);
     };
-  }, [variant, anchor]);
+  }, [variant, anchor, gap]);
 
   useLayoutEffect(() => {
     const dialog = ref.current;
@@ -111,7 +117,7 @@ export function Dialog({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={ref}
-      className={`${styles.dialog} ${variant === 'popover' ? styles.popover : ''} ${className ?? ''}`}
+      className={`${styles.dialog} ${variant === 'popover' ? styles.popover : ''} ${fit ? styles.fit : ''} ${className ?? ''}`}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       // Esc fires `cancel` then `close`; letting the browser close it and reporting that covers
