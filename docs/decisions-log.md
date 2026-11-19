@@ -144,6 +144,7 @@ The first milestone users can see: the list, its cards and their states, wired t
 | M3-12 | **Structure.** Cards are `article`s in a list labelled "Your clocks"; the tile is the list's last item. The DOM order is the reading order (name, day/night, country, time, day chip, details, buttons) and CSS grid areas place things where the boards draw them, on desktop and phone, from the same markup. Clock times are not in a live region (design-spec 5). | Default | Pending |
 | M3-13 | **Footer targets** widened to 44 px: "About" was 38 px wide (from M0). A new e2e check measures every visible button and link on the list. | Found | Confirmed |
 | M3-14 | **Drawn but not wired yet**: Add city, the tile and the empty state's Add city (M4), Choose a zone (M4), Jump to a time (M5), More options, Settings and About (M6). | Default | Confirmed |
+| M3-15 | **Playwright's WebKit build has native Temporal** (found in CI, where `typeof Temporal` was "object"), unlike shipping Safari 27.x, so the WebKit project had quietly stopped testing the polyfill. A shared fixture (`webapp/e2e/fixtures.ts`) now removes native Temporal on WebKit before any page script runs, which makes the WebKit project the Safari path: WebKit's engine and `Intl` data plus the polyfill. A test checks that the polyfill is fetched there and never on Chromium or Firefox. The mechanism was checked locally on Chromium (native Temporal removed: polyfill fetched once, cards correct). | Found | Confirmed |
 
 ## Owner rulings (2026-11-18)
 

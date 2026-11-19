@@ -22,7 +22,7 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    // WebKit has no native Temporal: this project exercises the polyfill path (closest proxy to Safari).
+    // Safari's path: e2e/fixtures.ts removes Playwright WebKit's native Temporal, so the polyfill runs.
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
   ],

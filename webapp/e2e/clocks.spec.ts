@@ -1,7 +1,8 @@
 // The clock list (M3) on every engine: real Intl and zone data from each browser, the polyfill
 // path on WebKit, and the production CSP from firebase.json.
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // The canvas Main board's moment: 9:43 PM, Tue Nov 17, in Chicago.
 const BOARD_TIME = new Date('2026-11-18T03:43:00Z');
@@ -68,6 +69,21 @@ async function keyboardMove(page: Page, name: string, key: string, position: str
   await page.getByRole('button', { name: `Drag to reorder ${name}` }).focus();
   await page.keyboard.press('Space');
   await expect(page.getByText(`Picked up ${name},`)).toBeAttached();
+  // dnd-kit announces the pickup at once but starts listening for arrow keys in a setTimeout, and
+  // measures the cards in the next frames. A loaded CI runner can press inside that gap, so wait
+  // one macrotask (queued after dnd-kit's) and two frames. People are never that quick.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resolve();
+            });
+          });
+        });
+      }),
+  );
   await page.keyboard.press(key);
   await expect(page.getByText(`${name} moved to ${position}.`)).toBeAttached();
   await page.keyboard.press('Space');
@@ -379,13 +395,18 @@ test('a change in another tab shows up here', async ({ page, context }) => {
   await expect.poll(() => cardNames(other)).toEqual(['London']);
 });
 
-test('WebKit runs on the Temporal polyfill', async ({ page, browserName }) => {
-  test.skip(browserName !== 'webkit', 'WebKit is the engine without native Temporal.');
+test('Temporal: the polyfill on WebKit (the Safari path), never on native engines', async ({
+  page,
+  browserName,
+}) => {
+  const fetched: string[] = [];
+  page.on('request', (r) => {
+    if (/\/temporal-polyfill-[^/]*\.js$/.test(new URL(r.url()).pathname)) fetched.push(r.url());
+  });
   await page.clock.setFixedTime(BOARD_TIME);
   await seed(page, [LONDON]);
   await page.goto('/');
   await expect(card(page, 'London')).toContainText('3:43 AM');
-  expect(await page.evaluate(() => typeof (globalThis as { Temporal?: unknown }).Temporal)).toBe(
-    'undefined',
-  );
+  await expect(card(page, 'London')).toContainText('Wed, Nov 18 · GMT');
+  expect(fetched).toHaveLength(browserName === 'webkit' ? 1 : 0);
 });
