@@ -1,14 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { deviceZone } from '../time/zones';
 import { resolveHourCycle } from '../time/format';
 import { T } from '../time/temporal';
+import { AddCityDialog, type AddCityMode } from '../ui/addCity/AddCityDialog';
 import { ClockGrid } from '../ui/clock/ClockGrid';
 import { cardView } from '../ui/clock/cardView';
 import { Controls } from '../ui/Controls';
 import { EmptyState } from '../ui/EmptyState';
 import { GearIcon, InfoIcon, LogoMark } from '../ui/icons';
 import { StorageBanner } from '../ui/StorageBanner';
-import { addLocalTime, moveCity, removeCity } from './actions';
+import { cityKey, defaultName, type NewCity } from '../storage/schema';
+import { addCity, addLocalTime, moveCity, removeCity, replaceCity } from './actions';
 import { useStore, type AppStore, type StorageNotice } from './store';
 import { useMinuteClock } from './useMinuteClock';
 import styles from './App.module.css';
@@ -26,6 +28,9 @@ export function App({ store }: { store: AppStore }) {
   const now = useMinuteClock();
   const [dismissed, setDismissed] = useState<StorageNotice | null>(null);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
+  const [addCityMode, setAddCityMode] = useState<AddCityMode | null>(null);
+  /** The last city added while the dialog was open, to focus if its opener has gone. */
+  const lastAdded = useRef<string | null>(null);
 
   // Read every render: the device zone can change while the page is open (travel, OS settings).
   const zone = deviceZone();
@@ -43,6 +48,39 @@ export function App({ store }: { store: AppStore }) {
     const neighbour = state.cities[i + 1] ?? state.cities[i - 1];
     store.update((s) => removeCity(s, id));
     setFocusRequest({ id: neighbour?.id ?? null });
+  };
+
+  const openAddCity = () => {
+    lastAdded.current = null;
+    setAddCityMode({ kind: 'add' });
+  };
+
+  const chooseZone = (id: string) => {
+    const city = state.cities.find((c) => c.id === id);
+    if (!city) return;
+    // Start from the city's own name (a renamed zone is often findable by it), or the zone's last
+    // part: "Europe/Kiev" → "Kiev".
+    const query =
+      city.kind === 'place'
+        ? city.name
+        : city.kind === 'zone'
+          ? (city.zone.split('/').pop() ?? '').replace(/_/g, ' ')
+          : '';
+    lastAdded.current = null;
+    setAddCityMode({ kind: 'replace', id, name: defaultName(city), query });
+  };
+
+  const add = (city: NewCity) => {
+    store.update((s) => addCity(s, city));
+    const key = cityKey(city);
+    lastAdded.current =
+      store.getSnapshot().state.cities.find((c) => cityKey(c) === key)?.id ?? null;
+  };
+
+  const replace = (id: string, city: NewCity) => {
+    store.update((s) => replaceCity(s, id, city));
+    setAddCityMode(null);
+    setFocusRequest({ id });
   };
 
   const addMyLocalTime = () => {
@@ -78,9 +116,10 @@ export function App({ store }: { store: AppStore }) {
             }}
           />
         )}
-        <Controls empty={empty} />
+        <Controls empty={empty} onAddCity={openAddCity} />
         {empty ? (
           <EmptyState
+            onAddCity={openAddCity}
             onUseLocalTime={addMyLocalTime}
             focusRequest={focusRequest?.id === null ? focusRequest : null}
           />
@@ -91,10 +130,31 @@ export function App({ store }: { store: AppStore }) {
               store.update((s) => moveCity(s, activeId, overId));
             }}
             onRemove={remove}
+            onAddCity={openAddCity}
+            onChooseZone={chooseZone}
             focusRequest={focusRequest}
           />
         )}
       </main>
+
+      {addCityMode && (
+        <AddCityDialog
+          mode={addCityMode}
+          cities={state.cities}
+          now={now}
+          deviceZone={zone}
+          hourCycle={hourCycle}
+          onAdd={add}
+          onReplace={replace}
+          onClose={() => {
+            setAddCityMode(null);
+          }}
+          onOpenerGone={() => {
+            // Adding the first city replaces the empty state, and with it the Add city button.
+            if (lastAdded.current) setFocusRequest({ id: lastAdded.current });
+          }}
+        />
+      )}
 
       <footer className={styles.footer}>
         <span>Meridian is a Blue Anvil Designs project.</span>

@@ -114,10 +114,17 @@ export function ClockCard({
 export interface UnknownZoneCardProps {
   view: UnknownZoneView;
   onRemove: (id: string) => void;
+  /** Opens add-city in replace mode (D14). */
+  onChooseZone?: ((id: string) => void) | undefined;
   focusRequest: object | null;
 }
 
-export function UnknownZoneCard({ view, onRemove, focusRequest }: UnknownZoneCardProps) {
+export function UnknownZoneCard({
+  view,
+  onRemove,
+  onChooseZone,
+  focusRequest,
+}: UnknownZoneCardProps) {
   const nameId = `card-${view.id}-name`;
   const ref = useFocusRequest(focusRequest);
   return (
@@ -134,8 +141,13 @@ export function UnknownZoneCard({ view, onRemove, focusRequest }: UnknownZoneCar
         shown.
       </p>
       <div className={styles.unknownActions}>
-        {/* Opens add-city's zone search in replace mode (D14), arriving in M4. */}
-        <button type="button" className={`${buttons.primary} ${buttons.compact}`}>
+        <button
+          type="button"
+          className={`${buttons.primary} ${buttons.compact}`}
+          onClick={() => {
+            onChooseZone?.(view.id);
+          }}
+        >
           Choose a zone
         </button>
         <button
