@@ -31,9 +31,11 @@ const COPY: Record<StorageNotice, { title: string; text: string }> = {
 export interface StorageBannerProps {
   notice: StorageNotice;
   onDismiss: () => void;
+  /** "What can I do?": About, opened on "Your data stays with you" (D19). */
+  onHelp?: () => void;
 }
 
-export function StorageBanner({ notice, onDismiss }: StorageBannerProps) {
+export function StorageBanner({ notice, onDismiss, onHelp }: StorageBannerProps) {
   const { title, text } = COPY[notice];
   return (
     <div role="alert" className={styles.banner}>
@@ -43,7 +45,11 @@ export function StorageBanner({ notice, onDismiss }: StorageBannerProps) {
       <div className={styles.body}>
         <strong className={styles.title}>{title}</strong>
         <span className={styles.text}>{text}</span>
-        {/* "What can I do?" opens a "Your data" section in About (D19), arriving in M6. */}
+        {notice === 'unavailable' && onHelp && (
+          <button type="button" className={styles.link} onClick={onHelp}>
+            What can I do?
+          </button>
+        )}
         {notice === 'newer' && (
           <button
             type="button"
