@@ -138,6 +138,16 @@ describe('storage banner', () => {
     expect(screen.getByRole('button', { name: 'Reload to update' })).toBeInTheDocument();
   });
 
+  it('says once when saved data couldn’t be read', () => {
+    const storage = fakeStorage({ [STORAGE_KEY]: '{not json' });
+    render(<App store={createStore(storage, loadState(storage))} />);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Your saved cities and settings couldn’t be read' +
+        'Meridian has started again with My Local Time.',
+    );
+    expect(screen.getByRole('article', { name: 'My Local Time' })).toBeInTheDocument();
+  });
+
   it('is absent when saving works', () => {
     renderApp();
     expect(screen.queryByRole('alert')).toBeNull();

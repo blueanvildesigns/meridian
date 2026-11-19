@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { STORAGE_KEY, type AppState } from '../storage/schema';
+import { BACKUP_KEY, STORAGE_KEY, type AppState } from '../storage/schema';
 import { loadState, serializeState } from '../storage/storage';
 import { fakeStorage } from '../storage/testStorage';
 import { LONDON, TOKYO } from '../test/places';
@@ -82,6 +82,38 @@ describe('createStore', () => {
     expect(store.getSnapshot().notice).toBe('newer');
     store.update((s) => removeCity(s, 'london'));
     expect(storage.data.get(STORAGE_KEY)).toBe(raw);
+  });
+});
+
+describe('unreadable saved data (R-17)', () => {
+  it('says some was left out, once: the cleaned-up data is saved straight away', () => {
+    const raw = JSON.stringify({
+      ...JSON.parse(serializeState(STATE)),
+      cities: [LONDON, { kind: 'mystery' }, TOKYO],
+    });
+    const storage = fakeStorage({ [STORAGE_KEY]: raw });
+    const store = createStore(storage, loadState(storage));
+    expect(store.getSnapshot().notice).toBe('repaired');
+    expect(savedIds(storage.data.get(STORAGE_KEY))).toEqual(['london', 'tokyo']);
+    expect(storage.data.get(BACKUP_KEY)).toBe(raw);
+    expect(createStore(storage, loadState(storage)).getSnapshot().notice).toBeNull();
+  });
+
+  it('says it started again when nothing could be read', () => {
+    const storage = fakeStorage({ [STORAGE_KEY]: '{not json' });
+    const store = createStore(storage, loadState(storage));
+    expect(store.getSnapshot().notice).toBe('reset');
+    expect(loadState(storage).status).toBe('ok');
+    expect(storage.data.get(BACKUP_KEY)).toBe('{not json');
+  });
+
+  it('says it can’t save instead, if saving the cleaned-up data fails', () => {
+    const storage = fakeStorage(
+      { [STORAGE_KEY]: '{not json' },
+      { write: (key) => key === STORAGE_KEY },
+    );
+    const store = createStore(storage, loadState(storage));
+    expect(store.getSnapshot().notice).toBe('unavailable');
   });
 });
 

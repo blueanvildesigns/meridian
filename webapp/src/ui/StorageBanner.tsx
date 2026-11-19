@@ -1,4 +1,5 @@
-// The amber banner shown when changes can't be saved (canvas ErrorStorage, ErrorPhone; spec 4.6).
+// The amber banner shown when changes can't be saved (canvas ErrorStorage, ErrorPhone; spec 4.6),
+// or once after saved data couldn't be read (R-17).
 
 import type { StorageNotice } from '../app/store';
 import buttons from './buttons.module.css';
@@ -15,6 +16,15 @@ const COPY: Record<StorageNotice, { title: string; text: string }> = {
   newer: {
     title: 'Meridian was updated in another tab',
     text: 'This tab is running an older version, so changes here won’t be saved.',
+  },
+  // Not drawn (R-17). Shown once: the data is saved back cleaned up.
+  repaired: {
+    title: 'Some saved cities or settings couldn’t be read',
+    text: 'Meridian left those out and kept the rest.',
+  },
+  reset: {
+    title: 'Your saved cities and settings couldn’t be read',
+    text: 'Meridian has started again with My Local Time.',
   },
 };
 
