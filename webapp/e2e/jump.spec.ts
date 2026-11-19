@@ -143,6 +143,65 @@ test.describe('jump', () => {
     await expect(jumpButton(page)).toBeFocused();
   });
 
+  test('picks a time from the list with the keyboard; Esc closes the list first', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await jumpButton(page).click();
+    const list = picker(page).getByRole('listbox', { name: 'Times' });
+    await timeField(page).focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(list).toBeVisible();
+    await expect(list.getByRole('option', { selected: true })).toHaveText('9:30 PM');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await expect(timeField(page)).toHaveValue('10:00 PM');
+    await expect(list).toBeHidden();
+    await expect(picker(page)).toBeVisible();
+
+    await timeField(page).fill('8p');
+    await expect(list.getByRole('option')).toHaveText([/^8:00 PM/, /^8:30 PM/]);
+    await page.keyboard.press('Escape');
+    await expect(list).toBeHidden();
+    await expect(picker(page)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(picker(page)).toBeHidden();
+    await expect(jumpButton(page)).toBeFocused();
+  });
+
+  test('picks a time with a click or a tap, under or over the field', async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto('/');
+    await jumpButton(page).click();
+    const toggle = picker(page).getByRole('button', { name: 'Show times' });
+    const list = picker(page).getByRole('listbox', { name: 'Times' });
+    if (isMobile) await toggle.tap();
+    else await toggle.click();
+    await expect(list).toBeVisible();
+    // A tap leaves the phone's keyboard down; a click puts focus in the field for the arrow keys.
+    if (isMobile) await expect(timeField(page)).not.toBeFocused();
+    else await expect(timeField(page)).toBeFocused();
+
+    const field = await picker(page).locator('div:has(> [role="combobox"])').boundingBox();
+    const box = await list.boundingBox();
+    const viewport = page.viewportSize();
+    if (!field || !box || !viewport) throw new Error('not laid out');
+    expect(Math.abs(box.x - field.x)).toBeLessThan(1);
+    expect(Math.abs(box.width - field.width)).toBeLessThan(1);
+    expect(box.y >= field.y + field.height || box.y + box.height <= field.y).toBe(true);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+
+    const option = list.getByRole('option', { name: '7:00 AM' });
+    if (isMobile) await option.tap();
+    else await option.click();
+    await expect(timeField(page)).toHaveValue('7:00 AM');
+    await expect(list).toBeHidden();
+    await expect(picker(page)).toBeVisible();
+  });
+
   test('hangs below Jump to a time on wide screens', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Wide screens only.');
     await page.goto('/');
@@ -239,6 +298,10 @@ test.describe('accessibility', () => {
 
       await fill(page, 'New York', '2027-03-14', '2:30 AM');
       await expect(picker(page).getByRole('alert')).toBeVisible();
+      expect((await axe()).violations).toEqual([]);
+
+      await timeField(page).press('ArrowDown');
+      await expect(picker(page).getByRole('listbox', { name: 'Times' })).toBeVisible();
       expect((await axe()).violations).toEqual([]);
     });
   }
