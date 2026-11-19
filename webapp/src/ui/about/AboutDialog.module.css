@@ -1,0 +1,115 @@
+/* About: canvas About (a 600 px dialog) and AboutPhone (a full sheet, no Done). */
+
+.dialog {
+  font-family: var(--font-sans);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px 24px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: -12px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--size-dialog-title);
+  font-weight: 600;
+}
+
+.close {
+  color: var(--fg);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  display: flex;
+  flex: none;
+  color: var(--accent);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.link {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--link-hover);
+  }
+}
+
+.support {
+  margin: 0;
+}
+
+.kofi {
+  text-decoration: none;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.done {
+  padding: 0 28px;
+}
+
+@media (max-width: 640px) {
+  .body {
+    padding: 12px 20px max(28px, env(safe-area-inset-bottom));
+  }
+
+  .footer {
+    display: none;
+  }
+}

@@ -168,7 +168,10 @@ test.describe('reordering', () => {
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, 'Phones have no visible handle; Move up/down arrives with the menu (M6).');
+    test.skip(
+      isMobile,
+      'Phones have no visible handle: Move up and down are in the menu (menu.spec).',
+    );
     await page.goto('/');
     await keyboardMove(page, 'Tokyo', 'ArrowLeft', 'position 2 of 3');
     await expect.poll(() => cardNames(page)).toEqual(['My Local Time', 'Tokyo', 'London']);

@@ -109,6 +109,15 @@ const pairs: [string, string, number][] = [
   ['muted', 'tag-bg', TEXT], // "UTC−4:00, the first time"
   ['tag-fg', 'panel', TEXT], // "Which 1:30 AM?": the legend straddles the box's border
   ['accent', 'tag-bg', UI], // the box's border and the radio buttons
+  // Card menu, rename, Undo toast, Settings
+  ['fg', 'menu-active-bg', TEXT],
+  ['accent', 'menu-active-bg', UI], // the reached item's ring
+  ['danger', 'panel', TEXT], // Remove
+  ['danger', 'menu-active-bg', TEXT],
+  ['toast-fg', 'toast-bg', TEXT],
+  ['toast-action', 'toast-bg', TEXT],
+  // The rename field's border is the card's focus colour, against the card (pairs above).
+  ['seg-selected-bg', 'seg-bg', UI], // the selected option in a Settings choice
 ];
 
 describe.each(Object.entries(themes))('%s theme contrast', (_name, theme) => {

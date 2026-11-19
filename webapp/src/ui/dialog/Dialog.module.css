@@ -33,18 +33,36 @@
   height: 100%;
 }
 
+/* As tall as the content, scrolling inside if the window is shorter (Settings, About). Not
+   `auto`: a modal dialog is pinned top and bottom, so `auto` would stretch it to the window. */
+.dialog.fit {
+  height: fit-content;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+
+.fit .panel {
+  height: auto;
+}
+
 /* The page behind a modal shouldn't scroll under it. */
 :global(html:has(dialog[open])) {
   overflow: hidden;
 }
 
 @media (max-width: 640px) {
-  .dialog {
+  .dialog,
+  .dialog.fit {
     width: 100%;
     height: 100%;
+    max-height: none;
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  .fit .panel {
+    min-height: 100%;
   }
 }
 
@@ -56,13 +74,14 @@
   inset: auto;
   top: var(--popover-top, 16px);
   left: var(--popover-left, 16px);
-  width: min(440px, calc(100% - 32px));
+  /* A popover's own class can set these: the card menu is narrower, with smaller corners. */
+  width: min(var(--popover-width, 440px), calc(100% - 32px));
   height: auto;
   max-height: calc(100dvh - 32px);
   margin: 0;
   overflow-y: auto;
   border: 1px solid var(--popover-border);
-  border-radius: var(--radius-card);
+  border-radius: var(--popover-radius, var(--radius-card));
   box-shadow: var(--popover-shadow);
 }
 

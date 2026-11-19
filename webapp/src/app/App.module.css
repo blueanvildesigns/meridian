@@ -51,8 +51,10 @@
   cursor: pointer;
 }
 
-.iconButton:hover {
-  background: color-mix(in srgb, var(--fg) 8%, transparent);
+@media (hover: hover) {
+  .iconButton:hover {
+    background: color-mix(in srgb, var(--fg) 8%, transparent);
+  }
 }
 
 .main {

@@ -1,0 +1,133 @@
+/* Settings: canvas Settings (a 600 px dialog; a full sheet on phones). Values from the board. */
+
+.dialog {
+  font-family: var(--font-sans);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 16px 24px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: -12px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--size-dialog-title);
+  font-weight: 600;
+}
+
+.close {
+  color: var(--fg);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* The segmented control (design-spec 3): the selected choice is filled. */
+.segments {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--seg-bg);
+}
+
+.segment {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: var(--target);
+  padding: 0 8px;
+  border-radius: 9px;
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.segment svg {
+  flex: none;
+}
+
+.segment:has(:checked) {
+  background: var(--seg-selected-bg);
+  color: var(--seg-selected-fg);
+}
+
+.segment:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The radio itself covers its segment, invisibly: the segment is what's drawn. */
+.radio {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.saved {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+}
+
+.done {
+  padding: 0 28px;
+}
+
+@media (max-width: 640px) {
+  .body {
+    padding: 12px 20px max(28px, env(safe-area-inset-bottom));
+  }
+
+  .segment {
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 4px;
+    font-size: 14px;
+  }
+}

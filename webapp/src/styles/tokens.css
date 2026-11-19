@@ -83,6 +83,15 @@
   --sheet-shadow: 0 -12px 40px rgba(20, 33, 61, 0.3);
   --sheet-handle: #b9c6e0;
 
+  /* Card menu, Undo toast: canvas CardMenu, CardMenuRemoved, CardMenuPhone */
+  --menu-active-bg: #eef2f8; /* the item the arrow keys have reached, ringed in --accent */
+  --menu-shadow: 0 14px 36px rgba(20, 33, 61, 0.28);
+  --danger: #b42318; /* Remove */
+  --toast-bg: #14213d;
+  --toast-fg: #f4f7ff;
+  --toast-action: #c9d8ff; /* Undo */
+  --toast-shadow: 0 10px 30px rgba(20, 33, 61, 0.35);
+
   /* Type */
   --font-serif: 'IBM Plex Serif', Georgia, serif;
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
@@ -176,6 +185,14 @@
   --popover-shadow: 0 18px 48px rgba(0, 0, 0, 0.5); /* derived */
   --sheet-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5); /* derived */
   --sheet-handle: #4a5a75; /* derived */
+
+  --menu-active-bg: #1e2e52; /* derived: add-city's active row */
+  --menu-shadow: 0 14px 36px rgba(0, 0, 0, 0.5); /* derived */
+  --danger: #ff9b90; /* derived */
+  --toast-bg: #dce6f7; /* derived: light on the dark page, as the dark toast is on the light one */
+  --toast-fg: #14213d; /* derived */
+  --toast-action: #1d3ab0; /* derived */
+  --toast-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* derived */
 }
 
 @media (max-width: 640px) {
