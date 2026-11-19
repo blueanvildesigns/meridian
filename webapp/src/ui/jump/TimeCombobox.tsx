@@ -91,7 +91,12 @@ export function TimeCombobox({
   const box = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const lastPointer = useRef('');
-  const centre = useRef(true);
+  /**
+   * How the list follows the highlight when it next moves: centred on opening or typing, just
+   * enough for the arrow keys, and not at all for the pointer. The row is already under the
+   * pointer, and scrolling would slide another row there, which the pointer would then highlight.
+   */
+  const follow = useRef<'centre' | 'nearest' | 'stay'>('centre');
 
   const [open, setOpen] = useState(false);
   /** What's been typed since the list opened, which narrows it; null shows every time. */
@@ -118,7 +123,7 @@ export function TimeCombobox({
   };
 
   const openAll = () => {
-    centre.current = true;
+    follow.current = 'centre';
     setOpen(true);
     setQuery(null);
     setMoved(null);
@@ -132,7 +137,7 @@ export function TimeCombobox({
   const move = (index: number) => {
     const option = options[Math.min(options.length - 1, Math.max(0, index))];
     if (!option) return;
-    centre.current = false;
+    follow.current = 'nearest';
     setMoved(minutesOf(option));
   };
 
@@ -160,10 +165,15 @@ export function TimeCombobox({
     };
   }, [shown, options]);
 
+  // Only when the highlight or the times change: not on other renders, which would pull the list
+  // back from wherever the wheel took it.
+  const activeId = shown ? optionId(active) : null;
   useLayoutEffect(() => {
-    const row = shown ? document.getElementById(optionId(active)) : null;
-    if (list.current && row) reveal(list.current, row, centre.current);
-  });
+    const row = activeId === null ? null : document.getElementById(activeId);
+    if (list.current && row && follow.current !== 'stay') {
+      reveal(list.current, row, follow.current === 'centre');
+    }
+  }, [activeId, options]);
 
   // A press anywhere else closes it (focus may not be in the field: a tap on the button leaves
   // the phone's keyboard down).
@@ -233,7 +243,7 @@ export function TimeCombobox({
           onChange={(e) => {
             const text = e.target.value;
             onChange(text);
-            centre.current = true;
+            follow.current = 'centre';
             setOpen(text.trim() !== '');
             setQuery(text);
             setMoved(null);
@@ -300,6 +310,7 @@ export function TimeCombobox({
                   i === active
                     ? undefined
                     : () => {
+                        follow.current = 'stay';
                         setMoved(minutesOf(option));
                       }
                 }

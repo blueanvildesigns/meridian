@@ -202,6 +202,54 @@ test.describe('jump', () => {
     await expect(picker(page)).toBeVisible();
   });
 
+  test('a mouse over the list highlights a time without scrolling it; the wheel and keys do', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'Hovering is a mouse thing.');
+    await page.goto('/');
+    await jumpButton(page).click();
+    const list = picker(page).getByRole('listbox', { name: 'Times' });
+    await picker(page).getByRole('button', { name: 'Show times' }).click();
+    await expect(list.getByRole('option', { selected: true })).toHaveText('9:30 PM');
+    const box = await list.boundingBox();
+    if (!box) throw new Error('not laid out');
+    const scrollTop = () => list.evaluate((el) => el.scrollTop);
+    const opened = await scrollTop();
+    expect(opened).toBeGreaterThan(0);
+
+    // A hand drifting up the list: the highlight follows the pointer, and the list stays put. It
+    // used to centre each highlighted row, which slid a new one under the pointer, and so on.
+    const x = box.x + box.width / 2;
+    await page.mouse.move(x, box.y + box.height - 8);
+    await page.mouse.move(x, box.y + 8, { steps: 12 });
+    // Then settling in the middle of a row (an edge between two is a coin toss between browsers).
+    const row = await page.evaluate(
+      ([px, py]) => {
+        const option = document.elementFromPoint(px, py)?.closest('[role="option"]');
+        const r = option?.getBoundingClientRect();
+        return option && r ? { text: option.textContent, y: r.top + r.height / 2 } : null;
+      },
+      [x, box.y + box.height / 3] as const,
+    );
+    if (!row) throw new Error('no time under the pointer');
+    await page.mouse.move(x, row.y, { steps: 4 });
+    expect(await scrollTop()).toBe(opened);
+    await expect(list.getByRole('option', { selected: true })).toHaveText(row.text);
+
+    // The wheel scrolls it.
+    await page.mouse.wheel(0, -200);
+    await expect.poll(scrollTop).toBeLessThan(opened);
+
+    // And the arrow keys bring the highlight into view.
+    await page.mouse.move(box.x + box.width + 40, box.y);
+    for (let i = 0; i < 12; i++) await page.keyboard.press('ArrowDown');
+    const selected = await list.getByRole('option', { selected: true }).boundingBox();
+    if (!selected) throw new Error('no highlighted time');
+    expect(selected.y).toBeGreaterThanOrEqual(box.y - 1);
+    expect(selected.y + selected.height).toBeLessThanOrEqual(box.y + box.height + 1);
+  });
+
   test('hangs below Jump to a time on wide screens', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Wide screens only.');
     await page.goto('/');

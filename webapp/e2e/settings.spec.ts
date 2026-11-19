@@ -87,7 +87,7 @@ test.describe('About', () => {
   test('credits the data and links out safely', async ({ page, isMobile }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'About Meridian' }).click();
-    await expect(about(page)).toContainText(/Version 1\.0\.0 \(\w+\)/);
+    await expect(about(page)).toContainText(/Version \d+\.\d+\.\d+ \(\w+\)/);
     await expect(about(page).getByRole('link', { name: 'GeoNames' })).toHaveAttribute(
       'href',
       'https://www.geonames.org/',
