@@ -6,7 +6,16 @@
 
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core';
 import { useEffect, useRef, type TouchEventHandler } from 'react';
-import { DragHandleIcon, MoonIcon, MoreIcon, SunIcon, WarningIcon } from '../icons';
+import { MAX_NAME_LENGTH } from '../../text/name';
+import {
+  CheckIcon,
+  CloseIcon,
+  DragHandleIcon,
+  MoonIcon,
+  MoreIcon,
+  SunIcon,
+  WarningIcon,
+} from '../icons';
 import buttons from '../buttons.module.css';
 import type { ClockView, UnknownZoneView } from './cardView';
 import styles from './ClockGrid.module.css';
@@ -28,19 +37,128 @@ function useFocusRequest(request: object | null) {
   return ref;
 }
 
+interface RenameFieldProps {
+  name: string;
+  onSave: (name: string) => void;
+  onCancel: () => void;
+}
+
+/**
+ * Rename in place (spec 4.4; canvas CardMenuRename): Enter or the tick saves, Esc or the cross
+ * cancels. Leaving the field saves too. The buttons keep focus in the field when pressed, so a
+ * press on Cancel can't count as leaving it (Safari doesn't focus buttons it clicks).
+ */
+function RenameField({ name, onSave, onCancel }: RenameFieldProps) {
+  const input = useRef<HTMLInputElement>(null);
+  const done = useRef(false);
+  const finish = (save: boolean) => {
+    if (done.current) return;
+    done.current = true;
+    if (save) onSave(input.current?.value ?? name);
+    else onCancel();
+  };
+
+  useEffect(() => {
+    input.current?.focus();
+    input.current?.select();
+  }, []);
+
+  const keepFocus = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+  };
+
+  return (
+    <form
+      className={styles.rename}
+      // Nothing is ever submitted to a server (form-action 'none').
+      onSubmit={(e) => {
+        e.preventDefault();
+        finish(true);
+      }}
+    >
+      <input
+        ref={input}
+        className={styles.renameInput}
+        type="text"
+        defaultValue={name}
+        maxLength={MAX_NAME_LENGTH}
+        aria-label="City name"
+        autoComplete="off"
+        enterKeyHint="done"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            finish(false);
+          }
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.form?.contains(e.relatedTarget)) finish(true);
+        }}
+      />
+      <button
+        type="submit"
+        className={`${buttons.icon} ${styles.renameSave}`}
+        aria-label="Save name"
+        onMouseDown={keepFocus}
+      >
+        <CheckIcon size={20} />
+      </button>
+      <button
+        type="button"
+        className={`${buttons.icon} ${styles.renameCancel}`}
+        aria-label="Cancel renaming"
+        onMouseDown={keepFocus}
+        onClick={() => {
+          finish(false);
+        }}
+      >
+        <CloseIcon size={20} />
+      </button>
+    </form>
+  );
+}
+
 export interface ClockCardProps {
   view: ClockView;
   handle: DragHandleProps;
-  focusRequest: object | null;
+  /** Focus the card, or its More options button with `more` (after Move up or down). */
+  focusRequest: { more?: boolean } | null;
+  /** This card's menu is open (its button looks pressed; on phones the card is ringed). */
+  menuOpen?: boolean;
+  onMenu?: ((id: string, button: HTMLElement | null) => void) | undefined;
+  /** Showing the rename field in place of the name. */
+  renaming?: boolean;
+  /** The rename field closed: `name` if it was saved, null if cancelled. */
+  onRenameEnd?: ((id: string, name: string | null) => void) | undefined;
 }
 
 export function ClockCard({
   view,
   handle: { setActivator, attributes, listeners },
   focusRequest,
+  menuOpen = false,
+  onMenu,
+  renaming = false,
+  onRenameEnd,
 }: ClockCardProps) {
   const nameId = `card-${view.id}-name`;
-  const ref = useFocusRequest(focusRequest);
+  const ref = useFocusRequest(focusRequest?.more ? null : focusRequest);
+  const more = useRef<HTMLButtonElement>(null);
+  // Moving the card re-inserts it in the page, which drops focus (in browsers as in tests).
+  useEffect(() => {
+    if (focusRequest?.more) more.current?.focus();
+  }, [focusRequest]);
+  const endRename = (name: string | null) => {
+    onRenameEnd?.(view.id, name);
+  };
+
+  // Once the rename field closes, focus goes back to the button that started it (the whole card
+  // on phones, which is hidden while renaming, so this waits for the render that shows it again).
+  const wasRenaming = useRef(renaming);
+  useEffect(() => {
+    if (wasRenaming.current && !renaming) more.current?.focus();
+    wasRenaming.current = renaming;
+  }, [renaming]);
   // On phones the drag handle is hidden and the whole card is the menu button (see the CSS), so a
   // long press on it starts a drag, as on the handle.
   const onTouchStart = listeners?.onTouchStart as TouchEventHandler<HTMLButtonElement> | undefined;
@@ -48,19 +166,39 @@ export function ClockCard({
   return (
     <article
       ref={ref}
-      className={`${styles.card} ${view.daytime ? styles.day : styles.night} ${view.reference ? styles.reference : ''}`}
+      className={[
+        styles.card,
+        view.daytime ? styles.day : styles.night,
+        view.reference ? styles.reference : '',
+        menuOpen ? styles.menuOpen : '',
+        renaming ? styles.renaming : '',
+      ].join(' ')}
       aria-labelledby={nameId}
       tabIndex={-1}
     >
-      <h2 id={nameId} className={styles.name}>
+      {/* Kept while renaming, out of sight, so the card keeps its name. */}
+      <h2 id={nameId} className={renaming ? 'visually-hidden' : styles.name}>
         {view.name}
       </h2>
+      {renaming && (
+        <RenameField
+          name={view.name}
+          onSave={endRename}
+          onCancel={() => {
+            endRename(null);
+          }}
+        />
+      )}
       {view.reference && <p className={styles.refTag}>Jump reference</p>}
       <p className={styles.period}>
         {view.daytime ? <SunIcon size={18} /> : <MoonIcon size={18} />}
         <span className={styles.periodLabel}>{view.daytime ? 'Daytime' : 'Night'}</span>
       </p>
-      <p className={styles.sub}>{view.subtitle}</p>
+      {renaming ? (
+        <p className={styles.sub}>Enter to save · Esc to cancel</p>
+      ) : (
+        <p className={styles.sub}>{view.subtitle}</p>
+      )}
       <p className={styles.time}>
         <span className={styles.digits}>{view.time}</span>
         {view.dayPeriod && (
@@ -98,11 +236,16 @@ export function ClockCard({
         >
           <DragHandleIcon size={18} />
         </button>
-        {/* The card menu arrives in M6. */}
         <button
+          ref={more}
           type="button"
           className={`${buttons.icon} ${styles.more}`}
           aria-label={`More options for ${view.name}`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          onClick={() => {
+            onMenu?.(view.id, more.current);
+          }}
           onTouchStart={onTouchStart}
         >
           <MoreIcon size={18} />

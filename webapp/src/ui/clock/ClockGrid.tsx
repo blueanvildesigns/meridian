@@ -33,10 +33,26 @@ export interface ClockGridProps {
   onAddCity?: () => void;
   /** "Choose a zone" on an unrecognised card. */
   onChooseZone?: (id: string) => void;
-  /** Move focus to the card with this ID (a new object each time; null ID means none). */
-  focusRequest?: { id: string | null } | null;
+  /**
+   * Move focus to the card with this ID, or its More options button with `more` (a new object
+   * each time; null ID means none).
+   */
+  focusRequest?: { id: string | null; more?: boolean } | null;
   /** Faded behind the Jump popover, as canvas JumpPicker draws it. */
   dimmed?: boolean;
+  /** The card whose menu is open, and the one being renamed. */
+  menuFor?: string | null;
+  renaming?: string | null;
+  onMenu?: (id: string, button: HTMLElement | null) => void;
+  onRenameEnd?: (id: string, name: string | null) => void;
+}
+
+/** What each card needs from the grid besides its view. */
+interface CardHandlers {
+  onRemove: (id: string) => void;
+  onChooseZone: ((id: string) => void) | undefined;
+  onMenu: ((id: string, button: HTMLElement | null) => void) | undefined;
+  onRenameEnd: ((id: string, name: string | null) => void) | undefined;
 }
 
 const INSTRUCTIONS =
@@ -80,7 +96,12 @@ export function ClockGrid({
   onChooseZone,
   focusRequest,
   dimmed = false,
+  menuFor = null,
+  renaming = null,
+  onMenu,
+  onRenameEnd,
 }: ClockGridProps) {
+  const handlers: CardHandlers = { onRemove, onChooseZone, onMenu, onRenameEnd };
   const sensors = useSensors(
     // Mouse and touch separately: a pointer sensor would turn every swipe on a phone into a drag.
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
@@ -113,8 +134,9 @@ export function ClockGrid({
             <SortableItem
               key={view.id}
               view={view}
-              onRemove={onRemove}
-              onChooseZone={onChooseZone}
+              handlers={handlers}
+              menuOpen={menuFor === view.id}
+              renaming={renaming === view.id}
               focusRequest={focusRequest?.id === view.id ? focusRequest : null}
             />
           ))}
@@ -132,12 +154,13 @@ export function ClockGrid({
 
 interface SortableItemProps {
   view: CardView;
-  onRemove: (id: string) => void;
-  onChooseZone: ((id: string) => void) | undefined;
-  focusRequest: object | null;
+  handlers: CardHandlers;
+  menuOpen: boolean;
+  renaming: boolean;
+  focusRequest: { more?: boolean } | null;
 }
 
-function SortableItem({ view, onRemove, onChooseZone, focusRequest }: SortableItemProps) {
+function SortableItem({ view, handlers, menuOpen, renaming, focusRequest }: SortableItemProps) {
   const ok = view.status === 'ok';
   const {
     attributes,
@@ -164,12 +187,16 @@ function SortableItem({ view, onRemove, onChooseZone, focusRequest }: SortableIt
           view={view}
           handle={{ setActivator: setActivatorNodeRef, attributes, listeners }}
           focusRequest={focusRequest}
+          menuOpen={menuOpen}
+          onMenu={handlers.onMenu}
+          renaming={renaming}
+          onRenameEnd={handlers.onRenameEnd}
         />
       ) : (
         <UnknownZoneCard
           view={view}
-          onRemove={onRemove}
-          onChooseZone={onChooseZone}
+          onRemove={handlers.onRemove}
+          onChooseZone={handlers.onChooseZone}
           focusRequest={focusRequest}
         />
       )}
