@@ -22,8 +22,10 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 - Preview channels: no per-channel charge is listed. Each site is limited to 50 channels including live, and previews expire (7 days by default). Hosting storage and transfer quotas are per project, not per channel, so previews count toward the 10 GB.
 - Budget alerts (Google Cloud console) notify but do not cap spending.
 
-### Expected usage (my estimate, not measured)
-- A first visit downloads the app JS, fonts and city data. Assuming about 2 to 3 MB compressed on a first visit and near zero after caching, 10 GB/month covers roughly 3,000 to 5,000 first visits. Measure the real size at M7 and update this.
+### Expected usage (measured at M7, 2026-11-19)
+- A first visit sends **221 KB**: the page, the app's JS and CSS, and five font files (sizes in section 3). Opening Add city adds the city data, **316 KB**, for **537 KB** in all. Safari adds the 18 KB Temporal polyfill.
+- After that, everything but `index.html` is cached for a year, and `index.html` is revalidated (a few hundred bytes when nothing changed). A new release sends only the files whose hash changed.
+- So 10 GB/month covers roughly **18,000 new visitors** who add a city (or about 45,000 who don't), plus repeat visits at almost nothing each. PR previews count toward the same quota, but each is one reviewer. The earlier guess was 3,000 to 5,000.
 - Cost if the free transfer is exceeded on Blaze: about $1.50 per extra 10 GB. A very busy month of 100 GB extra would be about $13.50.
 
 ### Spark or Blaze
@@ -48,6 +50,7 @@ Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18).
 | M4 (2026-11-18) | **108.1 KB / 92.1 KB** (332 KB raw), plus the polyfill where Temporal is missing (unchanged) | 5.4 KB | unchanged | **423 KB gzip / 316 KB Brotli** (1,018 KB raw), fetched when add-city first opens | Add city live: the search, dataset decoding and dialog join the initial bundle (M4-12). The dataset gains 2,690 airport codes and 488 airport towns (M4-1, M4-2), passing D18's ~400 KB target in gzip. Firebase serves it as Brotli, 316,179 bytes on the live site (checked 2026-11-19, the same as the local quality-11 figure), and the target is now measured as sent (R-14). |
 | M5 (2026-11-19) | **115.0 KB / 97.8 KB** (352 KB raw), plus the polyfill where Temporal is missing (unchanged) | 7.0 KB | unchanged | unchanged | Jump live: picker with its time list, banner and URL-hash state in the initial bundle, no new dependencies (M5-11). |
 | M6 (2026-11-19) | **119.3 KB / 101.3 KB** (367 KB raw), plus the polyfill where Temporal is missing (unchanged) | 8.3 KB | unchanged | unchanged | Card menu, rename, Undo toast, Settings and About in the initial bundle, no new dependencies (M6-13). Still well under the 300 KB budget. |
+| M7 (2026-11-19) | **119.3 KB / 101.2 KB** (367 KB raw), plus the polyfill where Temporal is missing: 19.7 KB / 17.5 KB | 8.3 KB (7.4 KB Brotli) | **112 KB** (5 Latin woff2). Until M7 it was about 190 KB: all ten files, Latin Extended too, loaded on every first visit (M7-2). | unchanged: 316 KB Brotli, on first add-city | **A first visit sends 221 KB** (was 301 KB before M7-2), **537 KB with the city data.** Measured file by file from the requests a first visit makes, as Firebase sends them: Brotli for text, woff2 as is. Also new: `third-party-licenses.txt`, 2 KB Brotli, fetched only if someone opens it (M7-3). |
 
 ## 4. Firebase configuration
 Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are mirrored locally by `webapp/scripts/serve-dist.ts`, and e2e runs against that. It was checked on a real preview channel too (M0-20, M0-21): the rewrite now covers only extensionless paths, and Firebase overrides `Strict-Transport-Security`. Decisions M0-12 to M0-16 and M0-20 to M0-21 in `docs/decisions-log.md`. Original outline:
@@ -58,6 +61,7 @@ Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are 
   - `/index.html` and `/`: `Cache-Control: no-cache`
   - Security headers: Content-Security-Policy (self only, plus whatever the build needs), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restricting unused features. Test CSP against the production build.
 - Add `robots.txt` and a `<meta name="robots" content="noindex">` until public launch.
+- **Final at M7 (M7-6):** the headers above stay as they are. Only the three noindex pieces change, in the launch PR (`docs/launch-checklist.md` section 3).
 
 ## 5. Custom domain setup (one-time, Graham)
 1. Create the Firebase project (can be linked to the existing Google Cloud account) and enable Hosting.
@@ -99,10 +103,12 @@ Go live when all of the following are true:
 - Blaze plan on, with the $5 budget alert in place (R-8).
 - Remove noindex only at launch.
 
+Where each item stands, and the remaining steps in order: `docs/launch-checklist.md`.
+
 ## 9. Order of work for hosting
 - M0: Firebase project, domain connected and certificate issued, workflows generated, a placeholder page deployed to the real domain (noindex). This proves the pipeline early. **Done 2026-11-18** (PR 21; decisions M0-15 and M0-20 to M0-27).
 - Each milestone: PR preview for review.
-- M7: measure bundle and transfer, set the final headers, make the billing decision, run the launch gate, remove noindex, announce.
+- M7: measure bundle and transfer, set the final headers, make the billing decision, run the launch gate, remove noindex, announce. **Measured and headers settled 2026-11-19 (PR 29).** The billing switch, the screen-reader pass, the redirects and the launch PR follow `docs/launch-checklist.md`.
 
 ## 10. Risks
 | Risk | Mitigation |
