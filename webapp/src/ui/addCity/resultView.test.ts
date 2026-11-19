@@ -39,9 +39,10 @@ describe('result rows (canvas AddCity)', () => {
       place: 'England, United Kingdom',
       time: '3:43',
       dayPeriod: 'AM',
+      offset: 'UTC+0:00',
+      abbreviation: 'GMT',
       zoneLine: 'UTC+0:00 · GMT',
       added: false,
-      label: 'London, England, United Kingdom, 3:43 AM, UTC+0:00 GMT',
     });
   });
 
@@ -53,7 +54,6 @@ describe('result rows (canvas AddCity)', () => {
   it('says "Added" for cities already on the list', () => {
     const [london] = rows('london', { added: new Set(['place:2643743']) });
     expect(london).toMatchObject({ added: true });
-    expect(london?.label).toMatch(/, added$/);
   });
 
   it('saves the place’s own data, so startup never needs the dataset (D2)', () => {
@@ -81,7 +81,6 @@ describe('match tags (canvas AddCityAirport)', () => {
     expect(ist[0]).toMatchObject({ name: 'Istanbul', tag: 'Airport IST' });
     expect(ist.find((r) => r.name === 'Kolkata')).toMatchObject({ tag: 'Time zone IST' });
     expect(ist.find((r) => r.name === 'Jerusalem')).toMatchObject({ tag: 'Time zone IST' });
-    expect(ist[0]?.label).toContain('Airport IST');
   });
 
   it('tags an alias match with the name that matched', () => {

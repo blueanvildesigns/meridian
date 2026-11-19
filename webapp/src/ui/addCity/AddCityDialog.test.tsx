@@ -74,7 +74,10 @@ describe('add city', () => {
     const [first] = options();
     expect(first).toHaveAttribute('aria-selected', 'true');
     expect(field()).toHaveAttribute('aria-activedescendant', first?.id);
-    expect(first).toHaveAccessibleName(/^London, England, United Kingdom, .*GMT$/);
+    // Engines may put a space before the hidden commas ("London , England"); speech is the same.
+    expect(first).toHaveAccessibleName(
+      /^London ?, England, United Kingdom ?, \d+:\d\d [AP]M ?, UTC\+0:00 GMT ?, Add$/,
+    );
 
     fireEvent.keyDown(field(), { key: 'Enter' });
     expect(savedNames(storage)).toEqual(['Tokyo', 'London']);
@@ -135,7 +138,7 @@ describe('add city', () => {
   it('offers My Local Time when it isn’t on the list (D13)', async () => {
     const { storage } = renderApp();
     fireEvent.click(screen.getByRole('button', { name: 'Add city' }));
-    const local = within(dialog()).getByRole('option', { name: /^My Local Time, Detected: / });
+    const local = within(dialog()).getByRole('option', { name: /^My Local Time ?, Detected: / });
     fireEvent.click(local);
     expect(savedNames(storage)).toEqual(['Tokyo', 'local']);
     await waitFor(() => {

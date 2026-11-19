@@ -323,6 +323,10 @@ interface ResultOptionProps {
 }
 
 function ResultOption({ id, row, verb, active, onPoint, onPick }: ResultOptionProps) {
+  // The option's name comes from what it shows (so it includes the visible text, WCAG 2.5.3):
+  // "London, England, United Kingdom, 3:43 AM, UTC+0:00 GMT, Add". The hidden commas give screen
+  // readers a pause where the layout gives sighted people one.
+  const pause = <span className="visually-hidden">, </span>;
   return (
     // The keyboard path is the search field (aria-activedescendant); a click or tap picks the row.
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
@@ -332,7 +336,6 @@ function ResultOption({ id, row, verb, active, onPoint, onPick }: ResultOptionPr
       tabIndex={-1}
       aria-selected={active}
       aria-disabled={row.added || undefined}
-      aria-label={row.label}
       className={`${styles.row} ${active ? styles.active : ''} ${row.added ? styles.isAdded : ''}`}
       onMouseMove={active ? undefined : onPoint}
       onClick={onPick}
@@ -340,10 +343,17 @@ function ResultOption({ id, row, verb, active, onPoint, onPick }: ResultOptionPr
       <span className={styles.what}>
         <span className={styles.nameLine}>
           <span className={styles.name}>{row.name}</span>
-          {row.tag && <span className={styles.tag}>{row.tag}</span>}
+          {row.tag && (
+            <>
+              {pause}
+              <span className={styles.tag}>{row.tag}</span>
+            </>
+          )}
         </span>
+        {pause}
         <span className={styles.place}>{row.place}</span>
       </span>
+      {pause}
       <span className={styles.when}>
         <span className={styles.time}>
           {row.time}
@@ -354,8 +364,18 @@ function ResultOption({ id, row, verb, active, onPoint, onPick }: ResultOptionPr
             </>
           )}
         </span>
-        <span className={styles.zone}>{row.zoneLine}</span>
+        {pause}
+        <span className={styles.zone}>
+          {row.offset}
+          {row.abbreviation && (
+            <>
+              {' '}
+              <span aria-hidden="true">·</span> {row.abbreviation}
+            </>
+          )}
+        </span>
       </span>
+      {pause}
       <span className={styles.action}>
         {row.added ? (
           <span className={styles.addedLabel}>

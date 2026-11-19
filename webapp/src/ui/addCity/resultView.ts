@@ -30,11 +30,12 @@ export interface ResultRow {
   time: string;
   /** "AM" / "PM", or "" in 24-hour format. */
   dayPeriod: string;
+  /** "UTC+0:00". */
+  offset: string;
+  abbreviation?: string;
   /** "UTC+0:00 · GMT", or just the offset when there's no abbreviation. */
   zoneLine: string;
   added: boolean;
-  /** One line for screen readers, without the visual separators. */
-  label: string;
 }
 
 /** The entry saved for a dataset place: its data is copied in (D2). */
@@ -77,11 +78,6 @@ function row(
   const key = cityKey(city);
   const name = defaultName(city);
   const { time, dayPeriod, offset, abbreviation } = timeFields(zone, country, ctx);
-  const added = ctx.added.has(key);
-  const clock = dayPeriod ? `${time} ${dayPeriod}` : time;
-  const label = [name, place, tag, clock, abbreviation ? `${offset} ${abbreviation}` : offset]
-    .filter(Boolean)
-    .join(', ');
   const result: ResultRow = {
     key,
     city,
@@ -89,10 +85,11 @@ function row(
     place,
     time,
     dayPeriod,
+    offset,
     zoneLine: abbreviation ? `${offset} · ${abbreviation}` : offset,
-    added,
-    label: added ? `${label}, added` : label,
+    added: ctx.added.has(key),
   };
+  if (abbreviation) result.abbreviation = abbreviation;
   if (tag) result.tag = tag;
   return result;
 }

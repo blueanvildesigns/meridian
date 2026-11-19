@@ -169,13 +169,18 @@
   overflow-wrap: anywhere;
 }
 
+/* A long tag ("Also called London Borough of Brent") wraps to its own line and, if it still
+   doesn't fit, is cut short; screen readers get it whole. */
 .tag {
+  max-width: 100%;
+  overflow: hidden;
   padding: 2px 10px;
   border-radius: var(--radius-pill);
   background: var(--tag-bg);
   color: var(--tag-fg);
   font-size: 12px;
   font-weight: 600;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
