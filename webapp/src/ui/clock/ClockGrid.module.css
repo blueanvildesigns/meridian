@@ -1,0 +1,398 @@
+/* Clock list: canvas boards Main and DarkMain (desktop), Mobile and DarkMobile (phone),
+   ErrorZone and ErrorPhone (unrecognised zone). Values from design-spec section 2 where pinned. */
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--col-min), 100%), 1fr));
+  gap: var(--grid-gap);
+}
+
+/* Each cell stretches its card to the row's height. */
+.item {
+  display: flex;
+  min-width: 0;
+}
+
+.item > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.dragging {
+  position: relative;
+  z-index: 2;
+}
+
+.dragging > article {
+  box-shadow: 0 12px 32px rgb(11 20 38 / 0.28);
+}
+
+/* ---- Clock card ---- */
+
+.day {
+  --card-bg: var(--day-card-bg);
+  --card-fg: var(--day-card-fg);
+  --card-muted: var(--day-card-muted);
+  --card-line: var(--day-card-line);
+  --chip-bg: var(--day-chip-bg);
+  --chip-fg: var(--day-chip-fg);
+  --card-icon: var(--day-icon);
+  --focus: var(--day-focus);
+}
+
+.night {
+  --card-bg: var(--night-card-bg);
+  --card-fg: var(--night-card-fg);
+  --card-muted: var(--night-card-muted);
+  --card-line: var(--night-card-line);
+  --chip-bg: var(--night-chip-bg);
+  --chip-fg: var(--night-chip-fg);
+  --card-icon: var(--night-icon);
+  --focus: var(--night-focus);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'period actions'
+    'name name'
+    'sub sub'
+    'time chip'
+    'details details';
+  grid-template-rows: auto auto auto auto 1fr;
+  row-gap: 6px;
+  column-gap: 8px;
+  min-height: var(--card-min-h);
+  padding: 16px 18px 18px;
+  background: var(--card-bg);
+  color: var(--card-fg);
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-card);
+}
+
+.period,
+.sub,
+.time,
+.chip,
+.details {
+  margin: 0;
+}
+
+.period {
+  grid-area: period;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--card-icon);
+  font-size: var(--size-label);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  margin: -8px -8px -8px 0;
+  color: var(--card-muted);
+}
+
+.handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.dragging .handle {
+  cursor: grabbing;
+}
+
+.name {
+  grid-area: name;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--size-city);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  grid-area: sub;
+  margin-top: -4px;
+  font-size: var(--size-label);
+  color: var(--card-muted);
+  overflow-wrap: anywhere;
+}
+
+.time {
+  grid-area: time;
+  align-self: baseline;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.digits {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: var(--size-clock);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ap {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--card-muted);
+}
+
+.chip {
+  grid-area: chip;
+  align-self: baseline;
+  justify-self: end;
+  margin-top: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font-size: var(--size-label);
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.details {
+  grid-area: details;
+  align-self: end;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--card-line);
+  font-size: var(--size-label);
+  color: var(--card-muted);
+}
+
+.meta {
+  min-width: 0;
+}
+
+.sepPhone {
+  display: none;
+}
+
+.diff {
+  flex: none;
+  font-weight: 600;
+  color: var(--card-fg);
+  white-space: nowrap;
+}
+
+/* ---- Unrecognised zone ---- */
+
+.unknown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: var(--card-min-h);
+  padding: 16px 18px 18px;
+  background: var(--surface);
+  color: var(--fg);
+  border: 2px dashed var(--warn-accent);
+  border-radius: var(--radius-card);
+}
+
+.unknownLabel,
+.unknownText {
+  margin: 0;
+}
+
+.unknownLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--warn-icon);
+  font-size: var(--size-label);
+  font-weight: 600;
+}
+
+.unknownName {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--size-city);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.unknownText {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.unknownActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* ---- Add-city tile ---- */
+
+.tile {
+  min-height: var(--card-min-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  border: 2px dashed var(--control-border);
+  border-radius: var(--radius-card);
+  color: var(--link);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tile:hover {
+  background: color-mix(in srgb, var(--link) 6%, transparent);
+}
+
+/* ---- Phone (canvas Mobile, DarkMobile, ErrorPhone) ---- */
+
+@media (max-width: 640px) {
+  .grid {
+    gap: 12px;
+  }
+
+  .card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'period name chip'
+      'time time details';
+    grid-template-rows: auto auto;
+    row-gap: 8px;
+    min-height: 0;
+    padding: 14px 16px;
+  }
+
+  .period {
+    min-height: 0;
+  }
+
+  /* Icon only on phones, as drawn; the word stays for screen readers. */
+  .periodLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .name {
+    align-self: center;
+    font-size: 19px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: normal;
+  }
+
+  .sub,
+  .handle {
+    display: none;
+  }
+
+  .chip {
+    align-self: center;
+    margin-top: 0;
+    padding: 3px 10px;
+    font-size: 12px;
+  }
+
+  .time {
+    align-self: end;
+    gap: 5px;
+    margin-top: 0;
+  }
+
+  .ap {
+    font-size: 15px;
+  }
+
+  /* Two right-aligned lines: "date · abbreviation", then "offset · difference". */
+  .details {
+    align-self: end;
+    display: block;
+    padding: 0;
+    border: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .meta {
+    display: contents;
+  }
+
+  .dateAbbr {
+    display: block;
+  }
+
+  .sep {
+    display: none;
+  }
+
+  .sepPhone {
+    display: inline;
+  }
+
+  /* The whole card is the menu button (canvas CardMenuPhone rings the tapped card). */
+  .actions {
+    display: contents;
+  }
+
+  .more {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    border-radius: var(--radius-card);
+    -webkit-touch-callout: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .more:hover {
+    background: transparent;
+  }
+
+  .more:focus-visible {
+    outline-width: 3px;
+  }
+
+  .more svg {
+    display: none;
+  }
+
+  .unknown {
+    min-height: 160px;
+  }
+
+  .tile {
+    min-height: 112px;
+  }
+}

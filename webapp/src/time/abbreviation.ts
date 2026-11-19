@@ -3,8 +3,32 @@
 // because the offset is shown next to it anyway (decision D7, refined in M1-4).
 
 /**
- * The tz database's own alphabetic abbreviations for zones no English Intl locale names, keyed by
- * UTC offset in seconds. The offset guard means a future rule change makes us omit the
+ * Zones the tz database labels "GMT" all year. Node's ICU names them "GMT", but Chrome 152 says
+ * "GMT+0", which the alphabetic check rightly drops, so the label comes from here instead (M3-9).
+ */
+const GMT_ZONES = [
+  'Africa/Abidjan',
+  'Africa/Accra',
+  'Africa/Bamako',
+  'Africa/Banjul',
+  'Africa/Bissau',
+  'Africa/Conakry',
+  'Africa/Dakar',
+  'Africa/Freetown',
+  'Africa/Lome',
+  'Africa/Monrovia',
+  'Africa/Nouakchott',
+  'Africa/Ouagadougou',
+  'Africa/Sao_Tome',
+  'Atlantic/Reykjavik',
+  'Atlantic/St_Helena',
+] as const;
+
+const UK = { 0: 'GMT', 3600: 'BST' };
+
+/**
+ * The tz database's own alphabetic abbreviations for zones some English Intl locale fails to name,
+ * keyed by UTC offset in seconds. The offset guard means a future rule change makes us omit the
  * abbreviation rather than show a wrong one. These are labels, not rules: no tzdata is bundled.
  */
 const TZDB_ABBREVIATIONS: Readonly<Record<string, Readonly<Record<number, string>>>> = {
@@ -17,6 +41,12 @@ const TZDB_ABBREVIATIONS: Readonly<Record<string, Readonly<Record<number, string
   'Asia/Karachi': { 18000: 'PKT' },
   'Asia/Jerusalem': { 7200: 'IST', 10800: 'IDT' },
   'Europe/Moscow': { 10800: 'MSK' },
+  'Europe/London': UK,
+  'Europe/Guernsey': UK,
+  'Europe/Isle_of_Man': UK,
+  'Europe/Jersey': UK,
+  'Europe/Dublin': { 0: 'GMT', 3600: 'IST' },
+  ...Object.fromEntries(GMT_ZONES.map((zone) => [zone, { 0: 'GMT' }])),
 };
 
 const ALPHABETIC = /^[A-Za-z]{2,6}$/;

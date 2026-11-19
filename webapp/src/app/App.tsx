@@ -1,12 +1,58 @@
+import { useMemo, useState } from 'react';
+import { deviceZone } from '../time/zones';
+import { resolveHourCycle } from '../time/format';
+import { T } from '../time/temporal';
+import { ClockGrid } from '../ui/clock/ClockGrid';
+import { cardView } from '../ui/clock/cardView';
+import { Controls } from '../ui/Controls';
+import { EmptyState } from '../ui/EmptyState';
 import { GearIcon, InfoIcon, LogoMark } from '../ui/icons';
+import { StorageBanner } from '../ui/StorageBanner';
+import { addLocalTime, moveCity, removeCity } from './actions';
+import { useStore, type AppStore, type StorageNotice } from './store';
+import { useMinuteClock } from './useMinuteClock';
 import styles from './App.module.css';
 
-// Pending confirmation (docs/decisions-log.md D21): taken from the old marketing site.
+// Owner ruling R-5.
 export const KOFI_URL = 'https://ko-fi.com/grahamtholomew';
 
-export function App() {
+/** Where focus goes when a card disappears (a new object each time, so the same target refocuses). */
+interface FocusRequest {
+  id: string | null;
+}
+
+export function App({ store }: { store: AppStore }) {
+  const { state, notice } = useStore(store);
+  const now = useMinuteClock();
+  const [dismissed, setDismissed] = useState<StorageNotice | null>(null);
+  const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
+
+  // Read every render: the device zone can change while the page is open (travel, OS settings).
+  const zone = deviceZone();
+  const hourCycle = resolveHourCycle(state.settings.timeFormat);
+  const views = useMemo(() => {
+    const instant = T().Instant.fromEpochMilliseconds(now);
+    return state.cities.map((city) =>
+      cardView(city, { instant, deviceZone: zone, hourCycle, mode: 'live' }),
+    );
+  }, [state.cities, now, zone, hourCycle]);
+  const empty = views.length === 0;
+
+  const remove = (id: string) => {
+    const i = state.cities.findIndex((c) => c.id === id);
+    const neighbour = state.cities[i + 1] ?? state.cities[i - 1];
+    store.update((s) => removeCity(s, id));
+    setFocusRequest({ id: neighbour?.id ?? null });
+  };
+
+  const addMyLocalTime = () => {
+    store.update(addLocalTime);
+    const local = store.getSnapshot().state.cities.find((c) => c.kind === 'local');
+    if (local) setFocusRequest({ id: local.id });
+  };
+
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${empty ? '' : styles.withBar}`}>
       <header className={styles.header}>
         <div className={styles.brand}>
           <LogoMark />
@@ -23,8 +69,31 @@ export function App() {
         </div>
       </header>
 
-      <main className={styles.main} aria-label="Clocks">
-        {/* Clock list arrives in M3. */}
+      <main className={styles.main}>
+        {notice && notice !== dismissed && (
+          <StorageBanner
+            notice={notice}
+            onDismiss={() => {
+              setDismissed(notice);
+            }}
+          />
+        )}
+        <Controls empty={empty} />
+        {empty ? (
+          <EmptyState
+            onUseLocalTime={addMyLocalTime}
+            focusRequest={focusRequest?.id === null ? focusRequest : null}
+          />
+        ) : (
+          <ClockGrid
+            views={views}
+            onMove={(activeId, overId) => {
+              store.update((s) => moveCity(s, activeId, overId));
+            }}
+            onRemove={remove}
+            focusRequest={focusRequest}
+          />
+        )}
       </main>
 
       <footer className={styles.footer}>

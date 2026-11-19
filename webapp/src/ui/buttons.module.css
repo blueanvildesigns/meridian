@@ -1,0 +1,69 @@
+/* Buttons from design-spec section 3: primary (accent fill), secondary (control border), icon. */
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--target);
+  border-radius: var(--radius-control);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.primary {
+  padding: 0 20px;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 0;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-text);
+}
+
+.primary:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-fg);
+  cursor: not-allowed;
+}
+
+.secondary {
+  padding: 0 18px;
+  background: var(--control-bg);
+  color: var(--fg);
+  border: 1px solid var(--control-border);
+}
+
+.secondary:hover {
+  background: color-mix(in srgb, var(--fg) 6%, var(--control-bg));
+}
+
+/* Smaller text, as on the unrecognised-zone card (canvas ErrorZone). */
+.compact {
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.icon {
+  width: var(--target);
+  height: var(--target);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: inherit;
+  cursor: pointer;
+}
+
+.icon:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}

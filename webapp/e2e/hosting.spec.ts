@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // These run against scripts/serve-dist.ts, which applies firebase.json's headers and rewrites.
 
