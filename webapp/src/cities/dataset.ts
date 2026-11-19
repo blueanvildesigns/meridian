@@ -1,5 +1,6 @@
-// The city dataset (D18): a GeoNames subset built by scripts/build-cities.ts. It's a separate,
-// hashed asset fetched only when needed (the add-city dialog), so startup never pays for it.
+// The city dataset (D18): a GeoNames subset plus OurAirports codes (M4-1), built by
+// scripts/build-cities.ts. It's a separate, hashed asset fetched only when needed (the add-city
+// dialog), so startup never pays for it.
 
 import citiesUrl from './data/cities.v1.json?url';
 
@@ -23,6 +24,12 @@ export interface Place {
   aliases: readonly string[];
 }
 
+/** An airport's IATA code and the place it serves. */
+export interface Airport {
+  code: string;
+  geonameId: number;
+}
+
 export interface DatasetSource {
   name: string;
   license: string;
@@ -35,6 +42,8 @@ export interface CityDataset {
   zones: readonly string[];
   /** Country code → [display name, ...other names people search by]. */
   countries: ReadonlyMap<string, readonly [string, ...string[]]>;
+  /** Sorted by code. Empty in a file built before airports were added. */
+  airports: readonly Airport[];
   source: DatasetSource;
 }
 
@@ -52,13 +61,14 @@ export function decodeDataset(json: unknown): CityDataset {
   if (!isObject(json) || json.format !== DATASET_FORMAT) {
     throw new DatasetError('Unexpected city data format');
   }
-  const { source, countries, regions, zones, cities } = json;
+  const { source, countries, regions, zones, cities, airports: airportRows = [] } = json;
   if (
     !isObject(source) ||
     !isObject(countries) ||
     !isObject(regions) ||
     !isStringArray(zones) ||
-    !Array.isArray(cities)
+    !Array.isArray(cities) ||
+    !Array.isArray(airportRows)
   ) {
     throw new DatasetError('City data is incomplete');
   }
@@ -114,11 +124,24 @@ export function decodeDataset(json: unknown): CityDataset {
     return place;
   });
 
+  const airports: Airport[] = airportRows.map((row: unknown, i) => {
+    const [code, index] = Array.isArray(row) ? (row as unknown[]) : [];
+    const place = typeof index === 'number' ? places[index] : undefined;
+    if (typeof code !== 'string' || !place) throw new DatasetError(`Bad airport row ${i}`);
+    return { code, geonameId: place.geonameId };
+  });
+
   const { name, license, dumpDate } = source;
   if (typeof name !== 'string' || typeof license !== 'string' || typeof dumpDate !== 'string') {
     throw new DatasetError('City data has no source');
   }
-  return { places, zones, countries: countryMap, source: { name, license, dumpDate } };
+  return {
+    places,
+    zones,
+    countries: countryMap,
+    airports,
+    source: { name, license, dumpDate },
+  };
 }
 
 let pending: Promise<CityDataset> | undefined;

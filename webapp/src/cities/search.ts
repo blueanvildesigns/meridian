@@ -1,13 +1,12 @@
 // Add-city search (spec 4.2; decisions D8, D9, D17, refined in M2-7 and M2-8).
 //
-// Matches place names and their aliases, airport codes (built, but no data until the licence is
-// confirmed), time zone abbreviations and names (PST, IST, "Central time"), raw IANA IDs, and
-// country and region names. Results are ranked by how the query matched, then by population.
+// Matches place names and their aliases, airport codes (OurAirports, M4-1), time zone
+// abbreviations and names (PST, IST, "Central time"), raw IANA IDs, and country and region names. Results are ranked by how the query matched, then by population.
 
 import { zoneAbbreviation } from '../time/abbreviation';
 import { T } from '../time/temporal';
 import { ZONE_ALIASES } from '../time/zones';
-import type { CityDataset, Place } from './dataset';
+import type { Airport, CityDataset, Place } from './dataset';
 import { fold } from './fold';
 import { zoneRepresentative } from './zoneData';
 
@@ -62,10 +61,7 @@ export interface SearchResponse {
   zoneGroups: ZoneGroup[];
 }
 
-export interface Airport {
-  code: string;
-  geonameId: number;
-}
+export type { Airport };
 
 interface ZoneName {
   zone: string;
@@ -125,7 +121,7 @@ function intlZoneName(
 /**
  * Builds the in-memory index. Zone names and abbreviations come from this browser's Intl at `now`
  * and half a year later, so both PST and PDT find Los Angeles whatever the season, and what you
- * can search for matches what the rows show.
+ * can search for matches what the rows show. Airports default to the dataset's own.
  */
 export function buildSearchIndex(
   dataset: CityDataset,
@@ -187,7 +183,7 @@ export function buildSearchIndex(
 
   const byId = new Map(places.map((p) => [p.geonameId, p]));
   const airports = new Map<string, Place>();
-  for (const a of options.airports ?? []) {
+  for (const a of options.airports ?? dataset.airports) {
     const place = byId.get(a.geonameId);
     if (place) airports.set(fold(a.code), place);
   }
@@ -322,7 +318,7 @@ export function searchCities(
     else if (raw.includes('/') && key.startsWith(q)) zoneHit(zone, 2);
   }
 
-  // Airport codes (built; no data until the licence is confirmed).
+  // Airport codes.
   const airport = index.airports.get(q);
   if (airport) hit(airport, 1, 'airport', query.trim().toUpperCase());
 

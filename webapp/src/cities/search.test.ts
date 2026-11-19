@@ -220,24 +220,40 @@ describe('IANA IDs (D9)', () => {
   });
 });
 
-describe('airport codes', () => {
-  it('match nothing while there is no airport data (licence pending)', () => {
-    expect(search('lhr').results.some((r) => r.type === 'place' && r.match === 'airport')).toBe(
-      false,
-    );
+describe('airport codes (M4-1)', () => {
+  it('find the place an airport serves, tagged with the code', () => {
+    expect(search('lhr').results[0]).toMatchObject({
+      type: 'place',
+      place: { name: 'London', countryCode: 'GB' },
+      match: 'airport',
+      matched: 'LHR',
+    });
+    expect(top('jfk')).toEqual(['New York City, US']);
   });
 
-  it('work once airport data is supplied', () => {
+  it('IST lists Istanbul’s airport and the zones abbreviated IST (canvas AddCityAirport)', () => {
+    const results = search('ist').results;
+    expect(results[0]).toMatchObject({
+      place: { name: 'Istanbul' },
+      match: 'airport',
+      matched: 'IST',
+    });
+    const zones = results.filter((r) => r.type === 'place' && r.match === 'zone');
+    expect(zones.map(label)).toEqual(expect.arrayContaining(['Kolkata, IN', 'Jerusalem, IL']));
+  });
+
+  it('can be overridden', () => {
     const london = place(search('london').results[0]);
     const withAirports = buildSearchIndex(realDataset(), {
       now: NOW,
-      airports: [{ code: 'LHR', geonameId: london.geonameId }],
+      airports: [{ code: 'XYZ', geonameId: london.geonameId }],
     });
-    expect(searchCities(withAirports, 'lhr').results[0]).toMatchObject({
+    expect(searchCities(withAirports, 'lhr').results).toEqual([]);
+    expect(searchCities(withAirports, 'xyz').results[0]).toMatchObject({
       type: 'place',
       place: { geonameId: london.geonameId },
       match: 'airport',
-      matched: 'LHR',
+      matched: 'XYZ',
     });
   });
 });
