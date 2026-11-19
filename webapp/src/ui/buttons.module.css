@@ -70,6 +70,8 @@
   cursor: pointer;
 }
 
-.icon:hover {
-  background: color-mix(in srgb, currentColor 10%, transparent);
+@media (hover: hover) {
+  .icon:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
 }

@@ -33,9 +33,10 @@
   height: 100%;
 }
 
-/* As tall as the content, scrolling inside if the window is shorter (Settings, About). */
+/* As tall as the content, scrolling inside if the window is shorter (Settings, About). Not
+   `auto`: a modal dialog is pinned top and bottom, so `auto` would stretch it to the window. */
 .dialog.fit {
-  height: auto;
+  height: fit-content;
   max-height: calc(100dvh - 48px);
   overflow-y: auto;
 }

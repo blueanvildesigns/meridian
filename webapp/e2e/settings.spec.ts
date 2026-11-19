@@ -62,6 +62,16 @@ test.describe('Settings', () => {
     await expect.poll(() => theme(page)).toBe('light');
   });
 
+  test('is as tall as its content on wide screens', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Phones get a full-screen sheet.');
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Settings' }).click();
+    const box = await settings(page).boundingBox();
+    // About 440 px drawn (canvas Settings); a modal dialog stretches to the window if let.
+    expect(box?.height).toBeLessThan(480);
+  });
+
   for (const scheme of ['light', 'dark'] as const) {
     test(`has no axe violations (${scheme})`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });
