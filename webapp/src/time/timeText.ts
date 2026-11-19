@@ -1,6 +1,7 @@
-// Typing a time into the Jump picker (decision D16): one text field, because native time inputs
-// ignore the app's 12/24-hour setting. It's lenient about what people type ("8am", "8:30 pm",
-// "20:00", "0830") and the picker rewrites it in the app's format when the field loses focus.
+// Typing a time into the Jump picker (D16, M5-3): its own field with a list of times, because
+// native time inputs ignore the app's 12/24-hour setting. It's lenient about what people type
+// ("8am", "8:30 pm", "20:00", "0830") and the picker rewrites it in the app's format when the
+// field loses focus.
 
 export interface HourMinute {
   hour: number;
