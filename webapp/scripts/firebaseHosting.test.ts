@@ -40,13 +40,14 @@ describe('firebase.json headers', () => {
     for (const path of SAMPLE_PATHS) expect(() => headersFor(config, path)).not.toThrow();
   });
 
-  it.each(SAMPLE_PATHS)('applies security headers and noindex to %s', (path) => {
+  it.each(SAMPLE_PATHS)('applies the security headers, and no noindex, to %s', (path) => {
     const h = headersFor(config, path);
     expect(h['content-security-policy']).toBeTruthy();
     expect(h['x-content-type-options']).toBe('nosniff');
     expect(h['referrer-policy']).toBe('strict-origin-when-cross-origin');
     expect(h['permissions-policy']).toContain('geolocation=()');
-    expect(h['x-robots-tag']).toContain('noindex'); // pre-launch: remove at the launch gate
+    // Launched (R-25): search engines may index the site. Firebase still marks web.app previews.
+    expect(h['x-robots-tag']).toBeUndefined();
   });
 
   it('caches hashed assets forever', () => {
