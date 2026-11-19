@@ -28,7 +28,7 @@ Implement as CSS custom properties. Light is the default; dark applies when Appe
 | day-icon | #8A4200 | sun icon and label on day cards |
 | night-icon | #F2C078 | moon icon and label on night cards |
 | warn-bg / warn-border / warn-text | #FFF4D6 / #E3B341 / #4A2F00 | banners (storage error, Jump) |
-| warn-accent | #C58A1B (dashed card border), #8A4200 (icon) | unrecognized-zone card |
+| warn-accent | #A86F0C (dashed card border; darkened from #C58A1B to reach 3:1, owner 2026-11-18, decision R-7), #8A4200 (icon) | unrecognized-zone card |
 | disabled | bg #C9D1E3, text #4A5A75 | disabled primary button |
 Jump banner amber and the "Jump reference" tag: from mockup (JumpActive).
 
