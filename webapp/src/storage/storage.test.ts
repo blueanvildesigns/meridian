@@ -51,13 +51,22 @@ describe('openStorage', () => {
 });
 
 describe('loadState', () => {
-  it('starts empty on first run (D22) and will persist', () => {
+  it('starts with My Local Time on first run (D22) and will persist', () => {
     const r = loadState(fakeStorage());
     expect(r).toEqual({
-      state: { cities: [], settings: { timeFormat: 'browser', appearance: 'system' } },
+      state: {
+        cities: [{ id: expect.any(String) as string, kind: 'local' }],
+        settings: { timeFormat: 'browser', appearance: 'system' },
+      },
       status: 'fresh',
       persistent: true,
     });
+  });
+
+  it('keeps an emptied list empty: only a first run is seeded', () => {
+    const s = fakeStorage();
+    saveState(s, { cities: [], settings: STATE.settings });
+    expect(loadState(s).state.cities).toEqual([]);
   });
 
   it('round-trips a saved state exactly', () => {
@@ -69,6 +78,7 @@ describe('loadState', () => {
 
   it('runs in memory when storage is null or reads throw', () => {
     expect(loadState(null)).toMatchObject({ status: 'unavailable', persistent: false });
+    expect(loadState(null).state.cities.map((c) => c.kind)).toEqual(['local']);
     expect(loadState(fakeStorage({}, { read: true }))).toMatchObject({
       status: 'unavailable',
       persistent: false,
@@ -86,7 +96,8 @@ describe('loadState', () => {
   ])('backs up and resets on %s', (_label, raw) => {
     const s = fakeStorage({ [STORAGE_KEY]: raw });
     const r = loadState(s);
-    expect(r).toMatchObject({ status: 'reset', persistent: true, state: { cities: [] } });
+    expect(r).toMatchObject({ status: 'reset', persistent: true });
+    expect(r.state.cities).toEqual([{ id: expect.any(String) as string, kind: 'local' }]);
     expect(s.data.get(BACKUP_KEY)).toBe(raw);
     // Loading never rewrites the main key; the corrupt copy stays until the first change.
     expect(s.data.get(STORAGE_KEY)).toBe(raw);

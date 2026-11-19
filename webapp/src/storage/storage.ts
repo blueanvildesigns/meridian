@@ -18,13 +18,13 @@ import { BACKUP_KEY, defaultState, SCHEMA_VERSION, STORAGE_KEY, type AppState } 
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 export type LoadStatus =
-  /** Nothing stored yet: first run (D22: empty list). */
+  /** Nothing stored yet: first run (D22: starts with My Local Time). */
   | 'fresh'
   /** Read exactly. */
   | 'ok'
   /** Some entries or settings were unusable and were dropped; the original is in BACKUP_KEY. */
   | 'repaired'
-  /** Nothing was readable; the original is in BACKUP_KEY and the app starts empty. */
+  /** Nothing was readable; the original is in BACKUP_KEY and the app starts fresh. */
   | 'reset'
   /** Written by a newer version; read as well as possible, and never overwritten. */
   | 'newer'
