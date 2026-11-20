@@ -123,5 +123,5 @@ Where each item stands, and the remaining steps in order: `docs/launch-checklist
 ## 11. Open items
 - ~~Spark vs Blaze.~~ Blaze with a $5 alert, before launch (R-8).
 - ~~Whether to redirect the `.com` and `.dev` domains.~~ Yes, both (R-12); live since 2026-11-20 (L-3).
-- ~~Repo public from the start, or private until launch.~~ Private until launch (M0-17). GitHub Pages unpublished (M0-27).
+- ~~Repo public from the start, or private until launch.~~ Private until launch (M0-17), public since 2026-11-19 (L-4). GitHub Pages unpublished (M0-27).
 - ~~Confirm sole authorship before the first public MIT release.~~ Confirmed (R-6).
