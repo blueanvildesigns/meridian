@@ -1,6 +1,6 @@
 # Meridian Web: launch checklist
 
-Status: prepared at M7 (2026-11-19). **Launched 2026-11-19**: the owner did section 2's checks and said "launch", and the launch PR removed the noindex. The .com and .dev redirects (2.4) went live on 2026-11-20 and were checked (L-3). Making the repo public (2.5) is still the owner's to do. The gate itself is `docs/hosting-plan.md` section 8; this file says where each item stands and what's left, in order. Steps marked **Graham** are console, device or decision steps I can't do. Steps marked **Claude** are mine.
+Status: prepared at M7 (2026-11-19). **Launched 2026-11-19**: the owner did section 2's checks and said "launch", and the launch PR removed the noindex. The .com and .dev redirects (2.4) went live on 2026-11-20 and were checked (L-3). The repo went public on 2026-11-19 (2.5, L-4), so every step here is done. The gate itself is `docs/hosting-plan.md` section 8; this file says where each item stands and what's left, in order. Steps marked **Graham** are console, device or decision steps I can't do. Steps marked **Claude** are mine.
 
 ## 1. Where the gate stands
 
@@ -57,6 +57,8 @@ Only the `meridian` host on each domain. Never change an apex record or the mark
 5. Wait for the console to show both as connected (usually a few hours, up to 24). Then tell me, and I'll check each one redirects to the .io address.
 
 ### 2.5 Make the repo public, at launch
+Done 2026-11-19 (L-4).
+
 1. **Repo visibility.** It stays private until launch (M0-17). To make it public: GitHub > the repo > **Settings** > **General** > **Danger Zone** > **Change visibility**. I checked the history for keys and tokens and found none; the Firebase deploy key is a GitHub secret, not in the repo. Pull requests from forks never get the deploy key or a preview.
 2. **The root README** is the first thing visitors see. The launch PR rewrites it for the web app, with a line saying the original Flutter app is still in the repo (R-27).
 
