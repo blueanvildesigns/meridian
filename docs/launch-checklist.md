@@ -1,6 +1,6 @@
 # Meridian Web: launch checklist
 
-Status: prepared at M7 (2026-11-19). **Launched 2026-11-19**: the owner did section 2's checks and said "launch", and the launch PR removed the noindex. The .com and .dev redirects (2.4) and making the repo public (2.5) are still the owner's to do. The gate itself is `docs/hosting-plan.md` section 8; this file says where each item stands and what's left, in order. Steps marked **Graham** are console, device or decision steps I can't do. Steps marked **Claude** are mine.
+Status: prepared at M7 (2026-11-19). **Launched 2026-11-19**: the owner did section 2's checks and said "launch", and the launch PR removed the noindex. The .com and .dev redirects (2.4) went live on 2026-11-20 and were checked (L-3). Making the repo public (2.5) is still the owner's to do. The gate itself is `docs/hosting-plan.md` section 8; this file says where each item stands and what's left, in order. Steps marked **Graham** are console, device or decision steps I can't do. Steps marked **Claude** are mine.
 
 ## 1. Where the gate stands
 
@@ -47,6 +47,8 @@ Console labels change from time to time; follow the console if they differ from 
 5. Save. A budget only warns; it never caps spending (hosting plan section 2).
 
 ### 2.4 Redirect the .com and .dev addresses (R-12)
+Done 2026-11-20: both 301 to the .io address (L-3).
+
 Only the `meridian` host on each domain. Never change an apex record or the marketing site.
 1. Firebase console > **Hosting** > **Add custom domain**.
 2. Enter `meridian.blueanvildesigns.com`. Tick the option to **redirect** it to an existing website, and choose `meridian.blueanvildesigns.io`.
