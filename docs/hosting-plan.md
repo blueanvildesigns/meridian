@@ -71,7 +71,7 @@ Implemented in `/firebase.json` (repo root) at M0. Its headers and rewrites are 
 5. Only change records for the `meridian` subdomain. Leave the apex `blueanvildesigns.io` and the existing marketing site alone.
 6. If the subdomain has A or CNAME records pointing somewhere else, Firebase can't issue the certificate; remove those first.
 7. Wait for verification and the certificate. Docs say up to 24 hours after DNS points to Firebase; usually a few hours. Start this early, in M0, so it is not on the critical path.
-8. Redirect `meridian.blueanvildesigns.com` and `.dev` to the `.io` address (the wizard has a redirect option). **Decided 2026-11-18 (R-12): yes, both.** Same rule: only the `meridian` host on each domain.
+8. Redirect `meridian.blueanvildesigns.com` and `.dev` to the `.io` address (the wizard has a redirect option). **Decided 2026-11-18 (R-12): yes, both.** Same rule: only the `meridian` host on each domain. **Live 2026-11-20:** one CNAME each, `meridian` to `meridian-web-a5829.web.app`, and both 301 to the `.io` address (L-3).
 
 ## 6. CI/CD (GitHub Actions)
 Implemented as the `deploy-preview` and `deploy-live` jobs in `.github/workflows/webapp-ci.yml` (M0-15). Firebase project `meridian-web-a5829`. Original outline:
@@ -122,6 +122,6 @@ Where each item stands, and the remaining steps in order: `docs/launch-checklist
 
 ## 11. Open items
 - ~~Spark vs Blaze.~~ Blaze with a $5 alert, before launch (R-8).
-- ~~Whether to redirect the `.com` and `.dev` domains.~~ Yes, both (R-12); owner to set up.
+- ~~Whether to redirect the `.com` and `.dev` domains.~~ Yes, both (R-12); live since 2026-11-20 (L-3).
 - ~~Repo public from the start, or private until launch.~~ Private until launch (M0-17). GitHub Pages unpublished (M0-27).
 - ~~Confirm sole authorship before the first public MIT release.~~ Confirmed (R-6).
