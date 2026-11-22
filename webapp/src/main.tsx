@@ -4,6 +4,7 @@ import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import { App } from './app/App';
+import { bugReportServiceFromEnv } from './app/bugReportClient';
 import { createStore } from './app/store';
 import { applyTheme, resolveTheme, syncThemeWithSystem, systemPrefersDark } from './app/theme';
 import { STORAGE_KEY } from './storage/schema';
@@ -42,7 +43,7 @@ async function start(root: HTMLElement) {
 
   createRoot(root).render(
     <StrictMode>
-      <App store={store} />
+      <App store={store} reportBug={bugReportServiceFromEnv(import.meta.env)} />
     </StrictMode>,
   );
 }

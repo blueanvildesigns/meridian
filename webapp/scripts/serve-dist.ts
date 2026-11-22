@@ -4,7 +4,7 @@ import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { headersFor, loadHosting, rewriteFor } from './firebaseHosting.ts';
+import { functionRewriteFor, headersFor, loadHosting, rewriteFor } from './firebaseHosting.ts';
 
 const port = Number(process.argv[2] ?? process.env.PORT ?? 4173);
 const config = loadHosting();
@@ -40,6 +40,18 @@ function fileAt(urlPath: string): string | undefined {
 
 createServer((req, res) => {
   const path = new URL(req.url ?? '/', 'http://localhost').pathname;
+  // There are no functions here (the emulator has them: functions/README.md). Answer as a
+  // function that's down would, so the app's fallback to GitHub's form can be seen working.
+  const fn = functionRewriteFor(config, path);
+  if (fn) {
+    res
+      .writeHead(503, {
+        ...headersFor(config, path),
+        'content-type': TYPES['.json'] ?? 'application/json',
+      })
+      .end(JSON.stringify({ ok: false, error: 'unavailable', message: `No function ${fn} here.` }));
+    return;
+  }
   let file = fileAt(path);
   if (!file) {
     const dest = rewriteFor(config, path);

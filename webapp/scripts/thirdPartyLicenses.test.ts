@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { packageDir, readPackage, renderLicences } from './thirdPartyLicenses';
 
@@ -35,6 +36,13 @@ describe('readPackage', () => {
     expect(readPackage('node_modules/@fontsource/ibm-plex-sans').text).toContain(
       'SIL OPEN FONT LICENSE',
     );
+  });
+
+  it('ships the standard Apache-2.0 text for a package that declares it but has no file', () => {
+    const appCheck = readPackage('node_modules/@firebase/app-check');
+    expect(appCheck).toMatchObject({ name: '@firebase/app-check', licence: 'Apache-2.0' });
+    expect(appCheck.text).toMatch(/^Apache License\s+Version 2\.0, January 2004/);
+    expect(appCheck.text).toMatch(/END OF TERMS AND CONDITIONS$/);
   });
 });
 

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { THEME_BOOT_SCRIPT } from '../src/app/themeBoot';
 import {
   cspDirectives,
+  functionRewriteFor,
   globToRegExp,
   headersFor,
   loadHosting,
@@ -20,6 +21,7 @@ const SAMPLE_PATHS = [
   '/robots.txt',
   '/some/deep/route',
   '/data/cities.v1.json',
+  '/api/report-bug',
 ];
 
 describe('globToRegExp', () => {
@@ -67,6 +69,18 @@ describe('firebase.json headers', () => {
     },
   );
 
+  it('sends bug reports to the reportBug function, ahead of the SPA rewrite', () => {
+    expect(functionRewriteFor(config, '/api/report-bug')).toBe('reportBug');
+    expect(rewriteFor(config, '/api/report-bug')).toBeUndefined();
+    expect(config.rewrites?.[0]?.function).toEqual({
+      functionId: 'reportBug',
+      region: 'us-central1',
+    });
+    for (const path of ['/', '/api/report-bugs', '/api/report-bug/x', '/api']) {
+      expect(functionRewriteFor(config, path)).toBeUndefined();
+    }
+  });
+
   // Otherwise a missing hashed file (an old chunk after a deploy, a source map) would be
   // answered with index.html under the year-long immutable cache header.
   it.each(['/assets/index-gone.js', '/assets/index-abc123.js.map', '/data/cities.v0.json'])(
@@ -80,16 +94,37 @@ describe('firebase.json headers', () => {
 describe('Content-Security-Policy', () => {
   const csp = cspDirectives(config);
 
-  it('allows the inline theme boot script by hash and nothing else inline', () => {
+  // Bug reports (docs/archive/2026-11-21-bug-reporting.md): App Check's reCAPTCHA Enterprise script
+  // and frame, and the token exchange. Loaded only when the reporter presses Send.
+  const RECAPTCHA_SCRIPTS = [
+    'https://www.google.com/recaptcha/',
+    'https://www.gstatic.com/recaptcha/',
+  ];
+  const RECAPTCHA_FRAMES = [
+    'https://www.google.com/recaptcha/',
+    'https://recaptcha.google.com/recaptcha/',
+  ];
+  const APP_CHECK = [
+    'https://content-firebaseappcheck.googleapis.com',
+    'https://www.google.com/recaptcha/',
+  ];
+
+  it('allows the inline theme boot script by hash, and reCAPTCHA, and nothing else', () => {
     const hash = createHash('sha256').update(THEME_BOOT_SCRIPT, 'utf8').digest('base64');
-    expect(csp.get('script-src')).toEqual(["'self'", `'sha256-${hash}'`]);
+    expect(csp.get('script-src')).toEqual(["'self'", `'sha256-${hash}'`, ...RECAPTCHA_SCRIPTS]);
   });
 
-  it('allows only same-origin resources', () => {
+  it('allows only same-origin resources, apart from the bug report spam check', () => {
     const all = [...csp.values()].flat().join(' ');
-    expect(all).not.toMatch(/unsafe-inline|unsafe-eval|https?:|\*/);
-    for (const d of ['default-src', 'style-src', 'font-src', 'img-src', 'connect-src']) {
+    expect(all).not.toMatch(/unsafe-inline|unsafe-eval|\*|http:/);
+    for (const d of ['default-src', 'style-src', 'font-src', 'img-src']) {
       expect(csp.get(d)).toEqual(["'self'"]);
+    }
+    expect(csp.get('connect-src')).toEqual(["'self'", ...APP_CHECK]);
+    expect(csp.get('frame-src')).toEqual(RECAPTCHA_FRAMES);
+    const allowed = new Set([...RECAPTCHA_SCRIPTS, ...RECAPTCHA_FRAMES, ...APP_CHECK]);
+    for (const source of all.split(' ').filter((s) => s.startsWith('https:'))) {
+      expect(allowed).toContain(source);
     }
   });
 

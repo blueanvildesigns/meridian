@@ -1,0 +1,40 @@
+name: Functions CI
+
+# Checks only. The function is deployed by hand (`firebase deploy --only functions`): the CI
+# service account has Hosting roles only (M0-23). See docs/manual-setup-bug-reporting.md.
+on:
+  push:
+    branches: [main]
+    paths: ['functions/**', 'firebase.json', 'firestore.rules', '.github/workflows/functions-ci.yml']
+  pull_request:
+    paths: ['functions/**', 'firebase.json', 'firestore.rules', '.github/workflows/functions-ci.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: functions-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: functions
+
+jobs:
+  check:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: functions/.nvmrc
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

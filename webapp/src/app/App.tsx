@@ -4,6 +4,7 @@ import { resolveHourCycle } from '../time/format';
 import { T } from '../time/temporal';
 import { AboutDialog } from '../ui/about/AboutDialog';
 import { AddCityDialog, type AddCityMode } from '../ui/addCity/AddCityDialog';
+import { BugReportDialog } from '../ui/bugReport/BugReportDialog';
 import { CardMenu } from '../ui/clock/CardMenu';
 import { ClockGrid } from '../ui/clock/ClockGrid';
 import { cardView, type ClockView } from '../ui/clock/cardView';
@@ -35,6 +36,7 @@ import {
   restoreCity,
 } from './actions';
 import { bugReportUrl, collectDiagnostics, diagnosticsText } from './bugReport';
+import type { BugReportService } from './bugReportClient';
 import { jumpLink, setJumpState, useJumpState } from './jumpLocation';
 import { useStore, type AppStore, type StorageNotice } from './store';
 import { KOFI_URL } from './links';
@@ -67,7 +69,13 @@ interface Removal {
   text: string;
 }
 
-export function App({ store }: { store: AppStore }) {
+export interface AppProps {
+  store: AppStore;
+  /** Sends in-app bug reports; null (the default) when this build can't, so GitHub's form opens. */
+  reportBug?: BugReportService | null;
+}
+
+export function App({ store, reportBug = null }: AppProps) {
   const { state, notice } = useStore(store);
   const now = useMinuteClock();
   const [dismissed, setDismissed] = useState<StorageNotice | null>(null);
@@ -92,6 +100,7 @@ export function App({ store }: { store: AppStore }) {
   const [announcement, setAnnouncement] = useState('');
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [bugReportOpen, setBugReportOpen] = useState(false);
   /** About, open; `focusData` when the storage banner's "What can I do?" opened it. */
   const [about, setAbout] = useState<{ focusData: boolean } | null>(null);
 
@@ -108,15 +117,14 @@ export function App({ store }: { store: AppStore }) {
     );
   }, [state.cities, shownMs, jump, zone, hourCycle, refId]);
   const empty = views.length === 0;
-  // GitHub's bug form, with the diagnostics filled in. Nothing is sent until the reporter submits
-  // it on GitHub, where they can read and edit every field first.
-  const reportUrl = useMemo(
-    () =>
-      bugReportUrl({
-        diagnostics: diagnosticsText(collectDiagnostics(state.settings.timeFormat)),
-      }),
+  // Bug reports: the in-app form when this build can send (phase 2), else GitHub's form with the
+  // diagnostics filled in (phase 1). Either way nothing is sent until the reporter says so, and
+  // they see the diagnostics first.
+  const diagnostics = useMemo(
+    () => diagnosticsText(collectDiagnostics(state.settings.timeFormat)),
     [state.settings.timeFormat],
   );
+  const reportUrl = useMemo(() => bugReportUrl({ diagnostics }), [diagnostics]);
   const menuIndex = menu ? state.cities.findIndex((c) => c.id === menu.id) : -1;
   const menuView = views.find((v): v is ClockView => v.id === menu?.id && v.status === 'ok');
 
@@ -390,8 +398,25 @@ export function App({ store }: { store: AppStore }) {
         <AboutDialog
           focusData={about.focusData}
           reportUrl={reportUrl}
+          {...(reportBug && {
+            onReportBug: () => {
+              // About closes (focus back on its opener), then the report opens over the page.
+              setAbout(null);
+              setBugReportOpen(true);
+            },
+          })}
           onClose={() => {
             setAbout(null);
+          }}
+        />
+      )}
+
+      {bugReportOpen && reportBug && (
+        <BugReportDialog
+          service={reportBug}
+          diagnostics={diagnostics}
+          onClose={() => {
+            setBugReportOpen(false);
           }}
         />
       )}
@@ -413,9 +438,21 @@ export function App({ store }: { store: AppStore }) {
           >
             About
           </button>
-          <a href={reportUrl} target="_blank" rel="noopener noreferrer">
-            Report a bug
-          </a>
+          {reportBug ? (
+            <button
+              type="button"
+              className={styles.linkButton}
+              onClick={() => {
+                setBugReportOpen(true);
+              }}
+            >
+              Report a bug
+            </button>
+          ) : (
+            <a href={reportUrl} target="_blank" rel="noopener noreferrer">
+              Report a bug
+            </a>
+          )}
           <a href={KOFI_URL} target="_blank" rel="noopener noreferrer">
             Support on Ko-fi
           </a>
