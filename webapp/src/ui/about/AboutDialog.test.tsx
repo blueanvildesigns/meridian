@@ -70,6 +70,24 @@ describe('About', () => {
     }
   });
 
+  it('links GitHub’s bug form with diagnostics only, never the saved cities', () => {
+    renderApp();
+    fireEvent.click(screen.getByRole('button', { name: 'About Meridian' }));
+    const href = link('Report a bug').getAttribute('href') ?? '';
+    const url = new URL(href);
+    expect(url.origin + url.pathname).toBe(
+      'https://github.com/blueanvildesigns/meridian/issues/new',
+    );
+    expect(url.searchParams.get('template')).toBe('bug_report.yml');
+    expect(url.searchParams.get('diagnostics')).toMatch(/^App version: .*\nTime format: 12-hour/s);
+    // LONDON's name, country and coordinates.
+    expect(decodeURIComponent(href)).not.toMatch(/London|United Kingdom|51\.5|-0\.1/);
+    // The footer (inert behind the dialog) has the same link.
+    const all = screen.getAllByRole('link', { name: 'Report a bug', hidden: true });
+    expect(all).toHaveLength(2);
+    for (const a of all) expect(a).toHaveAttribute('href', href);
+  });
+
   it('says data stays in the browser', () => {
     renderApp();
     fireEvent.click(screen.getByRole('button', { name: 'About Meridian' }));

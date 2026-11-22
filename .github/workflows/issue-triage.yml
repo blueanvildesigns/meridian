@@ -1,0 +1,25 @@
+# New issues get the needs-triage label and a short thank-you (docs/archive/2026-11-21-bug-reporting.md).
+# It never checks out or runs code from the issue, and no issue text reaches the shell: the issue
+# number comes from the event payload through an environment variable.
+name: Issue triage
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    name: Label and thank
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add needs-triage and comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue edit "$NUMBER" --add-label needs-triage
+          gh issue comment "$NUMBER" --body "Thanks for the report! We'll take a look."

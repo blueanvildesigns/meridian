@@ -65,6 +65,12 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 - Saved zone not recognized: that card shows a dashed amber state (no time) with "Choose a zone" (opens the add-city zone search) and "Remove". Other cards are unaffected. Never crash the list.
 - Mockups: canvas rows "About", "Empty list", "Error states".
 
+### 4.7 Bug reporting (2026-11-21-bug-reporting)
+- "Report a bug" in the footer and in About ("Found a bug?"). Not drawn on any board; it copies the neighbouring link and section styles.
+- It opens GitHub's bug report form (`.github/ISSUE_TEMPLATE/bug_report.yml`) in a new tab with a Diagnostics field filled in: app version and commit, user agent, OS name, IANA time zone, time format setting, locale. Never saved cities or anything else from storage. Links are capped at 2,000 characters.
+- Nothing is sent until the reporter submits on GitHub, where every field is visible and editable. Issues are public, and the form says so.
+- New issues get `needs-triage` and a short thank-you comment from `.github/workflows/issue-triage.yml`.
+
 ## 5. Platform
 
 - Time zone rules from the browser's `Intl`/Temporal support; no bundled tzdata.

@@ -186,6 +186,7 @@ test.describe('keyboard only', () => {
         ...cards,
         'Add a city',
         'About',
+        'Report a bug',
         'Support on Ko-fi',
       ]);
       expect(stops.filter((s) => !s.ring).map((s) => s.name)).toEqual([]);

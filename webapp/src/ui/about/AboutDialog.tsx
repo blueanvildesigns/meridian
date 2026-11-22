@@ -32,10 +32,12 @@ function External({ href, children }: { href: string; children: string }) {
 export interface AboutDialogProps {
   /** Start on "Your data stays with you" (the storage banner's help link, D19). */
   focusData?: boolean;
+  /** GitHub's bug form with the diagnostics filled in (`bugReportUrl()`). */
+  reportUrl: string;
   onClose: () => void;
 }
 
-export function AboutDialog({ focusData = false, onClose }: AboutDialogProps) {
+export function AboutDialog({ focusData = false, reportUrl, onClose }: AboutDialogProps) {
   const id = useId();
   return (
     <Dialog labelledBy={`${id}-title`} onClose={onClose} fit className={styles.dialog}>
@@ -106,6 +108,18 @@ export function AboutDialog({ focusData = false, onClose }: AboutDialogProps) {
           <p className={styles.text}>
             If Meridian says it can’t save, this browser is blocking site data, as private browsing
             often does. Allow site data for this site, or use a normal window, to keep your cities.
+          </p>
+        </section>
+
+        {/* Not drawn (docs/archive/2026-11-21-bug-reporting.md): styled like the sections around it. */}
+        <section className={styles.section} aria-labelledby={`${id}-bug`}>
+          <h3 id={`${id}-bug`} className={styles.sectionTitle}>
+            Found a bug?
+          </h3>
+          <p className={styles.text}>
+            <External href={reportUrl}>Report a bug</External> on GitHub. The form opens with
+            Meridian’s version, your browser, time zone and time format filled in, so you can check
+            them before you send. Your cities aren’t included.
           </p>
         </section>
 
