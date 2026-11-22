@@ -34,6 +34,7 @@ import {
   replaceCity,
   restoreCity,
 } from './actions';
+import { bugReportUrl, collectDiagnostics, diagnosticsText } from './bugReport';
 import { jumpLink, setJumpState, useJumpState } from './jumpLocation';
 import { useStore, type AppStore, type StorageNotice } from './store';
 import { KOFI_URL } from './links';
@@ -107,6 +108,15 @@ export function App({ store }: { store: AppStore }) {
     );
   }, [state.cities, shownMs, jump, zone, hourCycle, refId]);
   const empty = views.length === 0;
+  // GitHub's bug form, with the diagnostics filled in. Nothing is sent until the reporter submits
+  // it on GitHub, where they can read and edit every field first.
+  const reportUrl = useMemo(
+    () =>
+      bugReportUrl({
+        diagnostics: diagnosticsText(collectDiagnostics(state.settings.timeFormat)),
+      }),
+    [state.settings.timeFormat],
+  );
   const menuIndex = menu ? state.cities.findIndex((c) => c.id === menu.id) : -1;
   const menuView = views.find((v): v is ClockView => v.id === menu?.id && v.status === 'ok');
 
@@ -379,6 +389,7 @@ export function App({ store }: { store: AppStore }) {
       {about && (
         <AboutDialog
           focusData={about.focusData}
+          reportUrl={reportUrl}
           onClose={() => {
             setAbout(null);
           }}
@@ -402,6 +413,9 @@ export function App({ store }: { store: AppStore }) {
           >
             About
           </button>
+          <a href={reportUrl} target="_blank" rel="noopener noreferrer">
+            Report a bug
+          </a>
           <a href={KOFI_URL} target="_blank" rel="noopener noreferrer">
             Support on Ko-fi
           </a>

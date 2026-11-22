@@ -1,0 +1,57 @@
+# Bug report form (docs/archive/2026-11-21-bug-reporting.md). The app's "Report a bug" link opens
+# this form with the `diagnostics` field filled in; the field ids below are the query parameters it
+# uses, so keep them stable.
+name: Bug report
+description: Something in Meridian isn't working as it should.
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. **Issues are public**, so please leave out
+        anything personal, such as your name, email address or where you live.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One line that sums up the problem.
+      placeholder: The time for Sydney is an hour off after the clocks change
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you see?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to see instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we make it happen again?
+      placeholder: |
+        1. Add Sydney
+        2. Jump to April 5, 3:00 AM
+        3. See the time on the Sydney card
+    validations:
+      required: false
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: >-
+        Filled in by the app's "Report a bug" link: app version, browser, operating system, time
+        zone, time format and language. Nothing else (your saved cities never leave your browser).
+        Edit or delete anything you'd rather not share.
+      render: text
+    validations:
+      required: false
