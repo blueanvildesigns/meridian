@@ -14,7 +14,7 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 
 ## 3. Data and persistence
 
-- Local-only, browser storage. No accounts, backend or sync.
+- Local-only, browser storage. No accounts, backend or sync. The one exception is an in-app bug report, sent only when the reporter presses Send (4.7).
 - Storage schema is versioned so sharing or sync can be added later.
 - Stored city = display name (user-editable) + IANA zone ID. A special "My Local Time" entry follows the device's zone.
 
@@ -70,6 +70,8 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 - It opens GitHub's bug report form (`.github/ISSUE_TEMPLATE/bug_report.yml`) in a new tab with a Diagnostics field filled in: app version and commit, user agent, OS name, IANA time zone, time format setting, locale. Never saved cities or anything else from storage. Links are capped at 2,000 characters.
 - Nothing is sent until the reporter submits on GitHub, where every field is visible and editable. Issues are public, and the form says so.
 - New issues get `needs-triage` and a short thank-you comment from `.github/workflows/issue-triage.yml`.
+- **In-app form (phase 2)**, when the build has the Firebase settings (`webapp/.env.example`); otherwise the GitHub link above. "Report a bug" opens a dialog (full sheet on phones): What went wrong (required, 2,000 characters), Steps to reproduce (optional, 2,000), Email (optional, private), and "Include diagnostics" (ticked by default) showing the exact text sent. A standing note says issues are public. Hidden honeypot field. Success shows the issue number and link; failure offers GitHub's form with what was typed filled in.
+- Send loads Google reCAPTCHA Enterprise through Firebase App Check (a lazy chunk; nothing loads before Send) and posts to `/api/report-bug`, the `reportBug` function. It checks origin, size, a per-address limit, the App Check token (limited use, consumed), the fields, and a global cap, then creates the issue with a fine-grained token from Secret Manager. Every user field is in a code block. The email never goes in the issue; it's kept in Firestore `bugReportContacts/{issue}` (no client access, deleted after 180 days by a TTL policy).
 
 ## 5. Platform
 
@@ -84,7 +86,7 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 
 ## 7. Stack and hosting (2026-11-17-stack-and-hosting)
 
-- React + TypeScript + Vite; static SPA, no backend.
+- React + TypeScript + Vite; static SPA. The only backend is the bug report function (4.7): Cloud Functions for Firebase (2nd gen) in `functions/`, behind the Hosting rewrite `/api/report-bug`.
 - Time math: Temporal (native where available, polyfill otherwise). Zone rules from browser `Intl`.
 - City data: GeoNames subset bundled as static JSON with aliases; attribution on the About page.
 - Repo: GitHub (stays). License: MIT.

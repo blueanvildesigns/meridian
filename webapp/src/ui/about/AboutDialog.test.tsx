@@ -93,7 +93,9 @@ describe('About', () => {
     fireEvent.click(screen.getByRole('button', { name: 'About Meridian' }));
     expect(
       within(dialog()).getByRole('region', { name: 'Your data stays with you' }),
-    ).toHaveTextContent('Meridian has no accounts and sends nothing to a server.');
+    ).toHaveTextContent(
+      'Meridian has no accounts and sends nothing to a server, unless you send a bug report.',
+    );
   });
 
   it('opens on "Your data" from the storage banner’s "What can I do?"', () => {

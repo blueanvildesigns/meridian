@@ -10,9 +10,17 @@ export interface HeaderRule {
   headers: { key: string; value: string }[];
 }
 
+/** A rewrite to a file (`destination`) or to a Cloud Function (`function`). */
+export interface Rewrite {
+  source?: string;
+  regex?: string;
+  destination?: string;
+  function?: { functionId: string; region?: string };
+}
+
 export interface HostingConfig {
   public: string;
-  rewrites?: { source?: string; regex?: string; destination: string }[];
+  rewrites?: Rewrite[];
   headers?: HeaderRule[];
 }
 
@@ -67,8 +75,19 @@ export function headersFor(config: HostingConfig, path: string): Record<string, 
   return out;
 }
 
+/** The first rewrite that matches, as Firebase applies them. */
+function firstRewrite(config: HostingConfig, path: string): Rewrite | undefined {
+  return config.rewrites?.find((r) => ruleMatches(r, path));
+}
+
+/** The file a path is rewritten to, if its first matching rewrite is to a file. */
 export function rewriteFor(config: HostingConfig, path: string): string | undefined {
-  return config.rewrites?.find((r) => ruleMatches(r, path))?.destination;
+  return firstRewrite(config, path)?.destination;
+}
+
+/** The Cloud Function a path is rewritten to, if its first matching rewrite is to a function. */
+export function functionRewriteFor(config: HostingConfig, path: string): string | undefined {
+  return firstRewrite(config, path)?.function?.functionId;
 }
 
 export function cspDirectives(config: HostingConfig): Map<string, string[]> {

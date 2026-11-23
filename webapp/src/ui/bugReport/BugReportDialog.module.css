@@ -1,0 +1,223 @@
+/* Report a bug: not drawn; follows Settings and About (a 600 px dialog, a full sheet on phones). */
+
+.dialog {
+  font-family: var(--font-sans);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px 24px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: -12px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--size-dialog-title);
+  font-weight: 600;
+}
+
+.close {
+  color: var(--fg);
+}
+
+/* The storage banner's amber, without its icon: a standing note, not an alert. */
+.notice {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--warn-border);
+  border-radius: var(--radius-control);
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* The add-city field's look: control border, accent ring on focus. */
+.input {
+  width: 100%;
+  min-height: var(--target);
+  padding: 10px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
+  background: var(--control-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 16px; /* 16 px stops iOS zooming into the field */
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.input:focus-visible {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--danger);
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+
+.hint,
+.text,
+.small {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+  line-height: 1.45;
+}
+
+.text {
+  font-size: 14px;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--size-label);
+  font-weight: 600;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--target);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.diagnostics {
+  margin: 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--seg-bg);
+  color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Off-screen, not display: none, so form-filling bots still see a field to fill. */
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.failed {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-control);
+}
+
+.failedTitle {
+  margin: 0;
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sentTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.link {
+  color: var(--accent-text);
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--link-hover);
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.footer > .link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.send {
+  padding: 0 24px;
+}
+
+.send[aria-disabled='true'] {
+  background: var(--disabled-bg);
+  color: var(--disabled-fg);
+  cursor: progress;
+}
+
+@media (max-width: 640px) {
+  .body {
+    padding: 12px 20px max(28px, env(safe-area-inset-bottom));
+  }
+}

@@ -5,6 +5,7 @@
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
 
 /** Served next to index.html. */
@@ -37,14 +38,25 @@ export function readPackage(dir: string): PackageLicence {
     license?: string;
   };
   const file = readdirSync(dir).find((f) => /^(licen[cs]e|copying)(\.|$)/i.test(f));
-  if (!file) throw new Error(`${pkg.name} has no licence file to ship`);
+  const standard = pkg.license ? STANDARD_TEXTS[pkg.license] : undefined;
+  if (!file && !standard) throw new Error(`${pkg.name} has no licence file to ship`);
   return {
     name: pkg.name,
     version: pkg.version,
     licence: pkg.license ?? 'see below',
-    text: readFileSync(join(dir, file), 'utf8').trim(),
+    text: readFileSync(file ? join(dir, file) : (standard ?? ''), 'utf8').trim(),
   };
 }
+
+/**
+ * Licences whose text is the same for everyone, for packages that declare one but ship no file:
+ * the Firebase SDK (`@firebase/*`, Apache-2.0) has none in its npm packages, and Apache-2.0 asks
+ * for a copy to go with the code. The text is the Apache Software Foundation's, copied unchanged
+ * from TypeScript's LICENSE.txt.
+ */
+const STANDARD_TEXTS: Record<string, string> = {
+  'Apache-2.0': fileURLToPath(new URL('./licences/Apache-2.0.txt', import.meta.url)),
+};
 
 const RULE = '='.repeat(72);
 

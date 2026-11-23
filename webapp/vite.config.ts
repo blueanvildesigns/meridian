@@ -31,6 +31,16 @@ function buildInfo() {
 export default defineConfig({
   plugins: [themeBoot(), react(), thirdPartyLicenses()],
   define: buildInfo(),
+  server: {
+    // `npm run dev` sends bug reports to the Functions emulator (functions/README.md), the way
+    // Hosting's rewrite sends them to the deployed function.
+    proxy: {
+      '/api/report-bug': {
+        target: 'http://127.0.0.1:5001',
+        rewrite: () => '/meridian-web-a5829/us-central1/reportBug',
+      },
+    },
+  },
   build: {
     target: 'es2023',
     sourcemap: true,

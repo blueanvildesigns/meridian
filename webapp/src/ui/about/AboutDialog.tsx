@@ -34,10 +34,17 @@ export interface AboutDialogProps {
   focusData?: boolean;
   /** GitHub's bug form with the diagnostics filled in (`bugReportUrl()`). */
   reportUrl: string;
+  /** Opens the in-app bug report; absent when this build can't send one (GitHub's form instead). */
+  onReportBug?: () => void;
   onClose: () => void;
 }
 
-export function AboutDialog({ focusData = false, reportUrl, onClose }: AboutDialogProps) {
+export function AboutDialog({
+  focusData = false,
+  reportUrl,
+  onReportBug,
+  onClose,
+}: AboutDialogProps) {
   const id = useId();
   return (
     <Dialog labelledBy={`${id}-title`} onClose={onClose} fit className={styles.dialog}>
@@ -102,7 +109,7 @@ export function AboutDialog({ focusData = false, reportUrl, onClose }: AboutDial
           </h3>
           <p className={styles.text}>
             Your cities and settings are saved in this browser only. Meridian has no accounts and
-            sends nothing to a server.
+            sends nothing to a server, unless you send a bug report.
           </p>
           {/* Not drawn: the help the storage banner links to (D19). */}
           <p className={styles.text}>
@@ -116,11 +123,25 @@ export function AboutDialog({ focusData = false, reportUrl, onClose }: AboutDial
           <h3 id={`${id}-bug`} className={styles.sectionTitle}>
             Found a bug?
           </h3>
-          <p className={styles.text}>
-            <External href={reportUrl}>Report a bug</External> on GitHub. The form opens with
-            Meridian’s version, your browser, time zone and time format filled in, so you can check
-            them before you send. Your cities aren’t included.
-          </p>
+          {onReportBug ? (
+            <>
+              <p className={styles.text}>
+                Tell us here, no GitHub account needed. You’ll see exactly what’s sent before you
+                send it, and your cities are never included.
+              </p>
+              <p className={styles.support}>
+                <button type="button" className={buttons.secondary} onClick={onReportBug}>
+                  Report a bug
+                </button>
+              </p>
+            </>
+          ) : (
+            <p className={styles.text}>
+              <External href={reportUrl}>Report a bug</External> on GitHub. The form opens with
+              Meridian’s version, your browser, time zone and time format filled in, so you can
+              check them before you send. Your cities aren’t included.
+            </p>
+          )}
         </section>
 
         <section className={styles.section} aria-labelledby={`${id}-credits`}>

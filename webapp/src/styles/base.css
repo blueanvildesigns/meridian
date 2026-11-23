@@ -62,3 +62,9 @@ a:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* reCAPTCHA's badge (bug reports, loaded only on Send). Google allows hiding it when the form
+   names reCAPTCHA and links its privacy policy and terms, as the bug report dialog does. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

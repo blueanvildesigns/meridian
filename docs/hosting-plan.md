@@ -7,7 +7,7 @@ Status: planned 2026-11-18. Part of the design plan; behaviour lives in `docs/sp
 - Hosting: Firebase Hosting (Google's infrastructure, part of the user's GCP/Firebase account).
 - Live URL: `https://meridian.blueanvildesigns.io` (domain already purchased).
 - Deploys: GitHub Actions. Every PR gets a temporary preview URL; merging to `main` deploys live.
-- No backend, no database, no Firebase services other than Hosting.
+- No backend, no database, no Firebase services other than Hosting. **Superseded for bug reports (2026-11-21):** one Cloud Function (`reportBug`), Firestore for private contact emails, Secret Manager and App Check. See `docs/archive/2026-11-21-bug-reporting.md`.
 
 ## 2. Costs
 Verified against Firebase's Hosting quota and pricing page (checked 2026-11-18). Re-check before launch; prices change.

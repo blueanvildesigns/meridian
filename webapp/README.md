@@ -8,7 +8,7 @@ This is the web rewrite of the Meridian Flutter app. Spec: [`../docs/spec.md`](.
 
 ## Privacy
 
-There are no accounts, no analytics, no cookies and no requests to anyone else's servers. Your cities and settings stay in this browser's local storage. A shared Jump link carries the moment in the part of the address after `#`, which browsers never send to a server.
+There are no accounts, no analytics, no cookies and no requests to anyone else's servers. Your cities and settings stay in this browser's local storage. A shared Jump link carries the moment in the part of the address after `#`, which browsers never send to a server. The exception is a bug report, sent only when you press Send, after loading Google reCAPTCHA for the spam check (`src/ui/bugReport/`, `../functions/`).
 
 ## Browsers
 
@@ -62,7 +62,7 @@ e2e/                     Playwright specs
 
 ## Deploy
 
-GitHub Actions (`../.github/workflows/webapp-ci.yml`) lints, tests and builds every pull request, then deploys it to a temporary Firebase preview link posted on the PR. Merging to `main` deploys the live site. Hosting settings, headers and the CSP are in `../firebase.json`.
+GitHub Actions (`../.github/workflows/webapp-ci.yml`) lints, tests and builds every pull request, then deploys it to a temporary Firebase preview link posted on the PR. Merging to `main` deploys the live site. Hosting settings, headers and the CSP are in `../firebase.json`. The in-app bug report form appears only in builds with the Firebase settings from `.env.example` (in `.env.production`); otherwise "Report a bug" opens GitHub's form. Its function is deployed by hand (`../functions/README.md`).
 
 ## Credits and licence
 
