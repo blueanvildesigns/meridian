@@ -1,7 +1,9 @@
 // POST /api/report-bug (a Firebase Hosting rewrite to the reportBug function).
 //
-// Order: cheap checks first (method, type, size, origin, per-address rate limit), then App Check,
-// then validation, then the global cap, then GitHub. The reporter's email goes to the private
+// Order: cheap checks first (method, type, size, origin, per-address rate limit), then App Check
+// and our own one-use check on the token (tokenLedger.ts), then validation, then the global cap,
+// then GitHub. A token is used up even if the report then fails validation; the web app fetches
+// a new one for every Send. The reporter's email goes to the private
 // contact store after the issue exists, never into the issue. Logs carry outcomes and issue
 // numbers only: no report text, no email, no address.
 //
@@ -12,6 +14,7 @@ import type { CreatedIssue } from './github.js';
 import { issueFromReport, type IssueDraft } from './issue.js';
 import { MAX_BODY_BYTES } from './limits.js';
 import { clientAddress, type RateLimiter } from './rateLimit.js';
+import type { AppCheckResult, VerifiedToken } from './tokenLedger.js';
 import { validateReport } from './validate.js';
 
 /** The parts of an HTTP request the handler reads (an Express request has them all). */
@@ -39,8 +42,10 @@ export interface Logger {
 export interface HandlerDeps {
   /** Off switch (BUG_REPORT_ENABLED). */
   enabled: boolean;
-  /** True if the App Check token is valid and wasn't used before. */
-  verifyAppCheck: (token: string) => Promise<boolean>;
+  /** Checks the App Check token (and asks App Check to consume it). Throws if it's invalid. */
+  verifyAppCheck: (token: string) => Promise<AppCheckResult>;
+  /** Records a verified token as used: true the first time, false on any later use. */
+  claimToken: (token: VerifiedToken) => Promise<boolean>;
   /** Only ever true in the emulator, where there's no App Check to ask. */
   skipAppCheck: boolean;
   createIssue: (draft: IssueDraft) => Promise<CreatedIssue>;
@@ -62,6 +67,7 @@ export type ErrorCode =
   | 'rejected'
   | 'invalid'
   | 'busy'
+  | 'unavailable'
   | 'github';
 
 /** Short, friendly, and safe to show as is. The web app shows its own text for each code. */
@@ -76,6 +82,7 @@ const MESSAGES: Record<ErrorCode, string> = {
   rejected: 'This report couldn’t be accepted. Please report it on GitHub instead.',
   invalid: 'Some of the report is missing or too long.',
   busy: 'Lots of reports are arriving right now. Please try again later.',
+  unavailable: 'Bug reports aren’t working right now. Please report it on GitHub instead.',
   github: 'GitHub didn’t accept the report. Please try again, or report it on GitHub instead.',
 };
 
@@ -129,18 +136,34 @@ export function createHandler(deps: HandlerDeps) {
 
     if (!deps.skipAppCheck) {
       const token = header(req, 'x-firebase-appcheck');
-      let valid = false;
+      let outcome = 'app_check_missing';
+      let verified: VerifiedToken | undefined;
       if (token) {
         try {
-          valid = await deps.verifyAppCheck(token);
+          const result = await deps.verifyAppCheck(token);
+          if (result.ok) verified = result.token;
+          else outcome = result.reason === 'consumed' ? 'app_check_consumed' : 'app_check_no_id';
         } catch {
-          valid = false;
+          outcome = 'app_check_invalid';
         }
       }
-      if (!valid) {
-        deps.log.warn('bug report refused', {
-          outcome: token ? 'app_check_invalid' : 'app_check_missing',
-        });
+      if (verified) {
+        let firstUse: boolean;
+        try {
+          firstUse = await deps.claimToken(verified);
+        } catch (err) {
+          // Fail closed: without the record a token could be replayed.
+          deps.log.error('bug report: used-token record unavailable', { error: String(err) });
+          fail(res, 503, 'unavailable');
+          return;
+        }
+        if (!firstUse) {
+          outcome = 'app_check_replayed';
+          verified = undefined;
+        }
+      }
+      if (!verified) {
+        deps.log.warn('bug report refused', { outcome });
         fail(res, 401, 'app_check');
         return;
       }

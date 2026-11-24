@@ -146,11 +146,12 @@ The function runs as `report-bug@meridian-web-a5829.iam.gserviceaccount.com` (se
 - [ ] **Permissions** → Repository permissions → **Issues: Read and write**. GitHub adds **Metadata: Read-only** itself. Nothing else (no Contents, no Pull requests, no account permissions).
 - [ ] **Generate token** and copy it. You'll paste it once, in 4.5, and never need it again.
 
-### 4.4 Delete contact emails after 180 days (TTL)
-Each contact document carries `expireAt`, 180 days after the report.
+### 4.4 Delete old records automatically (TTL)
+Each contact document carries `expireAt`, 180 days after the report. Each used-token record (`usedAppCheckTokens`, the function's one-use check) carries `expireAt` too: the token's own expiry, after which App Check refuses the token anyway.
 
 - [ ] ```bash
   gcloud firestore fields ttls update expireAt --collection-group=bugReportContacts --enable-ttl --project $P
+  gcloud firestore fields ttls update expireAt --collection-group=usedAppCheckTokens --enable-ttl --project $P
   ```
   Or the console: Firestore → **Time-to-live** → **Create policy** → Collection group `bugReportContacts`, Timestamp field `expireAt` → **Create**. Deletion isn't instant after the date passes. (Not tried: the command needs the database from 4.1.)
 
@@ -232,7 +233,7 @@ The live site has no rewrite yet. Merging adds it (CI deploys Hosting); the form
 - [ ] Look at Firestore → `bugReportContacts` before you delete, if you want to see where emails land.
 - [ ] **Delete the debug token** afterwards (same Manage debug tokens screen): anyone holding it can get App Check tokens.
 - The script uses App Check's REST call `exchangeDebugToken` with `limitedUse: true`. Checked 2026-11-23: an unregistered token gets 403 "App attestation failed", so the call's shape, the app ID and the API key are right.
-- **Open (first run, 2026-11-23):** the report and the email check passed, but **the replayed token was accepted** (201, issue #39) instead of refused. A request with no token gets 401, so App Check is enforced; it's consuming the token that didn't take. Don't do part 8 until this is understood.
+- **First run, 2026-11-23:** the report and the email check passed, but **the replayed token was accepted** (201, issue #39). Tests showed App Check's own consume check misses about half of reuses (decision file item 24), so the function now keeps its own record of used tokens. After that fix is deployed (6.2 again), run this part again: the replay must get 401. Part 8 waits for that.
 
 ---
 
