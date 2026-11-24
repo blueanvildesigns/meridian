@@ -96,7 +96,7 @@ Hosting doesn't need one, so the project has none yet; App Check does.
 - [ ] Copy the **key ID** (the site key).
 
 ### 3.3 Register the app with App Check
-- [ ] https://console.firebase.google.com/project/meridian-web-a5829/appcheck → **Apps** tab → **Meridian Web** → **reCAPTCHA Enterprise**.
+- [ ] https://console.firebase.google.com/project/meridian-web-a5829/appcheck (left sidebar: **Security** → **App Check**) → **Apps** tab → **Meridian Web** → **reCAPTCHA Enterprise**.
 - [ ] Paste the site key from 3.2. Token time to live: leave **1 hour**. Risk threshold: leave **0.5** (Firebase's default). → **Save**.
 - [ ] You don't need to press **Enforce** for anything: enforcement applies to Firebase products (Firestore, Storage and so on), and the `reportBug` function checks tokens itself, always.
 
@@ -221,17 +221,18 @@ The live site has no rewrite yet. Merging adds it (CI deploys Hosting); the form
 
 `functions/scripts/prod-smoke.sh` sends one real report with an App Check **debug token**, shows the issue, checks the email isn't in it and that a replayed token is refused, then deletes the issue and its contact document.
 
-- [ ] Make a debug token: App Check → **Apps** → **Meridian Web** → **⋮** → **Manage debug tokens** → **Add debug token** → name `prod smoke test` → **Generate token** → copy → **Save**.
-- [ ] Run it (prompts keep the token out of your history):
+- [ ] Make a debug token: https://console.firebase.google.com/project/meridian-web-a5829/appcheck (left sidebar: **Security** → **App Check**) → **Apps** tab → the **⋮** at the far right of **Meridian Web**'s row (widen the window if it's cut off) → **Manage debug tokens** → **Add debug token** → name `prod smoke test` → **Generate token** → copy → **Save**.
+- [ ] From the repo root, in any shell (the script is bash, but asks for the token itself, so elvish or fish work too):
   ```bash
-  read -rs APPCHECK_DEBUG_TOKEN && export APPCHECK_DEBUG_TOKEN
-  export FIREBASE_API_KEY=<apiKey from 3.1> FIREBASE_APP_ID=<appId from 3.1>
   functions/scripts/prod-smoke.sh
   ```
+  Paste the token at the prompt; nothing shows, which keeps it off your screen and out of your history. The script strips spaces, quotes and bracketed-paste markers a paste can bring along. It knows the web app's API key and app ID (public).
   Expect: a 201 with an issue number; the issue printed with label `bug` (then `needs-triage` from the workflow) and the line "The reporter left a contact email…" but no address; the replay refused with **401**; then answer `y` to delete.
+- If step 1 says **403 "App attestation failed"**, App Check doesn't recognise the token: copy it again, or add a new one.
 - [ ] Look at Firestore → `bugReportContacts` before you delete, if you want to see where emails land.
 - [ ] **Delete the debug token** afterwards (same Manage debug tokens screen): anyone holding it can get App Check tokens.
-- **Unsure:** the script uses App Check's REST call `exchangeDebugToken` with `limitedUse: true`. I'm fairly sure of the shape but haven't run it. If step 1 fails, the token exchange is the suspect, not the function; the dialog test in part 8 covers the same path with a real browser.
+- The script uses App Check's REST call `exchangeDebugToken` with `limitedUse: true`. Checked 2026-11-23: an unregistered token gets 403 "App attestation failed", so the call's shape, the app ID and the API key are right.
+- **Open (first run, 2026-11-23):** the report and the email check passed, but **the replayed token was accepted** (201, issue #39) instead of refused. A request with no token gets 401, so App Check is enforced; it's consuming the token that didn't take. Don't do part 8 until this is understood.
 
 ---
 
