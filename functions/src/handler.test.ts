@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createHandler, type HandlerDeps, type HttpRequest } from './handler.js';
 import { isAllowedOrigin } from './origins.js';
 import { RateLimiter } from './rateLimit.js';
+import type { AppCheckResult, VerifiedToken } from './tokenLedger.js';
 
 const ORIGIN = 'https://meridian.blueanvildesigns.io';
 
@@ -26,10 +27,37 @@ function response() {
   return res;
 }
 
+const VERIFIED: VerifiedToken = { id: 'TF9a2-CiM6KhdT2Or0AvRTasV51k', expiresAt: new Date(0) };
+
+/** Like the Firestore record: true the first time an ID is claimed, false after. */
+function ledger() {
+  const used = new Set<string>();
+  return vi.fn((token: VerifiedToken) => {
+    const first = !used.has(token.id);
+    used.add(token.id);
+    return Promise.resolve(first);
+  });
+}
+
+/** Every request carries a new token, as the web app's do. */
+function freshTokens() {
+  let n = 0;
+  return vi.fn(() =>
+    Promise.resolve<AppCheckResult>({
+      ok: true,
+      token: { id: `token-${String(++n).padStart(12, '0')}`, expiresAt: new Date(0) },
+    }),
+  );
+}
+
+/** The same token every time: a replay. */
+const sameToken = () => vi.fn(() => Promise.resolve<AppCheckResult>({ ok: true, token: VERIFIED }));
+
 function deps(over: Partial<HandlerDeps> = {}): HandlerDeps {
   return {
     enabled: true,
-    verifyAppCheck: vi.fn(() => Promise.resolve(true)),
+    verifyAppCheck: freshTokens(),
+    claimToken: ledger(),
     skipAppCheck: false,
     createIssue: vi.fn(() =>
       Promise.resolve({ number: 7, url: 'https://github.com/blueanvildesigns/meridian/issues/7' }),
@@ -175,17 +203,69 @@ describe('report-bug handler', () => {
   });
 
   it('refuses a missing or invalid App Check token', async () => {
-    const d = deps({ verifyAppCheck: vi.fn(() => Promise.resolve(false)) });
+    const log = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    const d = deps({ verifyAppCheck: vi.fn(() => Promise.reject(new Error('bad jwt'))), log });
     const missing = request({ description: 'x' });
     delete missing.headers['x-firebase-appcheck'];
     expect((await run(d, missing)).statusCode).toBe(401);
     expect(d.verifyAppCheck).not.toHaveBeenCalled();
 
-    expect((await run(d, request({ description: 'x' }))).statusCode).toBe(401);
-    const throwing = deps({ verifyAppCheck: vi.fn(() => Promise.reject(new Error('bad jwt'))) });
-    const res = await run(throwing, request({ description: 'x' }));
+    const res = await run(d, request({ description: 'x' }));
     expect(res.statusCode).toBe(401);
     expect(res.body).toMatchObject({ error: 'app_check' });
+    expect(log.warn.mock.calls).toEqual([
+      ['bug report refused', { outcome: 'app_check_missing' }],
+      ['bug report refused', { outcome: 'app_check_invalid' }],
+    ]);
+    expect(d.claimToken).not.toHaveBeenCalled();
+    expect(d.createIssue).not.toHaveBeenCalled();
+  });
+
+  it('refuses a token App Check says was consumed, or one without an ID', async () => {
+    for (const reason of ['consumed', 'no_id'] as const) {
+      const log = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+      const d = deps({
+        verifyAppCheck: vi.fn(() => Promise.resolve<AppCheckResult>({ ok: false, reason })),
+        log,
+      });
+      const res = await run(d, request({ description: 'x' }));
+      expect(res.statusCode).toBe(401);
+      expect(log.warn).toHaveBeenCalledWith('bug report refused', {
+        outcome: `app_check_${reason}`,
+      });
+      expect(d.claimToken).not.toHaveBeenCalled();
+      expect(d.createIssue).not.toHaveBeenCalled();
+    }
+  });
+
+  it('takes each token once, even when App Check misses the replay', async () => {
+    const log = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    const d = deps({ verifyAppCheck: sameToken(), log });
+    expect((await run(d, request({ description: 'first' }))).statusCode).toBe(201);
+    const replay = await run(d, request({ description: 'again' }));
+    expect(replay.statusCode).toBe(401);
+    expect(replay.body).toMatchObject({ error: 'app_check' });
+    expect(log.warn).toHaveBeenCalledWith('bug report refused', { outcome: 'app_check_replayed' });
+    expect(d.claimToken).toHaveBeenCalledWith(VERIFIED);
+    expect(d.createIssue).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the token up before validation, so a bad report can’t be retried with it', async () => {
+    const d = deps({ verifyAppCheck: sameToken() });
+    expect((await run(d, request({ description: '' }))).statusCode).toBe(400);
+    expect((await run(d, request({ description: 'fixed' }))).statusCode).toBe(401);
+    expect(d.createIssue).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the used-token record can’t be written', async () => {
+    const log = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+    const d = deps({ claimToken: vi.fn(() => Promise.reject(new Error('firestore down'))), log });
+    const res = await run(d, request({ description: 'x' }));
+    expect(res.statusCode).toBe(503);
+    expect(res.body).toMatchObject({ ok: false, error: 'unavailable' });
+    expect(log.error).toHaveBeenCalledWith('bug report: used-token record unavailable', {
+      error: 'Error: firestore down',
+    });
     expect(d.createIssue).not.toHaveBeenCalled();
   });
 
@@ -195,6 +275,7 @@ describe('report-bug handler', () => {
     delete req.headers['x-firebase-appcheck'];
     expect((await run(d, req)).statusCode).toBe(201);
     expect(d.verifyAppCheck).not.toHaveBeenCalled();
+    expect(d.claimToken).not.toHaveBeenCalled();
   });
 
   it('rejects honeypot hits without creating an issue', async () => {

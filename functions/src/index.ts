@@ -17,6 +17,7 @@ import { createIssue } from './github.js';
 import { createHandler } from './handler.js';
 import { isAllowedOrigin } from './origins.js';
 import { RateLimiter } from './rateLimit.js';
+import { claimToken, readVerifiedToken } from './tokenLedger.js';
 
 initializeApp();
 
@@ -43,11 +44,11 @@ let handler: ReturnType<typeof createHandler> | undefined;
 function getHandler() {
   handler ??= createHandler({
     enabled: BUG_REPORT_ENABLED.value(),
-    verifyAppCheck: async (token) => {
-      // consume: replay protection. The web app sends a limited-use token, good for one report.
-      const result = await getAppCheck().verifyToken(token, { consume: true });
-      return result.alreadyConsumed !== true;
-    },
+    // consume: App Check's own replay protection. It misses reuses, so claimToken (our record in
+    // Firestore) is what actually makes a token good for one report.
+    verifyAppCheck: async (token) =>
+      readVerifiedToken(await getAppCheck().verifyToken(token, { consume: true })),
+    claimToken: (token) => claimToken(getFirestore(), token, new Date()),
     skipAppCheck: EMULATOR,
     createIssue: async (draft) => {
       const token = GITHUB_BUG_TOKEN.value();

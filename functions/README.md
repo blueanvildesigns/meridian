@@ -2,15 +2,16 @@
 
 One function, `reportBug` (Cloud Functions for Firebase, 2nd gen, Node 22, `us-central1`), behind the Hosting rewrite `/api/report-bug`. It turns an in-app bug report into a GitHub issue. Decisions: `docs/archive/2026-11-21-bug-reporting.md`. Owner setup and deploy: `docs/manual-setup-bug-reporting.md`.
 
-| File                                                  | What it does                                                                                                         |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `src/index.ts`                                        | The function, its params and secret, and the real App Check, GitHub and Firestore calls                              |
-| `src/handler.ts`                                      | The request flow: method, type, size, origin, rate limit, App Check, validation, global cap, GitHub, private contact |
-| `src/validate.ts`, `src/sanitize.ts`, `src/limits.ts` | Input checks and cleaning                                                                                            |
-| `src/issue.ts`                                        | The public issue: every user field in a code block, never the email                                                  |
-| `src/github.ts`                                       | `POST /repos/{repo}/issues`                                                                                          |
-| `src/contacts.ts`                                     | The private `bugReportContacts/{issue}` Firestore document                                                           |
-| `src/rateLimit.ts`                                    | In-memory limits: 5 an hour per address, 30 issues an hour in all                                                    |
+| File                                                  | What it does                                                                                                                        |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `src/index.ts`                                        | The function, its params and secret, and the real App Check, GitHub and Firestore calls                                             |
+| `src/handler.ts`                                      | The request flow: method, type, size, origin, rate limit, App Check, one-use check, validation, global cap, GitHub, private contact |
+| `src/validate.ts`, `src/sanitize.ts`, `src/limits.ts` | Input checks and cleaning                                                                                                           |
+| `src/issue.ts`                                        | The public issue: every user field in a code block, never the email                                                                 |
+| `src/github.ts`                                       | `POST /repos/{repo}/issues`                                                                                                         |
+| `src/contacts.ts`                                     | The private `bugReportContacts/{issue}` Firestore document                                                                          |
+| `src/tokenLedger.ts`                                  | Each App Check token works once: its ID goes in `usedAppCheckTokens/{jti}` with a create-only write                                 |
+| `src/rateLimit.ts`                                    | In-memory limits: 5 an hour per address, 30 issues an hour in all                                                                   |
 
 ## Checks
 
@@ -18,6 +19,7 @@ One function, `reportBug` (Cloud Functions for Firebase, 2nd gen, Node 22, `us-c
 cd functions
 npm ci
 npm run check   # lint, format, typecheck, unit tests, build
+npm run test:emulator   # the one-use check against the real Firestore emulator (needs Java)
 ```
 
 CI runs the same in `.github/workflows/functions-ci.yml`. Nothing deploys the function automatically.
