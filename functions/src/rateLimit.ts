@@ -70,17 +70,62 @@ export class RateLimiter {
   }
 }
 
+// Where Firebase Hosting's requests to the function come from, as Google's front end records them.
+// Seen in production on 2026-11-24/25 (17 requests, all in these blocks). All three are Google's
+// own ranges (goog.json) and none is a Google Cloud customer range (cloud.json), so nobody can rent
+// a machine there to pose as Hosting. If Hosting starts arriving from elsewhere, its visitors fall
+// back to sharing that address's limit: the limit gets stricter, never looser.
+const HOSTING_PROXY_V4: readonly (readonly [number, number])[] = [
+  cidr('66.102.0.0/20'),
+  cidr('74.125.0.0/16'),
+  cidr('192.178.0.0/15'),
+  cidr('127.0.0.0/8'), // the Hosting emulator; Google's front end never appends a loopback address
+];
+
+function cidr(block: string): readonly [number, number] {
+  const [base = '', bits = '32'] = block.split('/');
+  const mask = Number(bits) === 0 ? 0 : (~0 << (32 - Number(bits))) >>> 0;
+  return [((ipv4ToInt(base) ?? 0) & mask) >>> 0, mask];
+}
+
+function ipv4ToInt(address: string): number | undefined {
+  const parts = address.split('.');
+  if (parts.length !== 4) return undefined;
+  let n = 0;
+  for (const part of parts) {
+    if (!/^\d{1,3}$/.test(part) || Number(part) > 255) return undefined;
+    n = n * 256 + Number(part);
+  }
+  return n;
+}
+
+/** True for an address Hosting's requests arrive from (or the emulator's loopback). */
+export function isHostingProxy(address: string): boolean {
+  if (address === '::1') return true;
+  const v4 = ipv4ToInt(address.replace(/^::ffff:/i, ''));
+  if (v4 === undefined) return false;
+  return HOSTING_PROXY_V4.some(([base, mask]) => (v4 & mask) >>> 0 === base);
+}
+
 /**
- * The client's address as Firebase Hosting passes it on: the first entry of X-Forwarded-For.
- * A client can put its own value in front, so this is a best effort, not an identity; see the
- * decision file. Falls back to the socket address.
+ * The client's address, from X-Forwarded-For. Google's front end appends the address it received
+ * the request from, so the last entry is the only one a client can't write. At the function's own
+ * URL that is the client. Through Hosting it is Hosting, and the entry before it is the visitor
+ * (Hosting replaces whatever X-Forwarded-For the visitor sent; decision item 25). So: walk from the
+ * right past Hosting's addresses and take the first other one. Falls back to the socket address.
  */
 export function clientAddress(
   headers: Record<string, string | string[] | undefined>,
   fallback: string | undefined,
 ): string {
   const raw = headers['x-forwarded-for'];
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  const first = value?.split(',')[0]?.trim();
-  return first || fallback || 'unknown';
+  const entries = (Array.isArray(raw) ? raw.join(',') : (raw ?? ''))
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const entry = entries[i];
+    if (entry && !isHostingProxy(entry)) return entry;
+  }
+  return entries[0] || fallback || 'unknown';
 }
