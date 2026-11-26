@@ -11,7 +11,8 @@ fails=0
 OUT=$(mktemp)
 trap 'rm -f "$OUT"' EXIT
 # A fresh made-up address each run, so earlier runs' requests don't count against the per-address
-# limit (5 an hour). The function reads the first X-Forwarded-For entry (see rateLimit.ts).
+# limit (5 an hour). The Hosting emulator passes it through and
+# the function skips loopback addresses, so it keys on this one (see rateLimit.ts).
 ADDR="203.0.113.$((RANDOM % 250 + 1))"
 
 check() {
