@@ -270,7 +270,7 @@ Release 1.1, first milestone (spec 4.3; roadmap Release 1.1). Decisions in `docs
 
 ## M9: Add to calendar (2026-11-25)
 
-Release 1.1, second milestone (spec 4.3). Decisions 9–15 in `docs/archive/2026-11-25-release-1-1.md`; the four points the file left open (Custom…, the presets' look, the file error, branching) were asked on 2026-11-25 and the owner took each recommendation. Boards: CalendarDialog, CalendarDialogPhone. Stacked on M8 (PR 47).
+Release 1.1, second milestone (spec 4.3). Decisions 9–15 in `docs/archive/2026-11-25-release-1-1.md`; the four points the file left open (Custom…, the presets' look, the file error, branching) were asked on 2026-11-25 and the owner took each recommendation. Boards: CalendarDialog, CalendarDialogPhone. Builds on M8 (PR 47).
 
 | ID | Decision | Source | Status |
 |---|---|---|---|
