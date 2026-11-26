@@ -105,7 +105,7 @@ describe('Copy as text in live mode', () => {
 });
 
 describe('Copy as text in the Jump banner', () => {
-  it('sits between Copy link and Change, and copies the jumped moment with its link', async () => {
+  it('sits between Copy link and Add to calendar, and copies the moment with its link', async () => {
     window.history.replaceState(null, '', `/${TOKYO_HASH}`);
     renderApp([LOCAL, { ...LONDON, customName: 'Office' }, TOKYO]);
     const controls = screen.getByRole('region', { name: 'Controls' });
@@ -113,7 +113,14 @@ describe('Copy as text in the Jump banner', () => {
       within(controls)
         .getAllByRole('button')
         .map((b) => b.textContent),
-    ).toEqual(['Copy link', 'Copy as text', 'Change', 'Reset to live', 'Add city']);
+    ).toEqual([
+      'Copy link',
+      'Copy as text',
+      'Add to calendar',
+      'Change',
+      'Reset to live',
+      'Add city',
+    ]);
     await click(copyButton());
     expect(writeText).toHaveBeenCalledWith(
       [

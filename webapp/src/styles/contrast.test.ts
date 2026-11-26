@@ -72,6 +72,7 @@ const pairs: [string, string, number][] = [
   ['control-border', 'panel', UI], // search field and Add buttons
   ['accent', 'panel', UI], // focused search field
   ['focus', 'panel', UI],
+  ['seg-selected-bg', 'panel', UI], // the chosen duration chip in Add to calendar (M9-2)
   ['tag-fg', 'tag-bg', TEXT],
   ['fg', 'row-active-bg', TEXT],
   ['muted', 'row-active-bg', TEXT],

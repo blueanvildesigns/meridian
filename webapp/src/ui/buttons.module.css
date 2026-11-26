@@ -44,9 +44,17 @@
 }
 
 @media (hover: hover) {
-  .secondary:hover {
+  .secondary:hover:not(:disabled) {
     background: color-mix(in srgb, var(--fg) 6%, var(--control-bg));
   }
+}
+
+/* As the primary's disabled look (Add to calendar's actions before a duration is chosen, M9). */
+.secondary:disabled {
+  border-color: var(--disabled-bg);
+  background: var(--disabled-bg);
+  color: var(--disabled-fg);
+  cursor: not-allowed;
 }
 
 /* Smaller text, as on the unrecognised-zone card (canvas ErrorZone). */

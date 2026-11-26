@@ -1,0 +1,279 @@
+/* Add to calendar: canvas CalendarDialog (a 600 px dialog) and CalendarDialogPhone (a bottom
+   sheet, the web calendar buttons wrapping). Fields copy the Jump picker's; the duration chips use
+   the Settings segmented-control colours (M9-2). No new colour tokens. */
+
+.dialog {
+  font-family: var(--font-sans);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px 24px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: -12px;
+  margin-bottom: -12px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--size-dialog-title);
+  font-weight: 600;
+}
+
+.close {
+  color: var(--fg);
+}
+
+.when {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+  font-weight: 600;
+}
+
+/* As the Jump picker's fields: a 2px accent ring while focused, which is the focus indicator. */
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 16px;
+}
+
+.input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.input:focus-visible {
+  border-color: var(--accent);
+  outline: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.invalid,
+.invalid:focus-visible {
+  border-color: var(--jump-border);
+}
+
+.invalid:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--jump-border);
+}
+
+.minutes {
+  max-width: 180px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+  line-height: 1.4;
+}
+
+.error {
+  margin: 0;
+  color: var(--jump-text);
+  font-size: var(--size-label);
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* The presets and Custom…: pill chips that wrap, the chosen one filled (M9-2). */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target);
+  padding: 0 16px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip:has(:checked) {
+  border-color: var(--seg-selected-bg);
+  background: var(--seg-selected-bg);
+  color: var(--seg-selected-fg);
+}
+
+.chip:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The radio covers its chip, invisibly: the chip is what's drawn (as Settings' segments). */
+.radio {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ends {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 42px;
+  font-size: 15px;
+}
+
+.ends p {
+  margin: 0;
+}
+
+.ends p:first-child:not(.hint) {
+  font-weight: 600;
+}
+
+/* The file couldn't be made (M9-8): the Jump amber of the picker's skipped-time alert, whose
+   border holds 3:1 on a dialog panel in both themes (the storage banner's doesn't). */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--jump-border);
+  border-radius: 12px;
+  background: var(--jump-bg);
+  color: var(--jump-text);
+  font-size: 14px;
+  line-height: 1.45;
+  --focus: var(--jump-text);
+}
+
+.alert p {
+  margin: 0;
+}
+
+.alertIcon {
+  flex: none;
+  color: var(--jump-text);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.download {
+  align-self: flex-start;
+}
+
+.web {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.webButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.webButton {
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 16px;
+}
+
+.webName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.webNote {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.webButton:disabled .webNote {
+  color: inherit;
+}
+
+.privacy {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--size-label);
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 640px) {
+  .body {
+    gap: 16px;
+    padding: 12px 20px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .download {
+    align-self: stretch;
+  }
+
+  /* CalendarDialogPhone: the web calendar buttons wrap, sharing each row. */
+  .webButton {
+    flex: 1 1 140px;
+  }
+
+  .footer button {
+    flex: 1 1 auto;
+  }
+}
