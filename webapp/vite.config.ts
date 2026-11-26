@@ -65,7 +65,7 @@ export default defineConfig({
         test: {
           name: 'polyfill',
           environment: 'node',
-          include: ['src/time/**/*.test.ts'],
+          include: ['src/time/**/*.test.ts', 'src/ui/send/**/*.test.ts'],
           setupFiles: ['src/test/setup.ts'],
           restoreMocks: true,
           env: { MERIDIAN_TEMPORAL: 'polyfill' },

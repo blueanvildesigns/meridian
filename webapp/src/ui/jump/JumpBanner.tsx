@@ -1,9 +1,10 @@
-// The Jump banner (spec 4.3; canvas JumpActive): the moment the paused clocks show, with Copy
-// link, Change and Reset to live. It takes the LIVE status's place while a Jump is showing.
+// The Jump banner (spec 4.3; canvas JumpActive, SendJump): the moment the paused clocks show, with
+// Copy link, Copy as text (M8), Change and Reset to live. It takes the LIVE status's place while a
+// Jump is showing.
 
 import { useEffect, useId, useRef, useState } from 'react';
 import buttons from '../buttons.module.css';
-import { CheckIcon, ClockIcon, LinkIcon, ResetIcon } from '../icons';
+import { CheckIcon, ClockIcon, CopyTextIcon, LinkIcon, ResetIcon } from '../icons';
 import styles from './JumpBanner.module.css';
 
 /** How long "Link copied" stays on the button. */
@@ -14,13 +15,22 @@ export interface JumpBannerProps {
   when: string;
   /** The address that reproduces this Jump. */
   link: string;
+  /** Copy as text (M8): every card's time as text, with the link. */
+  onCopyText: () => void;
   onChange: (anchor: HTMLElement) => void;
   onReset: () => void;
   /** Focus the banner's text (a new object each time), e.g. once Apply has replaced Jump with it. */
   focusRequest: object | null;
 }
 
-export function JumpBanner({ when, link, onChange, onReset, focusRequest }: JumpBannerProps) {
+export function JumpBanner({
+  when,
+  link,
+  onCopyText,
+  onChange,
+  onReset,
+  focusRequest,
+}: JumpBannerProps) {
   const id = useId();
   const text = useRef<HTMLDivElement>(null);
   const manualInput = useRef<HTMLInputElement>(null);
@@ -84,6 +94,11 @@ export function JumpBanner({ when, link, onChange, onReset, focusRequest }: Jump
         >
           {copy === 'copied' ? <CheckIcon size={18} /> : <LinkIcon size={18} />}
           {copy === 'copied' ? 'Link copied' : 'Copy link'}
+        </button>
+        {/* Between Copy link and Add to calendar (decision 8); its toast says "Copied as text". */}
+        <button type="button" className={styles.button} onClick={onCopyText}>
+          <CopyTextIcon size={18} />
+          Copy as text
         </button>
         <button
           type="button"

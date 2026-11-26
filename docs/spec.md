@@ -40,7 +40,8 @@ A web world clock. A personal, reorderable list of places, each showing its curr
 ### 4.3 Jump (2026-11-17-jump)
 - Picker: popover on desktop, bottom sheet on phone. Fields: reference city, date, time, UTC equivalent; Cancel and Apply.
 - Reference city is chosen in the picker (default My Local Time) or via "Jump from here" on a card.
-- Active state: banner with date, time and reference city, clocks paused, Copy link, Change, Reset to live. Reference card is tagged "Jump reference".
+- Active state: banner with date, time and reference city, clocks paused, Copy link, Copy as text, Change, Reset to live. Reference card is tagged "Jump reference".
+- **Copy as text** (2026-11-25-release-1-1, M8), in the banner and beside "Jump to a time" in live mode: one line per card with its own date, e.g. `New York: Tue, Mar 30, 9:00 AM EDT`, using the names on the cards (renames included) and the Settings time format; My Local Time is written `My Local Time (America/Chicago)`. A blank line, then a Meridian link to the moment: the Jump's link, or in live mode the minute on screen as a Jump from the device's zone, with no name (M5-1). Toast "Copied as text". Not offered with an empty list.
 - State is kept in the URL (copyable link); a reload without it returns to live. No backend.
 - DST: a skipped time shows an inline alert with a one-click fix and Apply disabled until valid; a repeated time asks which occurrence (first preselected).
 - Correct across DST changes: calendar-day arithmetic in the reference zone, never +24h; "now" never jumps ahead.

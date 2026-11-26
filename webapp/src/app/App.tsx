@@ -15,7 +15,8 @@ import { JumpPicker } from '../ui/jump/JumpPicker';
 import { bannerWhen, referenceCardId, referencePlace } from '../ui/jump/jumpView';
 import { SettingsDialog } from '../ui/settings/SettingsDialog';
 import { StorageBanner } from '../ui/StorageBanner';
-import { UndoToast } from '../ui/UndoToast';
+import { copyText, liveMoment } from '../ui/send/copyText';
+import { Toast } from '../ui/Toast';
 import {
   cityKey,
   defaultName,
@@ -23,7 +24,7 @@ import {
   type NewCity,
   type StoredCity,
 } from '../storage/schema';
-import type { JumpState } from '../time/jumpUrl';
+import { encodeJump, type JumpState } from '../time/jumpUrl';
 import {
   addCity,
   addLocalTime,
@@ -62,11 +63,17 @@ interface MenuRequest {
   anchor: HTMLElement | null;
 }
 
-/** The card just removed, for Undo: where it was and what the toast says. */
+/** The card just removed, for Undo: what it was and where. */
 interface Removal {
   city: StoredCity;
   index: number;
+}
+
+/** The toast showing: "London removed · Undo" (with the removal) or "Copied as text" (M8). */
+interface ToastState {
   text: string;
+  action?: 'Undo';
+  removal?: Removal;
 }
 
 export interface AppProps {
@@ -95,7 +102,10 @@ export function App({ store, reportBug = null }: AppProps) {
   // The card menu (spec 4.4) and what it leads to.
   const [menu, setMenu] = useState<MenuRequest | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
-  const [removal, setRemoval] = useState<Removal | null>(null);
+  /** One toast at a time: a new one replaces the last, and a removal it replaces stands (M6-5). */
+  const [toast, setToast] = useState<ToastState | null>(null);
+  /** Copy as text's text, to copy by hand when the browser refused, and the moment it was for. */
+  const [copyFallback, setCopyFallback] = useState<{ text: string; key: string } | null>(null);
   /** Said by the polite live region: where Move up or Move down put a card. */
   const [announcement, setAnnouncement] = useState('');
 
@@ -150,22 +160,38 @@ export function App({ store, reportBug = null }: AppProps) {
     store.update((s) => removeCity(s, id));
     setFocusRequest({ id: neighbour?.id ?? null });
     // A new removal replaces the toast; the one before stands.
-    setRemoval({ city, index: i, text: `${displayName(city)} removed` });
+    setToast({ text: `${displayName(city)} removed`, action: 'Undo', removal: { city, index: i } });
   };
 
   const undoRemove = () => {
+    const removal = toast?.removal;
     if (!removal) return;
     store.update((s) => restoreCity(s, removal.city, removal.index));
-    setRemoval(null);
+    setToast(null);
     // Undo goes with the toast: focus the card it brought back (unless it was added again since).
     if (store.getSnapshot().state.cities.some((c) => c.id === removal.city.id)) {
       setFocusRequest({ id: removal.city.id });
     }
   };
 
-  const endRemoval = useCallback(() => {
-    setRemoval(null);
+  const endToast = useCallback(() => {
+    setToast(null);
   }, []);
+
+  // Copy as text (M8): what the cards show, a line each, then a link to the same moment. In live
+  // mode that's the minute on screen, as a Jump from this device's zone (decision 7).
+  const momentKey = jump ? encodeJump(jump) : 'live';
+  const copyAsText = async () => {
+    const text = copyText(views, jumpLink(jump ?? liveMoment(now, zone)));
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyFallback(null);
+      setToast({ text: 'Copied as text' });
+    } catch {
+      // No clipboard access (an older browser, or permission refused): show the text to copy.
+      setCopyFallback({ text, key: momentKey });
+    }
+  };
 
   const moveBy = (id: string, step: -1 | 1) => {
     store.update((s) => moveCityBy(s, id, step));
@@ -271,6 +297,9 @@ export function App({ store, reportBug = null }: AppProps) {
                     hourCycle,
                   ),
                   link: jumpLink(jump),
+                  onCopyText: () => {
+                    void copyAsText();
+                  },
                   onChange: (anchor) => {
                     setPicker({ anchor });
                   },
@@ -283,6 +312,11 @@ export function App({ store, reportBug = null }: AppProps) {
             setPicker({ anchor });
           }}
           onAddCity={openAddCity}
+          onCopyText={() => {
+            void copyAsText();
+          }}
+          // Only while it's for the mode on screen: a Jump, Change or Reset drops it.
+          copyFallback={copyFallback?.key === momentKey ? copyFallback : null}
           focusJump={focusJump}
         />
         {empty ? (
@@ -421,7 +455,7 @@ export function App({ store, reportBug = null }: AppProps) {
         />
       )}
 
-      <UndoToast message={removal} onUndo={undoRemove} onExpire={endRemoval} aboveBar={!empty} />
+      <Toast message={toast} onAction={undoRemove} onExpire={endToast} aboveBar={!empty} />
       <div role="status" className="visually-hidden">
         {announcement}
       </div>

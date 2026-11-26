@@ -3,7 +3,8 @@
 // 320 px, reduced motion, and axe on the screens no other spec covers. Where the rest are checked:
 // main board, legacy zone and reordering (clocks), empty list and storage banner (clocks), add city
 // (addCity), Jump picker, banner, skipped and repeated times and the time list (jump), card menu,
-// rename and Undo toast (menu), Settings and About (settings), the shell in both themes (shell).
+// rename and Undo toast (menu), Settings and About (settings), the shell in both themes (shell),
+// Copy as text's toast and the text to copy by hand (send).
 import AxeBuilder from '@axe-core/playwright';
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
@@ -171,8 +172,9 @@ test.describe('keyboard only', () => {
         if (!stop || stop.name === stops[0]?.name) break;
         stops.push(stop);
       }
-      // The header's buttons, then Jump and Add (a bar along the bottom on phones, still next in
-      // the Tab order), each card's handle and menu (phones have no handle), Add a city, the footer.
+      // The header's buttons, then Jump, Copy as text and Add (a bar along the bottom on phones,
+      // still next in the Tab order), each card's handle and menu (phones have no handle), Add a
+      // city, the footer.
       const cards = ['My Local Time', 'London', 'Tokyo'].flatMap((name) =>
         isMobile
           ? [`More options for ${name}`]
@@ -182,6 +184,7 @@ test.describe('keyboard only', () => {
         'Settings',
         'About Meridian',
         'Jump to a time',
+        'Copy as text',
         'Add city',
         ...cards,
         'Add a city',

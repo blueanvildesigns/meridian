@@ -6,7 +6,7 @@ import { STORAGE_KEY, type AppState, type StoredCity } from '../../storage/schem
 import { loadState, serializeState } from '../../storage/storage';
 import { fakeStorage } from '../../storage/testStorage';
 import { LONDON, TOKYO } from '../../test/places';
-import { UNDO_MS } from '../UndoToast';
+import { UNDO_MS } from '../Toast';
 
 vi.mock('../../time/zones', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../time/zones')>()),
