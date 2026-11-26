@@ -1,6 +1,7 @@
 // The Jump banner (spec 4.3; canvas JumpActive, SendJump): the moment the paused clocks show, with
-// Copy link, Copy as text (M8), Add to calendar (M9), Change and Reset to live. It takes the LIVE status's place while a
-// Jump is showing.
+// Copy link, Copy as text (M8), Add to calendar (M9), Change and Reset to live, and which cities'
+// clocks differ from today (M10; canvas DstJump). It takes the LIVE status's place while a Jump is
+// showing.
 
 import { useEffect, useId, useRef, useState } from 'react';
 import buttons from '../buttons.module.css';
@@ -22,6 +23,8 @@ export interface JumpBannerProps {
   when: string;
   /** The address that reproduces this Jump. */
   link: string;
+  /** "Clocks differ from today in …" (M10, decision 20), or null when no card's offset differs. */
+  clocksDiffer?: string | null;
   /** Copy as text (M8): every card's time as text, with the link. */
   onCopyText: () => void;
   /** Add to calendar (M9): opens its dialog. */
@@ -35,6 +38,7 @@ export interface JumpBannerProps {
 export function JumpBanner({
   when,
   link,
+  clocksDiffer = null,
   onCopyText,
   onAddToCalendar,
   onChange,
@@ -82,7 +86,7 @@ export function JumpBanner({
         className={styles.text}
         role="status"
         tabIndex={-1}
-        aria-labelledby={`${id}-label ${id}-when ${id}-note`}
+        aria-labelledby={`${id}-label ${id}-when ${id}-note${clocksDiffer ? ` ${id}-dst` : ''}`}
       >
         <span id={`${id}-label`} className={styles.label}>
           Jumped
@@ -93,6 +97,11 @@ export function JumpBanner({
         <span id={`${id}-note`} className={styles.note}>
           Clocks are paused. Day labels compare with My Local Time.
         </span>
+        {clocksDiffer && (
+          <span id={`${id}-dst`} className={styles.dst}>
+            {clocksDiffer}
+          </span>
+        )}
       </div>
       <div className={styles.buttons}>
         <button

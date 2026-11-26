@@ -48,6 +48,9 @@
   --chip-fg: var(--day-chip-fg);
   --card-icon: var(--day-icon);
   --focus: var(--day-focus);
+  --dst-bg: var(--day-dst-bg);
+  --dst-fg: var(--day-dst-fg);
+  --dst-border: var(--day-dst-border);
 }
 
 .night {
@@ -59,6 +62,9 @@
   --chip-fg: var(--night-chip-fg);
   --card-icon: var(--night-icon);
   --focus: var(--night-focus);
+  --dst-bg: var(--night-dst-bg);
+  --dst-fg: var(--night-dst-fg);
+  --dst-border: var(--night-dst-border);
 }
 
 .card {
@@ -243,6 +249,55 @@
   font-weight: 600;
   color: var(--card-fg);
   white-space: nowrap;
+}
+
+/* DST heads-up (M10; canvas DstLive, DstLiveDark, DstJump): an amber chip with an icon and words,
+   between the time row and the footer. Its row is only there when the card has a chip, so other
+   cards keep their layout; a grid row's cards stretch to match, and the extra space sits above
+   their footers (decision 18). */
+@media (min-width: 641px) {
+  .hasDst {
+    grid-template-areas:
+      'period actions'
+      'name name'
+      'sub sub'
+      'time chip'
+      'dst dst'
+      'details details';
+    grid-template-rows: auto auto auto auto auto 1fr;
+  }
+
+  .reference.hasDst {
+    grid-template-areas:
+      'period actions'
+      'name tag'
+      'sub sub'
+      'time chip'
+      'dst dst'
+      'details details';
+  }
+}
+
+.dst {
+  grid-area: dst;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 4px 0 0;
+  padding: 4px 12px 4px 8px;
+  border: 1px solid var(--dst-border);
+  border-radius: var(--radius-pill);
+  background: var(--dst-bg);
+  color: var(--dst-fg);
+  font-size: var(--size-label);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.dstIcon {
+  flex: none;
 }
 
 /* The Jump reference (canvas JumpActive, decision C6): a tag and a 2px border, with the padding
@@ -453,6 +508,15 @@
 
   .ap {
     font-size: 15px;
+  }
+
+  /* DST chip: a full-width row of its own under the time and details (M10-4), placed after the
+     last row whatever the card's layout (reference, renaming). */
+  .dst {
+    grid-area: auto / 1 / auto / -1;
+    margin: 0;
+    padding: 3px 10px 3px 7px;
+    font-size: 12px;
   }
 
   /* Two right-aligned lines: "date · abbreviation", then "offset · difference". */

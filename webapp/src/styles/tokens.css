@@ -60,6 +60,16 @@
   --night-icon: #f2c078;
   --night-focus: #8fb0ff;
 
+  /* DST heads-up chip (M10): one per card colour, the same in both themes (dark mode's softened
+     day cards keep the day chip). Proposed in the release 1.1 decision file; checked by the
+     contrast test. */
+  --day-dst-bg: #fff4d6;
+  --day-dst-fg: #4a2f00;
+  --day-dst-border: #a86f0c;
+  --night-dst-bg: #2e2410;
+  --night-dst-fg: #f2c078;
+  --night-dst-border: #8a6a1e;
+
   /* Warning: storage banner, unrecognized-zone card */
   --warn-bg: #fff4d6;
   --warn-border: #e3b341;

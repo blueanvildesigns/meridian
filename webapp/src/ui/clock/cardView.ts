@@ -4,6 +4,7 @@
 import { zoneRepresentative } from '../../cities/zoneData';
 import { displayName, type StoredCity } from '../../storage/schema';
 import { zoneAbbreviation } from '../../time/abbreviation';
+import { offsetDiffers, upcomingChange } from '../../time/dst';
 import {
   formatClock,
   formatDate,
@@ -24,6 +25,8 @@ export interface ClockContext {
   mode: DayLabelMode;
   /** The Jump reference card's ID, tagged "Jump reference" (spec 4.3). */
   referenceId?: string | null;
+  /** The current time, which a Jump's offsets are compared with (M10); `instant` if left out. */
+  now?: Temporal.Instant;
 }
 
 interface ViewBase {
@@ -49,6 +52,11 @@ export interface ClockView extends ViewBase {
   reference: boolean;
   /** My Local Time, which follows the device's zone. */
   local: boolean;
+  /**
+   * The DST heads-up chip (M10), or null: "Clocks change Sun, Mar 14" when the offset changes
+   * within 14 days (live), or "EDT then · EST today" when a Jump's offset differs from now's.
+   */
+  dst: string | null;
 }
 
 /** The saved zone isn't one this browser knows (spec 4.6). */
@@ -91,6 +99,12 @@ export function cardView(city: StoredCity, ctx: ClockContext): CardView {
   const { hour, minute } = snapshot.dateTime;
   const clock = formatClock(hour, minute, ctx.hourCycle);
   const offsetSeconds = Math.round(snapshot.offsetNanoseconds / 1e9);
+  const abbreviation = zoneAbbreviation(
+    ctx.instant.epochMilliseconds,
+    zone,
+    offsetSeconds,
+    country,
+  );
 
   return {
     status: 'ok',
@@ -102,11 +116,48 @@ export function cardView(city: StoredCity, ctx: ClockContext): CardView {
     dayPeriod: clock.dayPeriod,
     dayLabel: relativeDayLabel(snapshot.dayDiff, ctx.mode),
     date: formatDate(snapshot.dateTime),
-    abbreviation: zoneAbbreviation(ctx.instant.epochMilliseconds, zone, offsetSeconds, country),
+    abbreviation,
     offset: formatOffset(snapshot.offsetNanoseconds),
     difference: formatDifference(snapshot.minutesAhead),
     daytime: isDaytime(ctx.instant, zone, coordinates),
     reference: city.id === ctx.referenceId,
     local: city.kind === 'local',
+    dst:
+      ctx.mode === 'live'
+        ? liveChip(zone, ctx.instant)
+        : jumpChip(zone, ctx.instant, ctx.now ?? ctx.instant, abbreviation, country),
   };
+}
+
+/** "Clocks change Sun, Mar 14" (decision 17), for the first change in the window. */
+function liveChip(zone: string, now: Temporal.Instant): string | null {
+  const change = upcomingChange(zone, now);
+  return change && `Clocks change ${formatDate(change.date)}`;
+}
+
+/**
+ * "EDT then · EST today" (DstJump, M10 default): the abbreviations at the Jump and now, or the
+ * offsets where either has none, or both share one (a zone that moved its standard time).
+ */
+function jumpChip(
+  zone: string,
+  then: Temporal.Instant,
+  now: Temporal.Instant,
+  thenAbbreviation: string | undefined,
+  country: string | undefined,
+): string | null {
+  if (!offsetDiffers(zone, then, now)) return null;
+  const nowOffset = now.toZonedDateTimeISO(zone).offsetNanoseconds;
+  const thenOffset = then.toZonedDateTimeISO(zone).offsetNanoseconds;
+  const nowAbbreviation = zoneAbbreviation(
+    now.epochMilliseconds,
+    zone,
+    Math.round(nowOffset / 1e9),
+    country,
+  );
+  const named = thenAbbreviation && nowAbbreviation && thenAbbreviation !== nowAbbreviation;
+  const [a, b] = named
+    ? [thenAbbreviation, nowAbbreviation]
+    : [formatOffset(thenOffset), formatOffset(nowOffset)];
+  return `${a} then · ${b} today`;
 }

@@ -12,7 +12,7 @@ import { Controls } from '../ui/Controls';
 import { EmptyState } from '../ui/EmptyState';
 import { GearIcon, InfoIcon, LogoMark } from '../ui/icons';
 import { JumpPicker } from '../ui/jump/JumpPicker';
-import { bannerWhen, referenceCardId, referencePlace } from '../ui/jump/jumpView';
+import { bannerWhen, clocksDifferLine, referenceCardId, referencePlace } from '../ui/jump/jumpView';
 import { SettingsDialog } from '../ui/settings/SettingsDialog';
 import { StorageBanner } from '../ui/StorageBanner';
 import { CalendarDialog } from '../ui/send/CalendarDialog';
@@ -124,11 +124,20 @@ export function App({ store, reportBug = null }: AppProps) {
   const shownMs = jump ? jump.instant.epochMilliseconds : now;
   const views = useMemo(() => {
     const instant = T().Instant.fromEpochMilliseconds(shownMs);
+    // A Jump's DST chips compare its offsets with today's (M10), so they follow the minute too.
+    const current = T().Instant.fromEpochMilliseconds(now);
     const mode = jump ? 'jump' : 'live';
     return state.cities.map((city) =>
-      cardView(city, { instant, deviceZone: zone, hourCycle, mode, referenceId: refId }),
+      cardView(city, {
+        instant,
+        deviceZone: zone,
+        hourCycle,
+        mode,
+        referenceId: refId,
+        now: current,
+      }),
     );
-  }, [state.cities, shownMs, jump, zone, hourCycle, refId]);
+  }, [state.cities, shownMs, now, jump, zone, hourCycle, refId]);
   const empty = views.length === 0;
   // Bug reports: the in-app form when this build can send (phase 2), else GitHub's form with the
   // diagnostics filled in (phase 1). Either way nothing is sent until the reporter says so, and
@@ -300,6 +309,9 @@ export function App({ store, reportBug = null }: AppProps) {
                     hourCycle,
                   ),
                   link: jumpLink(jump),
+                  clocksDiffer: clocksDifferLine(
+                    views.flatMap((v) => (v.status === 'ok' && v.dst ? [v.name] : [])),
+                  ),
                   onCopyText: () => {
                     void copyAsText();
                   },

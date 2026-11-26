@@ -86,6 +86,20 @@ export function bannerWhen(jump: JumpState, place: string, cycle: HourCycle): st
   return `${formatDate(there, { withYear: true })} · ${formatClockInline(there.hour, there.minute, cycle)} in ${place}`;
 }
 
+/** "A", "A and B", "A, B and C", as the decision file writes lists. */
+function listNames(names: readonly string[]): string {
+  if (names.length <= 1) return names.join('');
+  return `${names.slice(0, -1).join(', ')} and ${names.at(-1) ?? ''}`;
+}
+
+/**
+ * The banner's DST line (decision 20; canvas DstJump): "Clocks differ from today in My Local Time,
+ * New York and London." Names as the cards show them, in list order. Null when none differ.
+ */
+export function clocksDifferLine(names: readonly string[]): string | null {
+  return names.length === 0 ? null : `Clocks differ from today in ${listNames(names)}.`;
+}
+
 function placeLine(city: StoredCity, zone: string): string {
   if (city.kind !== 'place') return zone;
   return [city.region, city.country].filter(Boolean).join(', ');
