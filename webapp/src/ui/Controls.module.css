@@ -40,6 +40,28 @@
   margin-left: auto;
 }
 
+/* Shown only when the browser refuses the clipboard (not drawn), under the row, full width. */
+.fallback {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.fallbackText {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
 @media (max-width: 640px) {
   /* Canvas Mobile: a plain status line, and the buttons in a bar along the bottom. */
   .hasClocks .status {
@@ -63,6 +85,7 @@
   }
 
   .hasClocks .jump,
+  .hasClocks .copyText,
   .hasClocks .add {
     min-height: 48px;
     border-radius: 12px;
@@ -73,12 +96,34 @@
     flex: 1 1 0;
   }
 
+  /* Three buttons in live mode (M8-6): a little less padding and gap so they fit from 360 px. */
+  .hasClocks:not(.jumping) .actions {
+    gap: 8px;
+  }
+
+  .hasClocks:not(.jumping) .jump {
+    padding: 0 14px;
+  }
+
+  .hasClocks:not(.jumping) .add {
+    padding: 0 12px;
+  }
+
   .hasClocks .add {
     flex: none;
     gap: 6px;
   }
 
+  /* Copy as text is its icon alone on the bar, 48 px square, so three buttons fit at 320 px
+     (M8-6); its name stays for screen readers. */
+  .hasClocks .copyText {
+    flex: none;
+    width: 48px;
+    padding: 0;
+  }
+
   /* "Add" on the bar; the full name stays for screen readers. */
+  .hasClocks .copyWords,
   .hasClocks .addWord {
     position: absolute;
     width: 1px;
@@ -87,6 +132,24 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  /* Under 360 px (reflow at 320, WCAG 1.4.10) Add is its icon too, 48 px square (M8-6). */
+  @media (max-width: 359px) {
+    .hasClocks:not(.jumping) .add {
+      width: 48px;
+      padding: 0;
+    }
+
+    .hasClocks:not(.jumping) .add > span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   }
 
   /* Canvas EmptyListPhone: pill, then the two buttons side by side. */

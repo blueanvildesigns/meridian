@@ -238,6 +238,17 @@ export function LinkIcon(props: IconProps) {
   );
 }
 
+/** Copy as text (M8): a sheet with lines of text over a second sheet. Not on the canvas (M8-6). */
+export function CopyTextIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <rect x="8" y="8" width="12" height="13" rx="2" />
+      <path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2" />
+      <path d="M11 12h6M11 15h6M11 18h3" />
+    </Icon>
+  );
+}
+
 /** Reset to live (canvas JumpActive). */
 export function ResetIcon(props: IconProps) {
   return (

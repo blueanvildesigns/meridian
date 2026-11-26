@@ -259,7 +259,8 @@ test.describe('jump', () => {
     if (!button || !box) throw new Error('not laid out');
     expect(Math.abs(box.x + box.width - (button.x + button.width))).toBeLessThan(1.5);
     expect(Math.round(box.y - (button.y + button.height))).toBe(18);
-    expect(box.width).toBe(440);
+    // Firefox can report 440.00003 when the popover lands on a fractional pixel.
+    expect(box.width).toBeCloseTo(440, 2);
   });
 
   test('is a bottom sheet on phones', async ({ page, isMobile }) => {

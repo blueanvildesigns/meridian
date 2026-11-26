@@ -38,7 +38,7 @@ Milestone numbers continue the log's numbering. Sizes are relative (S, M, L), no
 
 Small, independent, all built on Jump. A good first release because nothing here risks stored data.
 
-**M8: Copy as text (S).** A "Copy as text" button in the Jump banner (and "now" in live mode, to decide) that copies one line per city, for example `Tue, Mar 16: 9:00 AM New York, 2:00 PM London, 10:30 PM Mumbai`, using the Settings time format.
+**M8: Copy as text (S).** *Status: built, in review (branch `feat/m8-copy-as-text`).* A "Copy as text" button in the Jump banner (and "now" in live mode, to decide) that copies one line per city, for example `Tue, Mar 16: 9:00 AM New York, 2:00 PM London, 10:30 PM Mumbai`, using the Settings time format.
 - Decide: exact format, whether the link is appended, whether it uses card names (renames) or the city's own names. M5-1 keeps renames out of links; text copied for your own message could go either way.
 - Done when: unit tests cover 12h/24h, a day rollover, and DST dates; keyboard path and toast announce via role status; e2e passes in all three engines.
 

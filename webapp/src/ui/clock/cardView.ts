@@ -47,6 +47,8 @@ export interface ClockView extends ViewBase {
   daytime: boolean;
   /** This card is what the Jump is measured from. */
   reference: boolean;
+  /** My Local Time, which follows the device's zone. */
+  local: boolean;
 }
 
 /** The saved zone isn't one this browser knows (spec 4.6). */
@@ -105,5 +107,6 @@ export function cardView(city: StoredCity, ctx: ClockContext): CardView {
     difference: formatDifference(snapshot.minutesAhead),
     daytime: isDaytime(ctx.instant, zone, coordinates),
     reference: city.id === ctx.referenceId,
+    local: city.kind === 'local',
   };
 }

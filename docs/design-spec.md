@@ -64,7 +64,7 @@ Contrast: verify every text/background pair meets WCAG AA (4.5:1 body, 3:1 large
 - **Search result row** (AddCity*): city, region and country, local time, UTC offset and abbreviation, match tag, Add / Added state.
 - **Popover / bottom sheet** (CardMenu*, JumpPicker, JumpPhone): popover on desktop, bottom sheet on phone.
 - **Banner**: amber, role alert, dismissible.
-- **Toast**: bottom, "<City> removed" with Undo; duration open (spec section 8).
+- **Toast**: bottom, one at a time. "<City> removed" with Undo (8 s), or "Copied as text" (3 s, M8-7).
 - **Radiogroup** for Settings options with icons for Appearance.
 
 ## 4. Screens and states (board names)
@@ -78,11 +78,13 @@ Contrast: verify every text/background pair meets WCAG AA (4.5:1 body, 3:1 large
 | About | About, AboutPhone |
 | Empty list | EmptyList, EmptyListPhone |
 | Errors | ErrorStorage, ErrorZone, ErrorPhone |
+| Send a moment: Copy as text (M8) | SendLive, SendJump, CopyTextOutput |
 
 ## 5. Behaviour that affects visuals
 - Appearance: System by default (prefers-color-scheme), override Light/Dark stored locally. Settings changes apply live. Avoid a flash of the wrong theme on load (set the theme before first paint).
 - Time format: Browser default / 12-hour / 24-hour, applied everywhere times appear, including dialogs.
-- Jump active: clocks stop ticking, amber banner (Copy link, Change, Reset to live), reference card tagged.
+- Jump active: clocks stop ticking, amber banner (Copy link, Copy as text, Change, Reset to live), reference card tagged.
+- Copy as text (M8): a secondary button beside Jump to a time in live mode; on the phone bar, its icon alone, 48 px square (M8-6). It adds no colour tokens.
 - Reduced motion: respect prefers-reduced-motion for drag, dialog and toast animation.
 - Live regions: do not announce every clock tick. Announce Added, removed, Jump applied and errors.
 
