@@ -90,6 +90,12 @@ const pairs: [string, string, number][] = [
   ['night-chip-fg', 'night-chip-bg', TEXT],
   ['night-icon', 'night-card-bg', TEXT],
   ['night-focus', 'night-card-bg', UI],
+  // DST heads-up chip (M10): its words and icon on its fill, and its border against the card
+  // (dark mode's softened day card included)
+  ['day-dst-fg', 'day-dst-bg', TEXT],
+  ['day-dst-border', 'day-card-bg', UI],
+  ['night-dst-fg', 'night-dst-bg', TEXT],
+  ['night-dst-border', 'night-card-bg', UI],
   // Warning banner and unrecognized-zone card
   ['warn-text', 'warn-bg', TEXT],
   ['warn-link', 'warn-bg', TEXT],

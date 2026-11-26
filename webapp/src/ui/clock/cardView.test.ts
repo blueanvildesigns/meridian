@@ -1,6 +1,8 @@
+// Runs in both test projects, native Temporal and the polyfill (vite.config.ts): the DST chips
+// (M10) are each engine's zone rules.
 import { describe, expect, it } from 'vitest';
 import type { StoredCity } from '../../storage/schema';
-import { KOLKATA, LONDON, NOWHERE, TOKYO } from '../../test/places';
+import { KOLKATA, LONDON, NEW_YORK, NOWHERE, TOKYO } from '../../test/places';
 import { instant } from '../../time/testUtils';
 import { cardView, type CardView, type ClockContext, type ClockView } from './cardView';
 
@@ -129,5 +131,65 @@ describe('cardView', () => {
       name: 'Olympus Mons',
       zone: 'Mars/Olympus_Mons',
     });
+  });
+});
+
+describe('cardView: DST heads-up (M10)', () => {
+  const LOCAL: StoredCity = { id: 'l', kind: 'local' };
+  const zone = (z: string): StoredCity => ({ id: z, kind: 'zone', zone: z });
+  // Canvas DstLive: Fri, Mar 5, 2027, 4:00 PM in Chicago.
+  const MAR_5 = instant('2027-03-05T22:00:00Z');
+  const dst = (city: StoredCity, ctx: Partial<ClockContext>) => show(city, ctx).dst;
+
+  it('live: a chip on every card whose clocks change within 14 days, My Local Time too', () => {
+    const live = { instant: MAR_5 };
+    expect(dst(LOCAL, live)).toBe('Clocks change Sun, Mar 14');
+    expect(dst(NEW_YORK, live)).toBe('Clocks change Sun, Mar 14');
+    expect(dst(LONDON, live)).toBeNull();
+    expect(dst(KOLKATA, live)).toBeNull();
+    expect(dst(TOKYO, live)).toBeNull();
+    expect(dst(zone('Australia/Sydney'), live)).toBeNull();
+    // The canvas Main board's moment (Nov 17, 2026): nothing changes within 14 days.
+    expect(dst(LOCAL, {})).toBeNull();
+  });
+
+  it('live: the day is the change’s own (Sydney goes back on Sunday, Apr 4)', () => {
+    expect(dst(zone('Australia/Sydney'), { instant: instant('2027-03-25T00:00:00Z') })).toBe(
+      'Clocks change Sun, Apr 4',
+    );
+  });
+
+  // Canvas DstJump: a Jump to Tue, Mar 30, 2027, 9:00 AM in New York, seen on Mar 5.
+  const JUMP = { instant: instant('2027-03-30T13:00:00Z'), now: MAR_5, mode: 'jump' as const };
+
+  it('jump: "then · today" on every card whose offset differs from now’s', () => {
+    expect(dst(LOCAL, JUMP)).toBe('CDT then · CST today');
+    expect(dst(NEW_YORK, JUMP)).toBe('EDT then · EST today');
+    expect(dst(LONDON, JUMP)).toBe('BST then · GMT today');
+  });
+
+  it('jump: no chip where the offset is the same, even if the difference line changed', () => {
+    const kolkata = show(KOLKATA, JUMP);
+    expect(kolkata.difference).toBe('+10h 30m');
+    expect(kolkata.dst).toBeNull();
+    expect(dst(TOKYO, JUMP)).toBeNull();
+    expect(dst(zone('Australia/Sydney'), JUMP)).toBeNull();
+  });
+
+  it('jump: the offsets when a zone has no abbreviation (Lord Howe’s half hour)', () => {
+    const lordHowe = zone('Australia/Lord_Howe');
+    const winter = { ...JUMP, instant: instant('2027-06-01T00:00:00Z') };
+    expect(dst(lordHowe, winter)).toBe('UTC+10:30 then · UTC+11:00 today');
+  });
+
+  it('jump: a zone that dropped DST is flagged for a date before it did', () => {
+    const saoPaulo = zone('America/Sao_Paulo');
+    const summer2018 = { ...JUMP, instant: instant('2018-12-01T15:00:00Z') };
+    expect(dst(saoPaulo, summer2018)).toBe('UTC−2:00 then · UTC−3:00 today');
+    expect(dst(saoPaulo, JUMP)).toBeNull();
+  });
+
+  it('jump: no "now" given means nothing to compare with', () => {
+    expect(dst(NEW_YORK, { instant: JUMP.instant, mode: 'jump' })).toBeNull();
   });
 });

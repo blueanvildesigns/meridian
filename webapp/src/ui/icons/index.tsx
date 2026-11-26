@@ -259,6 +259,17 @@ export function CalendarPlusIcon(props: IconProps) {
   );
 }
 
+/** Clocks change (M10's DST chip): a clock inside a turning arrow, as DstLive draws it. */
+export function ClockChangeIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M21 12a9 9 0 1 1-3-6.7" />
+      <path d="M21 4v5h-5" />
+      <path d="M12 7v5l3 2" />
+    </Icon>
+  );
+}
+
 /** Download (M9: Download .ics file). */
 export function DownloadIcon(props: IconProps) {
   return (

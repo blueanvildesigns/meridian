@@ -6,6 +6,7 @@ import { date, instant, time } from '../../time/testUtils';
 import { resolveWallTime } from '../../time/wallTime';
 import {
   bannerWhen,
+  clocksDifferLine,
   gapText,
   initialReferenceKey,
   LINK_KEY,
@@ -227,5 +228,21 @@ describe('parseDateInput', () => {
     expect(parseDateInput('1899-12-31')).toEqual({ ok: false, error: 'range' });
     expect(parseDateInput('2201-01-01')).toEqual({ ok: false, error: 'range' });
     expect(parseDateInput('2200-12-31').ok).toBe(true);
+  });
+});
+
+describe('clocksDifferLine (M10, decision 20)', () => {
+  it('names every card whose clocks differ, as the canvas DstJump does', () => {
+    expect(clocksDifferLine(['My Local Time', 'New York', 'London'])).toBe(
+      'Clocks differ from today in My Local Time, New York and London.',
+    );
+    expect(clocksDifferLine(['Home', 'Sydney'])).toBe(
+      'Clocks differ from today in Home and Sydney.',
+    );
+    expect(clocksDifferLine(['New York'])).toBe('Clocks differ from today in New York.');
+  });
+
+  it('says nothing when no clock differs', () => {
+    expect(clocksDifferLine([])).toBeNull();
   });
 });

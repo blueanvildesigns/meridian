@@ -9,6 +9,7 @@ import { useEffect, useRef, type TouchEventHandler } from 'react';
 import { MAX_NAME_LENGTH } from '../../text/name';
 import {
   CheckIcon,
+  ClockChangeIcon,
   CloseIcon,
   DragHandleIcon,
   MoonIcon,
@@ -170,6 +171,7 @@ export function ClockCard({
         styles.card,
         view.daytime ? styles.day : styles.night,
         view.reference ? styles.reference : '',
+        view.dst ? styles.hasDst : '',
         menuOpen ? styles.menuOpen : '',
         renaming ? styles.renaming : '',
       ].join(' ')}
@@ -209,6 +211,13 @@ export function ClockCard({
         )}
       </p>
       <p className={styles.chip}>{view.dayLabel}</p>
+      {/* DST heads-up (M10): amber, with an icon and words, between the time and the footer. */}
+      {view.dst && (
+        <p className={styles.dst}>
+          <ClockChangeIcon size={16} className={styles.dstIcon} />
+          <span>{view.dst}</span>
+        </p>
+      )}
       <p className={styles.details}>
         <span className={styles.meta}>
           <span className={styles.dateAbbr}>

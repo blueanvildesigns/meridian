@@ -44,6 +44,12 @@
   font-size: var(--size-label);
 }
 
+/* "Clocks differ from today in …" (M10, decision 20), as DstJump draws it. */
+.dst {
+  font-size: var(--size-label);
+  font-weight: 600;
+}
+
 .buttons {
   display: flex;
   flex-wrap: wrap;

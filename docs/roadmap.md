@@ -47,7 +47,7 @@ Small, independent, all built on Jump. A good first release because nothing here
 - Verify: that a `blob:` download is allowed by the current CSP. I'd expect yes, but check on a preview deploy, since a CSP change is a larger decision than this feature.
 - Done when: the `.ics` imports correctly into Google, Apple and Outlook calendars for a normal day and for a day with a DST change (tested by hand, since there's no way to automate that), and the file contents are covered by unit tests.
 
-**M10: DST heads-up (M).** Warn when the picture changes: in live mode, a quiet note on a card when its offset will change within the next 14 days; in Jump mode, a note when the jumped date falls on the other side of a transition, so the "difference from my time" is not what you see today.
+**M10: DST heads-up (M).** *Status: built, in review (PR 49).* Warn when the picture changes: in live mode, a quiet note on a card when its offset will change within the next 14 days; in Jump mode, a note when the jumped date falls on the other side of a transition, so the "difference from my time" is not what you see today.
 - Decide: window length, wording, whether it appears on the card or in a single summary line under the banner.
 - Risk: this needs the zone-transition lookup from Temporal. I haven't confirmed the polyfill's support for it; the first step is a spike. If the polyfill lacks it, the fallback is scanning offsets day by day (cheap, but its tests must run on both engines).
 - Done when: tests cover a southern-hemisphere zone, a zone that dropped DST, a half-hour-offset zone, and both transition directions, on native and polyfill.

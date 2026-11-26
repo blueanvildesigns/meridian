@@ -30,6 +30,8 @@ Implement as CSS custom properties. Light is the default; dark applies when Appe
 | warn-bg / warn-border / warn-text | #FFF4D6 / #E3B341 / #4A2F00 | banners (storage error, Jump) |
 | warn-accent | #A86F0C (dashed card border; darkened from #C58A1B to reach 3:1, owner 2026-11-18, decision R-7), #8A4200 (icon) | unrecognized-zone card |
 | disabled | bg #C9D1E3, text #4A5A75 | disabled primary button |
+| day-dst (bg / text / border) | #FFF4D6 / #4A2F00 / #A86F0C | DST chip on day cards, in both themes (M10) |
+| night-dst (bg / text / border) | #2E2410 / #F2C078 / #8A6A1E | DST chip on night cards, in both themes (M10) |
 Jump banner amber and the "Jump reference" tag: from mockup (JumpActive).
 
 ### Colour, dark (deep navy)
@@ -41,7 +43,8 @@ Jump banner amber and the "Jump reference" tag: from mockup (JumpActive).
 | accent | #8FB0FF; primary button fill #8FB0FF with text #0B1426 |
 | control-border | #7A8DB3 |
 | dialog panel | #14213D, border #2C3C63, backdrop #050A14 |
-Dark warn and error colours: not mocked; derive and verify contrast.
+Dark warn and error colours: not mocked; derive and verify contrast. The DST chip (M10) keeps its day and night colours in dark mode: the softened day cards use the day chip unchanged.
+Checked ratios (contrast test): day chip text 11.3:1, border 4.3:1 on a day card and 3.4:1 on a softened one; night chip text 9.2:1, border 3.2:1.
 Contrast: verify every text/background pair meets WCAG AA (4.5:1 body, 3:1 large text and icons) in both modes with an automated check.
 
 ### Type
@@ -58,13 +61,13 @@ Contrast: verify every text/background pair meets WCAG AA (4.5:1 body, 3:1 large
 - **Header**: logo + "Meridian" wordmark left; Settings (gear) and About (info) icon buttons right.
 - **Status pill**: "LIVE · Showing the current time" with a filled dot.
 - **Buttons**: primary (accent fill), secondary (white, control-border), icon (transparent, 44x44), segmented control (radiogroup, selected = fg fill).
-- **Clock card** (board: Main, Mobile, DarkMain, DarkMobile): day/night icon + label top left; drag handle and more-options button top right; city name; time (serif, 40) with AM/PM or 24h; relative-day chip; date; zone abbreviation; UTC offset; difference from my time. Day card light, night card dark, per real sunrise/sunset.
+- **Clock card** (board: Main, Mobile, DarkMain, DarkMobile): day/night icon + label top left; drag handle and more-options button top right; city name; time (serif, 40) with AM/PM or 24h; relative-day chip; date; zone abbreviation; UTC offset; difference from my time. Day card light, night card dark, per real sunrise/sunset. **DST chip** (DstLive, DstLiveDark, DstJump, DstPhone; M10): an amber pill with a clock-and-arrow icon (16) and 13/600 text, left-aligned between the time row and the footer; cards in its grid row grow to match. On phones it is a row of its own under the compact card's time and details (12 px text), M10-4.
 - **Add-city tile** at the end of the grid.
 - **Dialog / sheet**: title, close, content, footer with primary Done. Focus trap, Esc closes, focus returns to the opener.
 - **Search result row** (AddCity*): city, region and country, local time, UTC offset and abbreviation, match tag, Add / Added state.
 - **Popover / bottom sheet** (CardMenu*, JumpPicker, JumpPhone): popover on desktop, bottom sheet on phone.
 - **Sheet** (CalendarDialog, CalendarDialogPhone): a centred 600 px dialog as tall as its content on desktop, a bottom sheet on phone (M9-9). Choices drawn as pill chips that wrap use the segmented control's selected fill (M9-2). Disabled secondary buttons take the disabled primary's colours (M9-11). No new colour tokens.
-- **Banner**: amber, role alert, dismissible.
+- **Banner**: amber, role alert, dismissible. The Jump banner adds "Clocks differ from today in …" in 13/600 under its note when any card's offset differs (DstJump, M10).
 - **Toast**: bottom, one at a time. "<City> removed" with Undo (8 s), or "Copied as text" (3 s, M8-7).
 - **Radiogroup** for Settings options with icons for Appearance.
 
@@ -81,6 +84,7 @@ Contrast: verify every text/background pair meets WCAG AA (4.5:1 body, 3:1 large
 | Errors | ErrorStorage, ErrorZone, ErrorPhone |
 | Send a moment: Copy as text (M8) | SendLive, SendJump, CopyTextOutput |
 | Send a moment: Add to calendar (M9) | CalendarDialog, CalendarDialogPhone |
+| DST heads-up (M10) | DstLive, DstLiveDark, DstJump, DstPhone (phone layout: M10-4) |
 
 ## 5. Behaviour that affects visuals
 - Appearance: System by default (prefers-color-scheme), override Light/Dark stored locally. Settings changes apply live. Avoid a flash of the wrong theme on load (set the theme before first paint).
