@@ -15,6 +15,7 @@ import { JumpPicker } from '../ui/jump/JumpPicker';
 import { bannerWhen, referenceCardId, referencePlace } from '../ui/jump/jumpView';
 import { SettingsDialog } from '../ui/settings/SettingsDialog';
 import { StorageBanner } from '../ui/StorageBanner';
+import { CalendarDialog } from '../ui/send/CalendarDialog';
 import { copyText, liveMoment } from '../ui/send/copyText';
 import { Toast } from '../ui/Toast';
 import {
@@ -110,6 +111,8 @@ export function App({ store, reportBug = null }: AppProps) {
   const [announcement, setAnnouncement] = useState('');
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** Add to calendar (M9), open: only during a Jump. */
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [bugReportOpen, setBugReportOpen] = useState(false);
   /** About, open; `focusData` when the storage banner's "What can I do?" opened it. */
   const [about, setAbout] = useState<{ focusData: boolean } | null>(null);
@@ -300,6 +303,9 @@ export function App({ store, reportBug = null }: AppProps) {
                   onCopyText: () => {
                     void copyAsText();
                   },
+                  onAddToCalendar: () => {
+                    setCalendarOpen(true);
+                  },
                   onChange: (anchor) => {
                     setPicker({ anchor });
                   },
@@ -410,6 +416,27 @@ export function App({ store, reportBug = null }: AppProps) {
           onOpenerGone={() => {
             // Adding the first city replaces the empty state, and with it the Add city button.
             if (lastAdded.current) setFocusRequest({ id: lastAdded.current });
+          }}
+        />
+      )}
+
+      {calendarOpen && jump && (
+        <CalendarDialog
+          moment={{
+            start: jump.instant,
+            refZone: jump.refZone,
+            refPlace: referencePlace(state.cities, jump, zone, refId),
+            link: jumpLink(jump),
+          }}
+          when={bannerWhen(jump, referencePlace(state.cities, jump, zone, refId), hourCycle)}
+          deviceZone={zone}
+          hourCycle={hourCycle}
+          onDone={(text) => {
+            setCalendarOpen(false);
+            if (text) setToast({ text });
+          }}
+          onClose={() => {
+            setCalendarOpen(false);
           }}
         />
       )}

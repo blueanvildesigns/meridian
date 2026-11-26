@@ -93,7 +93,13 @@ test.describe('copy as text', () => {
     await recordClipboard(page);
     await page.goto(`/${DST_HASH}`);
     const buttons = await controls(page).getByRole('button').allTextContents();
-    expect(buttons.slice(0, 4)).toEqual(['Copy link', 'Copy as text', 'Change', 'Reset to live']);
+    expect(buttons.slice(0, 5)).toEqual([
+      'Copy link',
+      'Copy as text',
+      'Add to calendar',
+      'Change',
+      'Reset to live',
+    ]);
     await copyButton(page).click();
     await expect(toast(page)).toBeVisible();
     // Chicago hasn't changed yet at this instant; New York has.

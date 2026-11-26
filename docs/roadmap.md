@@ -42,7 +42,7 @@ Small, independent, all built on Jump. A good first release because nothing here
 - Decide: exact format, whether the link is appended, whether it uses card names (renames) or the city's own names. M5-1 keeps renames out of links; text copied for your own message could go either way.
 - Done when: unit tests cover 12h/24h, a day rollover, and DST dates; keyboard path and toast announce via role status; e2e passes in all three engines.
 
-**M9: Add to calendar (S to M).** From a Jump, create an event: a small dialog for title and duration, then a downloaded `.ics` file and a Google Calendar link. Everything is built in the browser; nothing is sent anywhere.
+**M9: Add to calendar (S to M).** *Status: built, in review (branch `feat/m9-add-to-calendar`, stacked on M8).* From a Jump, create an event: a small dialog for title and duration, then a downloaded `.ics` file and a Google Calendar link. Everything is built in the browser; nothing is sent anywhere.
 - Decide: default duration (30 or 60 min), which zone the event is anchored in, whether the title defaults to something.
 - Verify: that a `blob:` download is allowed by the current CSP. I'd expect yes, but check on a preview deploy, since a CSP change is a larger decision than this feature.
 - Done when: the `.ics` imports correctly into Google, Apple and Outlook calendars for a normal day and for a day with a DST change (tested by hand, since there's no way to automate that), and the file contents are covered by unit tests.

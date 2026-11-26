@@ -249,6 +249,34 @@ export function CopyTextIcon(props: IconProps) {
   );
 }
 
+/** Add to calendar (M9; canvas SendJump, CalendarDialog): a calendar page with a plus. */
+export function CalendarPlusIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5" />
+    </Icon>
+  );
+}
+
+/** Download (M9: Download .ics file). */
+export function DownloadIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+    </Icon>
+  );
+}
+
+/** Opens in a new tab (M9: the web calendars). */
+export function ExternalIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+    </Icon>
+  );
+}
+
 /** Reset to live (canvas JumpActive). */
 export function ResetIcon(props: IconProps) {
   return (

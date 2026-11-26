@@ -4,7 +4,8 @@
 // main board, legacy zone and reordering (clocks), empty list and storage banner (clocks), add city
 // (addCity), Jump picker, banner, skipped and repeated times and the time list (jump), card menu,
 // rename and Undo toast (menu), Settings and About (settings), the shell in both themes (shell),
-// Copy as text's toast and the text to copy by hand (send).
+// Copy as text's toast and the text to copy by hand (send), and the Add to calendar dialog
+// (calendar).
 import AxeBuilder from '@axe-core/playwright';
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';

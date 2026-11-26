@@ -1,10 +1,17 @@
 // The Jump banner (spec 4.3; canvas JumpActive, SendJump): the moment the paused clocks show, with
-// Copy link, Copy as text (M8), Change and Reset to live. It takes the LIVE status's place while a
+// Copy link, Copy as text (M8), Add to calendar (M9), Change and Reset to live. It takes the LIVE status's place while a
 // Jump is showing.
 
 import { useEffect, useId, useRef, useState } from 'react';
 import buttons from '../buttons.module.css';
-import { CheckIcon, ClockIcon, CopyTextIcon, LinkIcon, ResetIcon } from '../icons';
+import {
+  CalendarPlusIcon,
+  CheckIcon,
+  ClockIcon,
+  CopyTextIcon,
+  LinkIcon,
+  ResetIcon,
+} from '../icons';
 import styles from './JumpBanner.module.css';
 
 /** How long "Link copied" stays on the button. */
@@ -17,6 +24,8 @@ export interface JumpBannerProps {
   link: string;
   /** Copy as text (M8): every card's time as text, with the link. */
   onCopyText: () => void;
+  /** Add to calendar (M9): opens its dialog. */
+  onAddToCalendar: () => void;
   onChange: (anchor: HTMLElement) => void;
   onReset: () => void;
   /** Focus the banner's text (a new object each time), e.g. once Apply has replaced Jump with it. */
@@ -27,6 +36,7 @@ export function JumpBanner({
   when,
   link,
   onCopyText,
+  onAddToCalendar,
   onChange,
   onReset,
   focusRequest,
@@ -99,6 +109,15 @@ export function JumpBanner({
         <button type="button" className={styles.button} onClick={onCopyText}>
           <CopyTextIcon size={18} />
           Copy as text
+        </button>
+        <button
+          type="button"
+          className={styles.button}
+          aria-haspopup="dialog"
+          onClick={onAddToCalendar}
+        >
+          <CalendarPlusIcon size={18} />
+          Add to calendar
         </button>
         <button
           type="button"

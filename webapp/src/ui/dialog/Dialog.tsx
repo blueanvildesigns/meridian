@@ -7,6 +7,8 @@
 //
 // The "popover" variant (Jump, design-spec 3) is the same modal dialog drawn as a card below the
 // control that opened it, with the page left visible, and as a bottom sheet on phones (M5-2).
+// The "sheet" variant (Add to calendar, M9) is a centred panel as tall as its content on wide
+// screens and the same bottom sheet on phones (CalendarDialog, CalendarDialogPhone).
 
 import { useEffectEvent, useLayoutEffect, useRef, type ReactNode } from 'react';
 import styles from './Dialog.module.css';
@@ -48,8 +50,11 @@ export interface DialogProps {
    * somewhere sensible.
    */
   onOpenerGone?: () => void;
-  /** "panel" (centred, fixed size) or "popover" (under `anchor`; a bottom sheet on phones). */
-  variant?: 'panel' | 'popover';
+  /**
+   * "panel" (centred, fixed size), "popover" (under `anchor`; a bottom sheet on phones) or "sheet"
+   * (centred and as tall as its content; a bottom sheet on phones).
+   */
+  variant?: 'panel' | 'popover' | 'sheet';
   /** The control a popover hangs from. */
   anchor?: HTMLElement | null;
   /** Room between a popover and its anchor (18 px; the card menu hangs straight off its button). */
@@ -117,7 +122,7 @@ export function Dialog({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={ref}
-      className={`${styles.dialog} ${variant === 'popover' ? styles.popover : ''} ${fit ? styles.fit : ''} ${className ?? ''}`}
+      className={`${styles.dialog} ${variant === 'panel' ? '' : (styles[variant] ?? '')} ${fit || variant === 'sheet' ? styles.fit : ''} ${className ?? ''}`}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       // Esc fires `cancel` then `close`; letting the browser close it and reporting that covers
